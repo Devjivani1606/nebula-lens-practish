@@ -1,0 +1,78 @@
+{
+  "nodes": [
+    {
+      "id": "arn:aws:lambda:ap-south-1:618642320905:function:auth-service",
+      "type": "lambdaNode",
+      "position": { "x": 250, "y": 50 },
+      "data": {
+        "name": "auth-service",
+        "runtime": "nodejs24.x",
+        "memory": "128 MB",
+        "lastModified": "5/20/2026",
+        "insights": "Environment variables contain MongoDB connection string."
+      }
+    },
+    {
+      "id": "arn:aws:lambda:ap-south-1:618642320905:function:user-service",
+      "type": "lambdaNode",
+      "position": { "x": 250, "y": 250 },
+      "data": {
+        "name": "user-service",
+        "runtime": "nodejs24.x",
+        "memory": "128 MB",
+        "lastModified": "5/20/2026",
+        "insights": "Standard compute role detected."
+      }
+    },
+    {
+      "id": "arn:aws:lambda:ap-south-1:618642320905:function:notification-service",
+      "type": "lambdaNode",
+      "position": { "x": 250, "y": 450 },
+      "data": {
+        "name": "notification-service",
+        "runtime": "nodejs24.x",
+        "memory": "128 MB",
+        "lastModified": "5/19/2026",
+        "insights": "Event-driven architecture."
+      }
+    },
+    {
+      "id": "arn:aws:s3:::manavtest-bucket",
+      "type": "s3Node",
+      "position": { "x": 700, "y": 250 },
+      "data": {
+        "name": "manavtest-bucket",
+        "creationDate": "5/26/2026",
+        "publicAccess": "Unknown"
+      }
+    },
+    {
+      "id": "ext-mongodb-cluster",
+      "type": "databaseNode",
+      "position": { "x": 700, "y": 50 },
+      "data": {
+        "name": "MongoDB Atlas Cluster",
+        "engine": "MongoDB",
+        "status": "Connected via Env Vars"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge-auth-to-mongo",
+      "source": "arn:aws:lambda:ap-south-1:618642320905:function:auth-service",
+      "target": "ext-mongodb-cluster",
+      "animated": true,
+      "label": "Reads/Writes Data",
+      "style": { "stroke": "#10b981", "strokeWidth": 2 }
+    },
+    {
+      "id": "edge-user-to-s3",
+      "source": "arn:aws:lambda:ap-south-1:618642320905:function:user-service",
+      "target": "arn:aws:s3:::manavtest-bucket",
+      "animated": true,
+      "label": "Fetches Assets",
+      "style": { "stroke": "#3b82f6", "strokeWidth": 2 }
+    }
+  ]
+}
