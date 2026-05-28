@@ -19,6 +19,8 @@ import initialData from '../data/architecture.json';
 type CanvasState = {
   nodes: Node[];
   edges: Edge[];
+  selectedNodeId: string | null;
+  setSelectedNodeId: (id: string | null) => void;
   onNodesChange: (changes: NodeChange[]) => void;
   onEdgesChange: (changes: EdgeChange[]) => void;
   onConnect: (connection: Connection) => void;
@@ -30,6 +32,10 @@ export const useCanvasStore = create<CanvasState>()(
     (set, get) => ({
       nodes: initialData.nodes,
       edges: initialData.edges,
+
+      // New Selection State
+      selectedNodeId: null,
+      setSelectedNodeId: (id) => set({ selectedNodeId: id }),
 
       onNodesChange: (changes: NodeChange[]) => {
         set({ nodes: applyNodeChanges(changes, get().nodes) });
@@ -50,11 +56,11 @@ export const useCanvasStore = create<CanvasState>()(
       // Debounce the history snapshots
       handleSet: (handleSet) => {
         let timeout: ReturnType<typeof setTimeout>;
-        return (pastState, currentState, replace) => {
+        return (pastState, replace) => {
           clearTimeout(timeout);
           // Wait 250ms after the last change before saving to history
           timeout = setTimeout(() => {
-            handleSet(pastState, currentState, replace);
+            handleSet(pastState, replace);
           }, 250);
         };
       },

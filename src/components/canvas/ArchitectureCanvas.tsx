@@ -14,7 +14,14 @@ const nodeTypes = { lambdaNode: LambdaNode, s3Node: S3Node, databaseNode: Databa
 const edgeTypes = { animatedEdge: AnimatedEdge };
 
 export default function ArchitectureCanvas() {
-  const { nodes, edges, onNodesChange, onEdgesChange, onConnect } = useCanvasStore();
+  const { nodes,
+          edges,
+          onNodesChange,
+          onEdgesChange,
+          onConnect,
+          selectedNodeId,
+          setSelectedNodeId,
+        } = useCanvasStore();
 
   const { undo, redo, pastStates, futureStates } = useStore(
     useCanvasStore.temporal,
@@ -87,6 +94,10 @@ export default function ArchitectureCanvas() {
         onConnect={onConnect}
         fitView
         defaultEdgeOptions={{ type: 'animatedEdge' }}
+
+        onNodeClick={(event, node) => setSelectedNodeId(node.id)}
+        onPaneClick={() => setSelectedNodeId(null)}
+        
       >
         <Background color="#cbd5e1" gap={20} size={2} />
         <Controls />
