@@ -27,10 +27,10 @@ function LambdaNode({ data, selected }: { data: any; selected?: boolean }) {
   Placed in the exact center (top-1/2 left-1/2), but opacity-0 makes it invisible.
   Our Smart Edge will calculate the real boundaries dynamically!
 */}
-<div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full pointer-events-none">
-  <Handle type="target" position={Position.Top} className="opacity-0" />
-  <Handle type="source" position={Position.Bottom} className="opacity-0" />
-</div>
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full pointer-events-none">
+        <Handle type="target" position={Position.Top} className="opacity-0" />
+        <Handle type="source" position={Position.Bottom} className="opacity-0" />
+      </div>
 
       {/* Node Content */}
       <div className="flex items-center gap-3">

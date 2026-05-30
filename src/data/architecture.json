@@ -6,10 +6,17 @@
       "position": { "x": 250, "y": 50 },
       "data": {
         "name": "auth-service",
-        "runtime": "nodejs24.x",
-        "memory": "128 MB",
+        "runtime": "nodejs20.x",
+        "memory": "512 MB",
         "lastModified": "5/20/2026",
-        "insights": "Environment variables contain MongoDB connection string."
+        "insights": "Warning: Hardcoded credentials detected.",
+        "metrics": {
+          "avgDuration": "240ms",
+          "errorRate": "0.12%",
+          "estMonthlyCost": "$4.50",
+          "iamRole": "BasicExecutionRole",
+          "securityScan": "Critical: MongoDB URI found in plaintext env vars."
+        }
       }
     },
     {
@@ -18,10 +25,17 @@
       "position": { "x": 250, "y": 250 },
       "data": {
         "name": "user-service",
-        "runtime": "nodejs24.x",
-        "memory": "128 MB",
+        "runtime": "nodejs20.x",
+        "memory": "1024 MB",
         "lastModified": "5/20/2026",
-        "insights": "Standard compute role detected."
+        "insights": "Optimized compute profile.",
+        "metrics": {
+          "avgDuration": "85ms",
+          "errorRate": "0.01%",
+          "estMonthlyCost": "$12.00",
+          "iamRole": "S3FullAccessRole",
+          "securityScan": "Warning: IAM role has overly broad S3 permissions (*)."
+        }
       }
     },
     {
@@ -30,30 +44,53 @@
       "position": { "x": 250, "y": 450 },
       "data": {
         "name": "notification-service",
-        "runtime": "nodejs24.x",
+        "runtime": "nodejs20.x",
         "memory": "128 MB",
         "lastModified": "5/19/2026",
-        "insights": "Event-driven architecture."
+        "insights": "Underutilized memory.",
+        "metrics": {
+          "avgDuration": "1200ms",
+          "errorRate": "2.4%",
+          "estMonthlyCost": "$1.20",
+          "iamRole": "SESPublishRole",
+          "securityScan": "Pass: Least privilege maintained."
+        }
       }
     },
     {
-      "id": "arn:aws:s3:::manavtest-bucket",
+      "id": "arn:aws:s3:::bhargav-bucket",
       "type": "s3Node",
-      "position": { "x": 700, "y": 250 },
+      "position": { "x": 800, "y": 250 },
       "data": {
-        "name": "manavtest-bucket",
+        "name": "bhargav-bucket",
         "creationDate": "5/26/2026",
-        "publicAccess": "Unknown"
+        "publicAccess": "Blocked",
+        "insights": "Encryption: AES-256",
+        "metrics": {
+          "totalSize": "45.2 GB",
+          "objectCount": "14,203",
+          "versioning": "Suspended",
+          "encryption": "SSE-S3",
+          "securityScan": "Pass: Block Public Access is enabled."
+        }
       }
     },
     {
       "id": "ext-mongodb-cluster",
       "type": "databaseNode",
-      "position": { "x": 700, "y": 50 },
+      "position": { "x": 800, "y": 50 },
       "data": {
         "name": "MongoDB Atlas Cluster",
-        "engine": "MongoDB",
-        "status": "Connected via Env Vars"
+        "engine": "MongoDB 7.0",
+        "status": "Healthy",
+        "insights": "Public IP Whitelist enabled.",
+        "metrics": {
+          "tier": "M10 Dedicated",
+          "region": "ap-south-1",
+          "connections": "42 active",
+          "estMonthlyCost": "$65.00",
+          "securityScan": "Warning: Cluster allows connections from 0.0.0.0/0."
+        }
       }
     }
   ],
@@ -69,7 +106,7 @@
     {
       "id": "edge-user-to-s3",
       "source": "arn:aws:lambda:ap-south-1:618642320905:function:user-service",
-      "target": "arn:aws:s3:::manavtest-bucket",
+      "target": "arn:aws:s3:::bhargav-bucket",
       "animated": true,
       "label": "Fetches Assets",
       "style": { "stroke": "#3b82f6", "strokeWidth": 2 }

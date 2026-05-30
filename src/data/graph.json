@@ -1,0 +1,356 @@
+{
+    "nodes": [
+        {
+            "id": "vpc-0022744aecf9087ed",
+            "type": "VPC",
+            "name": "vpc-0022744aecf9087ed"
+        },
+        {
+            "id": "vpc-099eff0667486af96",
+            "type": "VPC",
+            "name": "demo-vpc"
+        },
+        {
+            "id": "vpc-009fe7cc9ee7636e4",
+            "type": "VPC",
+            "name": "vpc-009fe7cc9ee7636e4"
+        },
+        {
+            "id": "igw-0bb69b0e080d26b95",
+            "type": "IGW",
+            "name": "igw-0bb69b0e080d26b95"
+        },
+        {
+            "id": "igw-0bc164e5889442554",
+            "type": "IGW",
+            "name": "igw-0bc164e5889442554"
+        },
+        {
+            "id": "subnet-006a9504534ae2924",
+            "type": "Subnet",
+            "name": "subnet-006a9504534ae2924"
+        },
+        {
+            "id": "subnet-0e46b5614f6e362cb",
+            "type": "Subnet",
+            "name": "Private-Subnet"
+        },
+        {
+            "id": "subnet-065f229769b1a9ecc",
+            "type": "Subnet",
+            "name": "subnet-065f229769b1a9ecc"
+        },
+        {
+            "id": "subnet-00098a97078980b2f",
+            "type": "Subnet",
+            "name": "RDS-Pvt-subnet-2"
+        },
+        {
+            "id": "subnet-0098ced803e947f60",
+            "type": "Subnet",
+            "name": "subnet-0098ced803e947f60"
+        },
+        {
+            "id": "subnet-0f2629341b4ade639",
+            "type": "Subnet",
+            "name": "Public-Subnet"
+        },
+        {
+            "id": "subnet-03ebc037795aca065",
+            "type": "Subnet",
+            "name": "subnet-03ebc037795aca065"
+        },
+        {
+            "id": "subnet-003d875530b27b54a",
+            "type": "Subnet",
+            "name": "RDS-Pvt-subnet-3"
+        },
+        {
+            "id": "subnet-00494a2e023b55af3",
+            "type": "Subnet",
+            "name": "subnet-00494a2e023b55af3"
+        },
+        {
+            "id": "subnet-0f280ed6c684f1f10",
+            "type": "Subnet",
+            "name": "RDS-Pvt-subnet-1"
+        },
+        {
+            "id": "subnet-0ac5b9b2b81ed7aec",
+            "type": "Subnet",
+            "name": "subnet-0ac5b9b2b81ed7aec"
+        },
+        {
+            "id": "i-09544b0e4ca51e7de",
+            "type": "EC2",
+            "name": " App-Server"
+        },
+        {
+            "id": "database-1",
+            "type": "RDS",
+            "name": "database-1"
+        },
+        {
+            "id": "Demo-alb",
+            "type": "APPLICATION_LB",
+            "name": "Demo-alb"
+        },
+        {
+            "id": "nat-188ad5820ee31b344",
+            "type": "NAT_GATEWAY",
+            "name": "nat-188ad5820ee31b344"
+        },
+        {
+            "id": "rtb-02fe7b7742ce03f7c",
+            "type": "ROUTE_TABLE",
+            "name": "rtb-02fe7b7742ce03f7c"
+        },
+        {
+            "id": "rtb-0ccb9cc3ff6c144df",
+            "type": "ROUTE_TABLE",
+            "name": "rtb-0ccb9cc3ff6c144df"
+        },
+        {
+            "id": "rtb-01ec039e993717bea",
+            "type": "ROUTE_TABLE",
+            "name": "rtb-01ec039e993717bea"
+        },
+        {
+            "id": "rtb-05594258c8e656d17",
+            "type": "ROUTE_TABLE",
+            "name": "rtb-05594258c8e656d17"
+        },
+        {
+            "id": "rtb-0fb2c796ef460a714",
+            "type": "ROUTE_TABLE",
+            "name": "rtb-0fb2c796ef460a714"
+        },
+        {
+            "id": "rtb-002a222195e1f310c",
+            "type": "ROUTE_TABLE",
+            "name": "rtb-002a222195e1f310c"
+        },
+        {
+            "id": "rtb-055ddb09354aa0f62",
+            "type": "ROUTE_TABLE",
+            "name": "rtb-055ddb09354aa0f62"
+        },
+        {
+            "id": "sg-0dac008635cd92e4b",
+            "type": "SECURITY_GROUP",
+            "name": "default"
+        },
+        {
+            "id": "sg-020c7998f05a9821d",
+            "type": "SECURITY_GROUP",
+            "name": "default"
+        },
+        {
+            "id": "sg-05d18b337c1066cdc",
+            "type": "SECURITY_GROUP",
+            "name": "RDS-sg"
+        },
+        {
+            "id": "sg-0597805417acc4bf1",
+            "type": "SECURITY_GROUP",
+            "name": "ALB-sg"
+        },
+        {
+            "id": "sg-020384daa8c05534d",
+            "type": "SECURITY_GROUP",
+            "name": "rds-ec2-1"
+        },
+        {
+            "id": "sg-02c978218f8f643fd",
+            "type": "SECURITY_GROUP",
+            "name": "default"
+        },
+        {
+            "id": "sg-054e387103bc97442",
+            "type": "SECURITY_GROUP",
+            "name": "EC2-sg"
+        },
+        {
+            "id": "sg-0d65e75c868fb0b08",
+            "type": "SECURITY_GROUP",
+            "name": "ec2-rds-1"
+        },
+        {
+            "id": "sg-0d7374a9ba3f9a320",
+            "type": "SECURITY_GROUP",
+            "name": "launch-wizard-1"
+        }
+    ],
+    "edges": [
+        {
+            "source": "vpc-099eff0667486af96",
+            "target": "subnet-003d875530b27b54a",
+            "relation": "contains"
+        },
+        {
+            "source": "vpc-099eff0667486af96",
+            "target": "sg-0597805417acc4bf1",
+            "relation": "contains"
+        },
+        {
+            "source": "vpc-009fe7cc9ee7636e4",
+            "target": "subnet-00494a2e023b55af3",
+            "relation": "contains"
+        },
+        {
+            "source": "vpc-099eff0667486af96",
+            "target": "rtb-05594258c8e656d17",
+            "relation": "contains"
+        },
+        {
+            "source": "vpc-0022744aecf9087ed",
+            "target": "subnet-0ac5b9b2b81ed7aec",
+            "relation": "contains"
+        },
+        {
+            "source": "vpc-099eff0667486af96",
+            "target": "sg-020c7998f05a9821d",
+            "relation": "contains"
+        },
+        {
+            "source": "vpc-0022744aecf9087ed",
+            "target": "sg-0d7374a9ba3f9a320",
+            "relation": "contains"
+        },
+        {
+            "source": "vpc-099eff0667486af96",
+            "target": "rtb-0ccb9cc3ff6c144df",
+            "relation": "contains"
+        },
+        {
+            "source": "vpc-099eff0667486af96",
+            "target": "subnet-0f2629341b4ade639",
+            "relation": "contains"
+        },
+        {
+            "source": "vpc-0022744aecf9087ed",
+            "target": "subnet-065f229769b1a9ecc",
+            "relation": "contains"
+        },
+        {
+            "source": "vpc-099eff0667486af96",
+            "target": "subnet-0f280ed6c684f1f10",
+            "relation": "contains"
+        },
+        {
+            "source": "vpc-099eff0667486af96",
+            "target": "sg-0d65e75c868fb0b08",
+            "relation": "contains"
+        },
+        {
+            "source": "vpc-009fe7cc9ee7636e4",
+            "target": "subnet-0098ced803e947f60",
+            "relation": "contains"
+        },
+        {
+            "source": "vpc-0022744aecf9087ed",
+            "target": "sg-02c978218f8f643fd",
+            "relation": "contains"
+        },
+        {
+            "source": "subnet-0f2629341b4ade639",
+            "target": "Demo-alb",
+            "relation": "contains"
+        },
+        {
+            "source": "vpc-099eff0667486af96",
+            "target": "igw-0bb69b0e080d26b95",
+            "relation": "contains"
+        },
+        {
+            "source": "vpc-0022744aecf9087ed",
+            "target": "rtb-02fe7b7742ce03f7c",
+            "relation": "contains"
+        },
+        {
+            "source": "vpc-009fe7cc9ee7636e4",
+            "target": "sg-0dac008635cd92e4b",
+            "relation": "contains"
+        },
+        {
+            "source": "subnet-00098a97078980b2f",
+            "target": "database-1",
+            "relation": "contains"
+        },
+        {
+            "source": "vpc-099eff0667486af96",
+            "target": "rtb-002a222195e1f310c",
+            "relation": "contains"
+        },
+        {
+            "source": "vpc-099eff0667486af96",
+            "target": "rtb-055ddb09354aa0f62",
+            "relation": "contains"
+        },
+        {
+            "source": "vpc-099eff0667486af96",
+            "target": "sg-05d18b337c1066cdc",
+            "relation": "contains"
+        },
+        {
+            "source": "vpc-0022744aecf9087ed",
+            "target": "subnet-03ebc037795aca065",
+            "relation": "contains"
+        },
+        {
+            "source": "subnet-003d875530b27b54a",
+            "target": "Demo-alb",
+            "relation": "contains"
+        },
+        {
+            "source": "vpc-009fe7cc9ee7636e4",
+            "target": "subnet-006a9504534ae2924",
+            "relation": "contains"
+        },
+        {
+            "source": "vpc-099eff0667486af96",
+            "target": "sg-054e387103bc97442",
+            "relation": "contains"
+        },
+        {
+            "source": "vpc-099eff0667486af96",
+            "target": "rtb-0fb2c796ef460a714",
+            "relation": "contains"
+        },
+        {
+            "source": "vpc-099eff0667486af96",
+            "target": "subnet-0e46b5614f6e362cb",
+            "relation": "contains"
+        },
+        {
+            "source": "subnet-0f280ed6c684f1f10",
+            "target": "database-1",
+            "relation": "contains"
+        },
+        {
+            "source": "subnet-003d875530b27b54a",
+            "target": "database-1",
+            "relation": "contains"
+        },
+        {
+            "source": "subnet-0e46b5614f6e362cb",
+            "target": "i-09544b0e4ca51e7de",
+            "relation": "contains"
+        },
+        {
+            "source": "vpc-099eff0667486af96",
+            "target": "sg-020384daa8c05534d",
+            "relation": "contains"
+        },
+        {
+            "source": "vpc-099eff0667486af96",
+            "target": "subnet-00098a97078980b2f",
+            "relation": "contains"
+        },
+        {
+            "source": "vpc-009fe7cc9ee7636e4",
+            "target": "rtb-01ec039e993717bea",
+            "relation": "contains"
+        }
+    ]
+}

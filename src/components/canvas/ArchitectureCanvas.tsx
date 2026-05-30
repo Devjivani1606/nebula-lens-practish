@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useCallback, useRef } from 'react';
 import { ReactFlow, Background, Controls, Panel } from '@xyflow/react';
 import { useStore } from 'zustand';
 import { useCanvasStore } from '../../store/useCanvasStore';
@@ -13,44 +13,117 @@ import AnimatedEdge from './AnimatedEdge';
 const nodeTypes = { lambdaNode: LambdaNode, s3Node: S3Node, databaseNode: DatabaseNode };
 const edgeTypes = { animatedEdge: AnimatedEdge };
 
+// Spring-like easing: fast start with a gentle overshoot
+function springEase(t: number): number {
+  return 1 - Math.pow(1 - t, 3) * Math.cos(t * Math.PI * 0.5);
+}
+
+const ANIMATION_DURATION = 400; // ms
+
 export default function ArchitectureCanvas() {
-  const { nodes,
-          edges,
-          onNodesChange,
-          onEdgesChange,
-          onConnect,
-          selectedNodeId,
-          setSelectedNodeId,
-        } = useCanvasStore();
+  const {
+    nodes,
+    edges,
+    onNodesChange,
+    onEdgesChange,
+    onConnect,
+    selectedNodeId,
+    setSelectedNodeId,
+  } = useCanvasStore();
 
   const { undo, redo, pastStates, futureStates } = useStore(
     useCanvasStore.temporal,
     (state) => state
   );
 
-  // 1. Track if an undo/redo action is actively animating
-  const [isHistoryAnimating, setIsHistoryAnimating] = useState(false);
+  const animationRef = useRef<number | null>(null);
 
-  // 2. Intercept Undo calls to safely flag the animation window
-  const executeUndo = () => {
+  // Animate nodes from old positions to new positions by interpolating
+  const animateTransition = useCallback((
+    oldPositions: Map<string, { x: number; y: number }>,
+    targetNodes: typeof nodes  // The final target state captured BEFORE animation starts
+  ) => {
+    // Cancel any running animation
+    if (animationRef.current) {
+      cancelAnimationFrame(animationRef.current);
+      // If cancelling a previous animation, resume tracking before starting new one
+      useCanvasStore.temporal.getState().resume();
+    }
+
+    // Pause temporal tracking so intermediate frames don't pollute undo history
+    useCanvasStore.temporal.getState().pause();
+
+    const startTime = performance.now();
+
+    const tick = (now: number) => {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / ANIMATION_DURATION, 1);
+      const eased = springEase(progress);
+
+      // Interpolate from old → target using the captured snapshot
+      const interpolatedNodes = targetNodes.map((node) => {
+        const oldPos = oldPositions.get(node.id);
+        if (!oldPos) return node;
+
+        const x = oldPos.x + (node.position.x - oldPos.x) * eased;
+        const y = oldPos.y + (node.position.y - oldPos.y) * eased;
+
+        return {
+          ...node,
+          position: { x, y },
+        };
+      });
+
+      useCanvasStore.setState({ nodes: interpolatedNodes });
+
+      if (progress < 1) {
+        animationRef.current = requestAnimationFrame(tick);
+      } else {
+        // Land exactly on target positions
+        useCanvasStore.setState({ nodes: targetNodes });
+        animationRef.current = null;
+        // Resume temporal tracking now that animation is complete
+        useCanvasStore.temporal.getState().resume();
+      }
+    };
+
+    animationRef.current = requestAnimationFrame(tick);
+  }, []);
+
+  const executeUndo = useCallback(() => {
     if (pastStates.length > 0) {
-      setIsHistoryAnimating(true);
+      // 1. Capture current node positions BEFORE undo
+      const currentNodes = useCanvasStore.getState().nodes;
+      const oldPositions = new Map(
+        currentNodes.map((n) => [n.id, { x: n.position.x, y: n.position.y }])
+      );
+
+      // 2. Execute undo — nodes jump to previous state instantly
       undo();
-      // Remove the transition properties right as the animation finishes (300ms)
-      setTimeout(() => setIsHistoryAnimating(false), 300);
-    }
-  };
 
-  // 3. Intercept Redo calls
-  const executeRedo = () => {
+      // 3. Capture the target positions AFTER undo (before animation modifies them)
+      const targetNodes = [...useCanvasStore.getState().nodes];
+
+      // 4. Animate from old positions to the new (restored) positions
+      animateTransition(oldPositions, targetNodes);
+    }
+  }, [pastStates.length, undo, animateTransition]);
+
+  const executeRedo = useCallback(() => {
     if (futureStates.length > 0) {
-      setIsHistoryAnimating(true);
-      redo();
-      setTimeout(() => setIsHistoryAnimating(false), 300);
-    }
-  };
+      const currentNodes = useCanvasStore.getState().nodes;
+      const oldPositions = new Map(
+        currentNodes.map((n) => [n.id, { x: n.position.x, y: n.position.y }])
+      );
 
-  // Update keyboard shortcuts to use our custom transition executors
+      redo();
+
+      const targetNodes = [...useCanvasStore.getState().nodes];
+      animateTransition(oldPositions, targetNodes);
+    }
+  }, [futureStates.length, redo, animateTransition]);
+
+  // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       const modifier = event.ctrlKey || event.metaKey;
@@ -71,19 +144,19 @@ export default function ArchitectureCanvas() {
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [undo, redo, pastStates.length, futureStates.length]);
+  }, [executeUndo, executeRedo]);
+
+  // Cleanup animation on unmount
+  useEffect(() => {
+    return () => {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
+    };
+  }, []);
 
   return (
-    /* 4. THE POLISH LAYER:
-         When isHistoryAnimating is true, we inject a highly responsive, custom
-         spring easing function (cubic-bezier) directly into the internal classes of
-         both React Flow nodes and edge SVG paths.
-    */
-    <div className={`w-full h-screen bg-slate-50 transition-colors duration-200 ${
-      isHistoryAnimating
-        ? '[&_.react-flow__node]:transition-transform [&_.react-flow__node]:duration-400 [&_.react-flow__node]:ease-[cubic-bezier(0.34, 1.56, 0.64,1)] [&_.react-flow__edge-path]:transition-all [&_.react-flow__edge-path]:duration-400 [&_.react-flow__edge-path]:ease-[cubic-bezier(0.34, 1.56, 0.64, 1)]'
-        : ''
-    }`}>
+    <div className="w-full h-screen bg-slate-50 transition-colors duration-200">
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -94,15 +167,12 @@ export default function ArchitectureCanvas() {
         onConnect={onConnect}
         fitView
         defaultEdgeOptions={{ type: 'animatedEdge' }}
-
         onNodeClick={(event, node) => setSelectedNodeId(node.id)}
         onPaneClick={() => setSelectedNodeId(null)}
-        
       >
         <Background color="#cbd5e1" gap={20} size={2} />
         <Controls />
 
-        {/* Update panel click handlers to use the animated execution wrappers */}
         <Panel position="top-left" className="bg-white/80 backdrop-blur-md p-2 rounded-xl shadow-sm border border-slate-200 flex gap-2">
           <button
             onClick={executeUndo}
@@ -123,4 +193,4 @@ export default function ArchitectureCanvas() {
       </ReactFlow>
     </div>
   );
-}
+}

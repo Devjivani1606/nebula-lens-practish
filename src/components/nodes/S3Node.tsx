@@ -45,13 +45,17 @@ function S3Node({ data, selected }: { data: any; selected?: boolean }) {
 
       {/* S3 Specific Metadata */}
       <div className="mt-3 space-y-1 text-xs text-slate-600">
-        <div className="flex justify-between items-center bg-slate-100/50 px-2 py-1 rounded">
+        {/* <div className="flex justify-between items-center bg-slate-100/50 px-2 py-1 rounded">
           <span className="font-medium">Created:</span>
           <span>{data.creationDate}</span>
-        </div>
+        </div> */}
         <div className="flex justify-between items-center bg-slate-100/50 px-2 py-1 rounded">
           <span className="font-medium">Access:</span>
           <span className="text-amber-600 font-semibold">{data.publicAccess}</span>
+        </div>
+        <div className="flex justify-between items-center bg-slate-100/50 px-2 py-1 rounded">
+          <span className="font-medium">TotalSize:</span>
+          <span className="text-slate-500 font-semibold">{data.metrics.totalSize}</span>
         </div>
       </div>
 

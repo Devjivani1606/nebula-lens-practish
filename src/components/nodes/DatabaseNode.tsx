@@ -53,6 +53,12 @@ function DatabaseNode({ data, selected }: { data: any; selected?: boolean }) {
           {data.status}
         </div>
       )}
+      {data.insights && (
+        <div className="mt-3 flex items-center gap-2 text-xs font-medium text-indigo-700 bg-indigo-50/50 p-2 rounded-md border border-indigo-100">
+          <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+          {data.insights}
+        </div>
+      )}
 
 
 

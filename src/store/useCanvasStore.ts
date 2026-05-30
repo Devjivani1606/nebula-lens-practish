@@ -14,6 +14,7 @@ import {
 
 // Import our Boto3 mock data
 import initialData from '../data/architecture.json';
+// import initialData from '../data/transformed_architecture.json';
 
 // 1. Define the TypeScript interface for our store
 type CanvasState = {
@@ -48,19 +49,19 @@ export const useCanvasStore = create<CanvasState>()(
       },
     }),
     {
-      // 2. Partialize: Tell Zundo exactly what to track for undo/redo
+      // Partialize: Tell Zundo exactly what to track for undo/redo
       partialize: (state) => ({
         nodes: state.nodes,
         edges: state.edges,
       }),
       // Debounce the history snapshots
-      handleSet: (handleSet) => {
+      handleSet: (originalHandleSet) => {
         let timeout: ReturnType<typeof setTimeout>;
         return (pastState, replace) => {
           clearTimeout(timeout);
           // Wait 250ms after the last change before saving to history
           timeout = setTimeout(() => {
-            handleSet(pastState, replace);
+            originalHandleSet(pastState, replace);
           }, 250);
         };
       },
