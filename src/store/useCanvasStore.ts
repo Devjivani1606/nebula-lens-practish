@@ -13,7 +13,8 @@ import {
 } from '@xyflow/react';
 
 // Import our Boto3 mock data
-import initialData from '../data/architecture.json';
+// import initialData from '../data/architecture.json';
+import initialData from '../data/latestdata.json'
 // import initialData from '../data/transformed_architecture.json';
 
 // 1. Define the TypeScript interface for our store
@@ -31,8 +32,8 @@ type CanvasState = {
 export const useCanvasStore = create<CanvasState>()(
   temporal(
     (set, get) => ({
-      nodes: initialData.nodes,
-      edges: initialData.edges,
+      nodes: initialData.nodes as Node[],
+      edges: initialData.edges as Edge[],
 
       // New Selection State
       selectedNodeId: null,

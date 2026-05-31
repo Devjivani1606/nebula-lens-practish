@@ -9,8 +9,20 @@ import LambdaNode from '../nodes/LambdaNode';
 import S3Node from '../nodes/S3Node';
 import DatabaseNode from '../nodes/DatabaseNode';
 import AnimatedEdge from './AnimatedEdge';
-
-const nodeTypes = { lambdaNode: LambdaNode, s3Node: S3Node, databaseNode: DatabaseNode };
+import VpcNode from '../nodes/VpcNode';
+import SubnetNode from '../nodes/SubnetNode';
+import ApiGatewayNode from '../nodes/ApiGatewayNode';
+import SqsNode from '../nodes/SqsNode';
+const nodeTypes = {
+  lambdaNode: LambdaNode,
+  s3Node: S3Node,
+  databaseNode: DatabaseNode,
+  VPC: VpcNode,
+  IGW: VpcNode,
+  Subnet: SubnetNode,
+  apiGatewayNode: ApiGatewayNode,
+  sqsNode: SqsNode,
+};
 const edgeTypes = { animatedEdge: AnimatedEdge };
 
 // Spring-like easing: fast start with a gentle overshoot
@@ -64,6 +76,13 @@ export default function ArchitectureCanvas() {
       const interpolatedNodes = targetNodes.map((node) => {
         const oldPos = oldPositions.get(node.id);
         if (!oldPos) return node;
+
+        if (
+        oldPos.x === node.position.x &&
+        oldPos.y === node.position.y
+        ) {
+        return node;
+        }
 
         const x = oldPos.x + (node.position.x - oldPos.x) * eased;
         const y = oldPos.y + (node.position.y - oldPos.y) * eased;
@@ -126,6 +145,15 @@ export default function ArchitectureCanvas() {
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
+
+// Ignore shortcuts when user is typing in inputs
+      if (
+        event.target instanceof HTMLInputElement ||
+        event.target instanceof HTMLTextAreaElement
+      ) {
+        return;
+      }
+
       const modifier = event.ctrlKey || event.metaKey;
 
       if (modifier && event.key.toLowerCase() === 'z' && !event.shiftKey) {
@@ -193,4 +221,4 @@ export default function ArchitectureCanvas() {
       </ReactFlow>
     </div>
   );
-}
+}
