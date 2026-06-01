@@ -3,20 +3,23 @@
 import React, { memo } from 'react';
 import { Handle, Position } from '@xyflow/react';
 import { motion } from 'framer-motion';
+import { useLensVisuals } from '../../hooks/useLensVisuals';
 
 const springTransition = { type: "spring", stiffness: 400, damping: 30 } as const;
 
-function S3Node({ data, selected }: { data: any; selected?: boolean }) {
+function S3Node({ id, data, selected }: { id: string; data: any; selected?: boolean }) {
+  const { opacity, isHighlighted, isDimmed } = useLensVisuals(id);
   return (
     <motion.div
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.97 }}
       //framer motion animation
       animate={{
-        boxShadow: selected
+        opacity: opacity,
+        boxShadow: (selected || isHighlighted)
           ? "0px 0px 0px 2px #3b82f6, 0px 10px 25px -5px rgba(59, 130, 246, 0.4)"
           : "0px 1px 3px 0px rgba(0, 0, 0, 0.1), 0px 1px 2px -1px rgba(0, 0, 0, 0.1)",
-        borderColor: selected ? "rgba(59, 130, 246, 0)" : "rgba(226, 232, 240, 0.5)",
+        borderColor: (selected || isHighlighted) ? "rgba(59, 130, 246, 0)" : "rgba(226, 232, 240, 0.5)",
       }}
       transition={springTransition} // This uses the same stiffness:400 spring as everything else!
       // Keep only the base layout classes here

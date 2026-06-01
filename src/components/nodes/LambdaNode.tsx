@@ -1,11 +1,13 @@
 import React, { memo } from 'react';
 import { Handle, Position } from '@xyflow/react';
 import { motion } from 'framer-motion';
-
+import { useLensVisuals } from '../../hooks/useLensVisuals';
 // The mentor's exact spring physics configuration
 const springTransition = { type: "spring", stiffness: 400, damping: 30 } as const;
 
-function LambdaNode({ data, selected }: { data: any; selected?: boolean }) {
+function LambdaNode({ id, data, selected }: { id: string; data: any; selected?: boolean }) {
+  // Ask the hook how this specific node should look right now
+  const { opacity, isHighlighted, isDimmed } = useLensVisuals(id);
   return (
     // framer-motion wrapper for physical interactions
     <motion.div
@@ -13,14 +15,20 @@ function LambdaNode({ data, selected }: { data: any; selected?: boolean }) {
       whileTap={{ scale: 0.97 }}
       //framer motion animation
       animate={{
-        boxShadow: selected
+        opacity: opacity,
+        boxShadow: (selected || isHighlighted)
           ? "0px 0px 0px 2px #3b82f6, 0px 10px 25px -5px rgba(59, 130, 246, 0.4)"
           : "0px 1px 3px 0px rgba(0, 0, 0, 0.1), 0px 1px 2px -1px rgba(0, 0, 0, 0.1)",
-        borderColor: selected ? "rgba(59, 130, 246, 0)" : "rgba(226, 232, 240, 0.5)",
+        borderColor: (selected || isHighlighted) ? "rgba(59, 130, 246, 0)" : "rgba(226, 232, 240, 0.5)",
       }}
       transition={springTransition} // This uses the same stiffness:400 spring as everything else!
       // Keep only the base layout classes here
-      className="relative min-w-[200px] rounded-xl backdrop-blur-md bg-white/60 p-4 border"
+
+
+      // 4. Disable pointer events if dimmed so the user can't accidentally click it
+      className={`relative min-w-[200px] rounded-xl backdrop-blur-md bg-white/60 p-4 border ${
+        isDimmed ? 'pointer-events-none grayscale-[50%]' : ''
+      }`}
     >
 
       {/* INVISIBLE OMNI-HANDLE:

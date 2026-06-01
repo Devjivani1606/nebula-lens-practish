@@ -3,6 +3,7 @@
     {
       "id": "vpc-main",
       "type": "VPC",
+      "parentId": null,
       "position": { "x": 0, "y": 0 },
       "style": { "width": 900, "height": 500 },
       "data": {
@@ -17,7 +18,7 @@
     {
       "id": "subnet-private",
       "type": "Subnet",
-      "parentNode": "vpc-main",
+      "parentId": "vpc-main",
       "extent": "parent",
       "position": { "x": 50, "y": 80 },
       "style": { "width": 800, "height": 380 },
@@ -33,6 +34,7 @@
     {
       "id": "api-gateway-ingress",
       "type": "apiGatewayNode",
+      "parentId": null,
       "position": { "x": -250, "y": 250 },
       "data": {
         "name": "Client API Gateway",
@@ -46,7 +48,7 @@
     {
       "id": "sqs-job-queue",
       "type": "sqsNode",
-      "parentNode": "subnet-private",
+      "parentId": "subnet-private",
       "extent": "parent",
       "position": { "x": 50, "y": 150 },
       "data": {
@@ -61,7 +63,7 @@
     {
       "id": "lambda-processor",
       "type": "lambdaNode",
-      "parentNode": "subnet-private",
+      "parentId": "subnet-private",
       "extent": "parent",
       "position": { "x": 300, "y": 150 },
       "data": {
@@ -77,7 +79,7 @@
     {
       "id": "db-mongo-cluster",
       "type": "databaseNode",
-      "parentNode": "subnet-private",
+      "parentId": "subnet-private",
       "extent": "parent",
       "position": { "x": 550, "y": 150 },
       "data": {
@@ -92,6 +94,7 @@
     {
       "id": "s3-asset-bucket",
       "type": "s3Node",
+      "parentId": null,
       "position": { "x": 950, "y": 250 },
       "data": {
         "name": "Asset Storage",

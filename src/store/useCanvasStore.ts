@@ -16,7 +16,7 @@ import {
 // import initialData from '../data/architecture.json';
 import initialData from '../data/latestdata.json'
 // import initialData from '../data/transformed_architecture.json';
-
+type LensType = 'structural' | 'blast-radius' | 'cost';
 // 1. Define the TypeScript interface for our store
 type CanvasState = {
   nodes: Node[];
@@ -26,6 +26,11 @@ type CanvasState = {
   onNodesChange: (changes: NodeChange[]) => void;
   onEdgesChange: (changes: EdgeChange[]) => void;
   onConnect: (connection: Connection) => void;
+  // NEW: Lens State
+  activeLens: LensType;
+  setActiveLens: (lens: LensType) => void;
+  focusedNodeId: string | null;
+  setFocusedNodeId: (id: string | null) => void;
 };
 
 // 1. Wrap the store creator in `temporal`
@@ -48,6 +53,11 @@ export const useCanvasStore = create<CanvasState>()(
       onConnect: (connection: Connection) => {
         set({ edges: addEdge(connection, get().edges) });
       },
+      activeLens: 'structural',
+      setActiveLens: (lens) => set({ activeLens: lens }),
+
+      focusedNodeId: null,
+      setFocusedNodeId: (id) => set({ focusedNodeId: id }),
     }),
     {
       // Partialize: Tell Zundo exactly what to track for undo/redo

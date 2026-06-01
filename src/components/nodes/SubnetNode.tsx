@@ -3,15 +3,18 @@
 import React, { memo } from 'react';
 import { Handle, Position } from '@xyflow/react';
 import { motion } from 'framer-motion';
+import { useLensVisuals } from '../../hooks/useLensVisuals';
 
-function SubnetNode({ data, selected }: { data: any; selected?: boolean }) {
+function SubnetNode({ id,data, selected }: { id: string; data: any; selected?: boolean }) {
+  const { opacity, isHighlighted, isDimmed } = useLensVisuals(id);
   return (
     <motion.div
       // We remove the scale animation so the whole screen doesn't shake!
       animate={{
+        opacity: opacity,
         // Smooth transition for the blue border and background on selection
-        borderColor: selected ? "rgba(59, 130, 246, 0.8)" : "rgba(59, 130, 246, 0.4)",
-        backgroundColor: selected ? "rgba(59, 130, 246, 0.05)" : "rgba(59, 130, 246, 0.01)",
+        borderColor: (selected || isHighlighted) ? "rgba(59, 130, 246, 0.8)" : "rgba(59, 130, 246, 0.4)",
+        backgroundColor: (selected || isHighlighted) ? "rgba(59, 130, 246, 0.05)" : "rgba(59, 130, 246, 0.01)",
       }}
       transition={{ duration: 0.2 }}
       // THE FIX: w-full h-full, dashed border, transparent background
