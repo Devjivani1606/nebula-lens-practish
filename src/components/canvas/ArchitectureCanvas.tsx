@@ -14,6 +14,7 @@ import SubnetNode from '../nodes/SubnetNode';
 import ApiGatewayNode from '../nodes/ApiGatewayNode';
 import SqsNode from '../nodes/SqsNode';
 import MetricsSidebar from '../ui/MetricsSidebar';
+import LensToolbar from '../ui/LensToolbar';
 
 const nodeTypes = {
   lambdaNode: LambdaNode,
@@ -223,24 +224,9 @@ export default function ArchitectureCanvas() {
           >
             Redo ↪
           </button>
-      {/* Lens Toggle Buttons (Inside ReactFlow or floating above it) */}
-      <div className="absolute top-4 left-1/2 -translate-x-1/2 flex gap-2 z-40">
-        {['structural', 'blast-radius', 'cost'].map((lens) => (
-          <button
-            key={lens}
-            // Use the reactive function here
-            onClick={() => setActiveLens(lens as any)}
-            className={`px-4 py-2 rounded-lg capitalize font-bold text-sm transition-all duration-200
-              ${activeLens === lens // Use the reactive state here!
-                ? 'bg-indigo-600 text-white shadow-lg ring-2 ring-indigo-200'
-                : 'bg-white text-slate-700 hover:bg-slate-100'}`}
-          >
-            {lens.replace('-', ' ')}
-          </button>
-        ))}
-      </div>
-        </Panel>
 
+        </Panel>
+<LensToolbar />
       </ReactFlow>
     </div>
   );

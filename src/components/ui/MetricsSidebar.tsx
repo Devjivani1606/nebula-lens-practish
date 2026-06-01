@@ -39,12 +39,15 @@ export default function MetricsSidebar() {
   const selectedNodeId = useCanvasStore((state) => state.selectedNodeId);
   const setSelectedNodeId = useCanvasStore((state) => state.setSelectedNodeId);
   const nodes = useCanvasStore((state) => state.nodes);
+  const activeLens = useCanvasStore((state) => state.activeLens);
 
   const selectedNode = nodes.find((n) => n.id === selectedNodeId);
 
   // 2. THE FIX: Safely check for container types with optional chaining
   const isContainer = selectedNode?.type?.toLowerCase().includes('vpc') ||
                       selectedNode?.type?.toLowerCase().includes('subnet');
+
+  const isOpen = !!selectedNode && !isContainer && activeLens !== 'blast-radius';
 
   // 3. THE FIX: Cast the data to our strict TypeScript interface
   const data = selectedNode?.data as CustomNodeData | undefined;
@@ -57,7 +60,7 @@ export default function MetricsSidebar() {
   return (
     <AnimatePresence>
       {/* 4. THE FIX: Strict narrowing. TS now guarantees selectedNode and data are NOT undefined inside this block */}
-      {selectedNode && data && !isContainer && (
+      {selectedNode && data && !isContainer && activeLens !== 'blast-radius' && (
         <>
           <motion.div
             initial={{ opacity: 0 }}
