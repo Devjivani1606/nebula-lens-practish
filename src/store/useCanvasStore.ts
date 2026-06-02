@@ -22,10 +22,13 @@ type CanvasState = {
   nodes: Node[];
   edges: Edge[];
   selectedNodeId: string | null;
+  isLoading: boolean; // Track data retrieval states
+
   setSelectedNodeId: (id: string | null) => void;
   onNodesChange: (changes: NodeChange[]) => void;
   onEdgesChange: (changes: EdgeChange[]) => void;
   onConnect: (connection: Connection) => void;
+  fetchInfrastructure: () => Promise<void>;
   // NEW: Lens State
   activeLens: LensType;
   setActiveLens: (lens: LensType) => void;
@@ -39,7 +42,7 @@ export const useCanvasStore = create<CanvasState>()(
     (set, get) => ({
       nodes: initialData.nodes as Node[],
       edges: initialData.edges as Edge[],
-
+      isLoading: false,
       // New Selection State
       selectedNodeId: null,
       setSelectedNodeId: (id) => set({ selectedNodeId: id }),
@@ -58,7 +61,28 @@ export const useCanvasStore = create<CanvasState>()(
 
       focusedNodeId: null,
       setFocusedNodeId: (id) => set({ focusedNodeId: id }),
+
+      fetchInfrastructure: async () => {
+    set({ isLoading: true });
+    try {
+      const response = await fetch('/api/infrastructure');
+      if (!response.ok) throw new Error('Failed to capture cloud layout topology');
+      const data = await response.json();
+
+      set({
+        nodes: data.nodes,
+        edges: data.edges,
+        isLoading: false
+      });
+    } catch (error) {
+      console.error("Hydration Error:", error);
+      set({ isLoading: false });
+    }
+  }
+
     }),
+
+
     {
       // Partialize: Tell Zundo exactly what to track for undo/redo
       partialize: (state) => ({

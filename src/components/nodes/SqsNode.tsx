@@ -7,7 +7,15 @@ import { useLensVisuals } from '../../hooks/useLensVisuals';
 const springTransition = { type: "spring", stiffness: 400, damping: 30 } as const;
 
 function SqsNode({ id, data, selected }: { id: string; data: any; selected?: boolean }) {
-  const { opacity, isHighlighted, isDimmed } = useLensVisuals(id);
+  const { opacity, isHighlighted, isDimmed, heatmapColor, borderColor: lensBorderColor } = useLensVisuals(id);
+
+  const activeBackgroundColor = heatmapColor
+    ? heatmapColor
+    : (selected || isHighlighted ? "rgba(249, 115, 22, 0.05)" : "rgba(255, 255, 255, 1)");
+
+  const activeBorderColor = lensBorderColor
+    ? lensBorderColor
+    : (selected || isHighlighted ? "rgba(249, 115, 22, 0)" : "rgba(226, 232, 240, 0.5)");
   return (
     <motion.div
       whileHover={{ scale: 1.02 }}
@@ -15,10 +23,12 @@ function SqsNode({ id, data, selected }: { id: string; data: any; selected?: boo
       //framer motion animation
       animate={{
         opacity: opacity,
+        backgroundColor: activeBackgroundColor, // <- Apply it here!
+        borderColor: activeBorderColor,
         boxShadow: (selected || isHighlighted)
           ? "0px 0px 0px 2px #3b82f6, 0px 10px 25px -5px rgba(59, 130, 246, 0.4)"
           : "0px 1px 3px 0px rgba(0, 0, 0, 0.1), 0px 1px 2px -1px rgba(0, 0, 0, 0.1)",
-        borderColor: (selected || isHighlighted) ? "rgba(59, 130, 246, 0)" : "rgba(226, 232, 240, 0.5)",
+        //borderColor: (selected || isHighlighted) ? "rgba(59, 130, 246, 0)" : "rgba(226, 232, 240, 0.5)",
       }}
       transition={springTransition} // This uses the same stiffness:400 spring as everything else!
       // Keep only the base layout classes here

@@ -14,7 +14,7 @@ export function useLensVisuals(nodeId: string) {
   const nodes = useCanvasStore((state) => state.nodes);
 
   // Default state (Structural View or nothing selected)
-  if (activeLens === 'structural' || !selectedNodeId) {
+  if (activeLens === 'structural') {
     return { opacity: 1, isHighlighted: false, isDimmed: false };
   }
 
@@ -22,7 +22,10 @@ export function useLensVisuals(nodeId: string) {
   const selectedNode = nodes.find((n) => n.id === selectedNodeId);
 
   // Blast Radius Logic
-  if (activeLens === 'blast-radius') {
+  if (activeLens === 'blast-radius' && selectedNodeId) {
+
+    const currentNode = nodes.find((n) => n.id === nodeId);
+    const selectedNode = nodes.find((n) => n.id === selectedNodeId);
 
     // 1. THE BULLETPROOF GUARD CLAUSE
     if (isContainer(selectedNode?.type)) {
@@ -62,9 +65,45 @@ export function useLensVisuals(nodeId: string) {
   }
 
   // Cost Topology Logic
+  // Cost Topology Logic
   if (activeLens === 'cost') {
-    return { opacity: 1, isHighlighted: false, isDimmed: false };
+    // 1. Containers don't have direct costs in this model, dim them
+    if (isContainer(currentNode?.type)) {
+      return { opacity: 0.3, isHighlighted: false, isDimmed: true, heatmapColor: undefined };
+    }
+
+    // 2. THE FIX: Safely extract and forcefully convert the cost to a real number
+    const rawCost = (currentNode?.data as any)?.metrics?.estMonthlyCost;
+    const cost = rawCost !== undefined ? Number(rawCost) : undefined;
+
+    // 3. THE FIX: Check if it is missing OR if the conversion failed (isNaN)
+    if (cost === undefined || isNaN(cost)) {
+      return { opacity: 0.2, isHighlighted: false, isDimmed: true, heatmapColor: undefined };
+    }
+
+    // 4. The Heatmap Algorithm (Green -> Orange -> Red)
+    let heatmapColor = "rgba(34, 197, 94, 0.15)"; // Default: Tailwind green-500
+    let borderColor = "rgba(34, 197, 94, 0.5)";
+
+    if (cost > 500) {
+      // Critical Cost (Red)
+      heatmapColor = "rgba(239, 68, 68, 0.25)"; // Tailwind red-500
+      borderColor = "rgba(239, 68, 68, 0.8)";
+    } else if (cost > 100) {
+      // Warning Cost (Orange)
+      heatmapColor = "rgba(249, 115, 22, 0.2)"; // Tailwind orange-500
+      borderColor = "rgba(249, 115, 22, 0.6)";
+    }
+
+    return {
+      opacity: 1,
+      isHighlighted: false,
+      isDimmed: false,
+      heatmapColor,
+      borderColor // Passing the custom border color to the component
+    };
   }
 
-  return { opacity: 1, isHighlighted: false, isDimmed: false };
+  // Default return for Structural View
+  return { opacity: 1, isHighlighted: false, isDimmed: false, heatmapColor: undefined, borderColor: undefined };
 }

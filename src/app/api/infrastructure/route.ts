@@ -1,0 +1,156 @@
+import { NextResponse } from 'next/server';
+
+export async function GET() {
+  // Simulate minor network latency inherent to cloud API aggregation
+  await new Promise((resolve) => setTimeout(resolve, 800));
+
+  const mockAwsArchitecture = {
+    "nodes": [
+    {
+      "id": "vpc-main",
+      "type": "VPC",
+      "parentId": null,
+      "position": { "x": 0, "y": 0 },
+      "style": { "width": 900, "height": 500 },
+      "data": {
+        "name": "Production VPC",
+        "insights": "Flow logs enabled.",
+        "metrics": {
+          "cidrBlock": "10.0.0.0/16",
+          "region": "ap-south-1"
+        }
+      }
+    },
+    {
+      "id": "subnet-private",
+      "type": "Subnet",
+      "parentId": "vpc-main",
+      "extent": "parent",
+      "position": { "x": 50, "y": 80 },
+      "style": { "width": 800, "height": 380 },
+      "data": {
+        "name": "Private Compute Subnet",
+        "insights": "No direct internet access.",
+        "metrics": {
+          "cidrBlock": "10.0.1.0/24",
+          "availabilityZone": "ap-south-1a"
+        }
+      }
+    },
+    {
+      "id": "api-gateway-ingress",
+      "type": "apiGatewayNode",
+      "parentId": null,
+      "position": { "x": -250, "y": 250 },
+      "data": {
+        "name": "Client API Gateway",
+        "insights": "Rate limiting active.",
+        "metrics": {
+          "requestsPerSec": "1200",
+          "latency": "45ms",
+          "totalRequests": '1.2M',
+          "errorRate": '0.04%',
+          "avgLatency": '42ms',
+          "estMonthlyCost": 45
+        }
+      }
+    },
+    {
+      "id": "sqs-job-queue",
+      "type": "sqsNode",
+      "parentId": "subnet-private",
+      "extent": "parent",
+      "position": { "x": 50, "y": 150 },
+      "data": {
+        "name": "Job Processing Queue",
+        "insights": "5 messages in flight.",
+        "metrics": {
+          "type": "Standard",
+          "retentionPeriod": "4 days",
+          "messagesVisible": 14, "messagesDelayed": 0, "ageOfOldestMessage": '12s', "estMonthlyCost": 12
+        }
+      }
+    },
+    {
+      "id": "lambda-processor",
+      "type": "lambdaNode",
+      "parentId": "subnet-private",
+      "extent": "parent",
+      "position": { "x": 300, "y": 150 },
+      "data": {
+        "name": "Data Processor",
+        "insights": "Warning: High memory usage.",
+        "metrics": {
+          "runtime": "nodejs20.x",
+          "memory": "1024 MB",
+          "avgDuration": "850ms",
+          "memoryUtilization": '89%', "invocations": '450k', "errors": 2, "estMonthlyCost": 320
+        }
+      }
+    },
+    {
+      "id": "db-mongo-cluster",
+      "type": "databaseNode",
+      "parentId": "subnet-private",
+      "extent": "parent",
+      "position": { "x": 550, "y": 150 },
+      "data": {
+        "name": "MongoDB Atlas",
+        "insights": "Healthy.",
+        "metrics": {
+          "engine": "MongoDB 7.0",
+          "tier": "M10 Dedicated",
+          "activeConnections": 142, "cpuUtilization": '24%', "diskUsed": '124GB', "estMonthlyCost": 850
+        }
+      }
+    },
+    {
+      "id": "s3-asset-bucket",
+      "type": "s3Node",
+      "parentId": null,
+      "position": { "x": 950, "y": 250 },
+      "data": {
+        "name": "Asset Storage",
+        "insights": "Encryption enabled.",
+        "metrics": {
+          "totalSize": "1.2 TB",
+          "versioning": "Active",
+          "bucketObjects": '45,201', "publicAccess": 'Disabled', "estMonthlyCost": 140
+        }
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge-api-to-sqs",
+      "source": "api-gateway-ingress",
+      "target": "sqs-job-queue",
+      "type": "animatedEdge",
+      "label": "POST /jobs"
+    },
+    {
+      "id": "edge-sqs-to-lambda",
+      "source": "sqs-job-queue",
+      "target": "lambda-processor",
+      "type": "animatedEdge",
+      "label": "Triggers Event"
+    },
+    {
+      "id": "edge-lambda-to-db",
+      "source": "lambda-processor",
+      "target": "db-mongo-cluster",
+      "type": "animatedEdge",
+      "label": "Reads/Writes State"
+    },
+    {
+      "id": "edge-lambda-to-s3",
+      "source": "lambda-processor",
+      "target": "s3-asset-bucket",
+      "type": "animatedEdge",
+      "label": "Stores Assets"
+    }
+  ]
+  };
+
+  return NextResponse.json(mockAwsArchitecture);
+}

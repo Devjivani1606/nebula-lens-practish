@@ -15,6 +15,7 @@ import ApiGatewayNode from '../nodes/ApiGatewayNode';
 import SqsNode from '../nodes/SqsNode';
 import MetricsSidebar from '../ui/MetricsSidebar';
 import LensToolbar from '../ui/LensToolbar';
+import TopNav from '../ui/TopNav';
 
 const nodeTypes = {
   lambdaNode: LambdaNode,
@@ -45,7 +46,9 @@ export default function ArchitectureCanvas() {
     selectedNodeId,
     setSelectedNodeId,
     activeLens,
-    setActiveLens
+    setActiveLens,
+    fetchInfrastructure,
+    isLoading
   } = useCanvasStore();
 
   const { undo, redo, pastStates, futureStates } = useStore(
@@ -188,9 +191,31 @@ export default function ArchitectureCanvas() {
     };
   }, []);
 
+
+useEffect(() => {
+    fetchInfrastructure();
+  }, [fetchInfrastructure]);
+
+  if (isLoading && nodes.length === 0) {
+    return (
+      <div className="w-full h-screen flex flex-col items-center justify-center bg-slate-50 gap-3">
+        <div className="w-6 h-6 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest animate-pulse">
+          Parsing AWS Topology...
+        </p>
+      </div>
+    );
+  }
+
   return (
-    <div className="w-full h-screen bg-slate-50 transition-colors duration-200">
-      {/* Drop the Sidebar here! */}
+    <div className="flex flex-col w-full h-screen bg-slate-50 overflow-hidden">
+
+      {/* TopNav at the very top */}
+    <TopNav />
+
+    {/* 3. Wrap React Flow in a flex-1 container so it fills the remaining height */}
+    <div className="flex-1 relative w-full h-full">
+      {/* Sidebar here! */}
       <MetricsSidebar />
 
       <ReactFlow
@@ -228,6 +253,7 @@ export default function ArchitectureCanvas() {
         </Panel>
 <LensToolbar />
       </ReactFlow>
+      </div>
     </div>
   );
 }
