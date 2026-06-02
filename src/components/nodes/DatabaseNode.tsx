@@ -1,9 +1,11 @@
 'use client';
 
 import React, { memo } from 'react';
+import Image from 'next/image';
 import { Handle, Position } from '@xyflow/react';
 import { motion } from 'framer-motion';
 import { useLensVisuals } from '../../hooks/useLensVisuals';
+import Icon from "../../../public/icons/amazon-dynamodb.svg"
 
 const springTransition = { type: "spring", stiffness: 400, damping: 30 } as const;
 
@@ -49,16 +51,29 @@ function DatabaseNode({ id, data, selected }: { id: string; data: any; selected?
 
       {/* Node Header */}
       <div className="flex items-center gap-3">
-        {/* DB Icon Box */}
-        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-400 to-indigo-600 flex items-center justify-center text-white font-bold shadow-inner">
-          DB
+        {/* 2. THE NEW ICON CONTAINER (Neutral, Glassy, Premium) */}
+        <div className="w-12 h-12 rounded-xl bg-white border border-slate-100 shadow-[0_2px_10px_-3px_rgba(0,0,0,0.05)] flex items-center justify-center shrink-0">
+          <Image
+            src={Icon}
+            alt="Database"
+            width={28}
+            height={28}
+            className="object-contain drop-shadow-sm"
+          />
         </div>
 
-        <div className="flex flex-col">
-          <span className="text-xs font-semibold tracking-wider text-slate-500 uppercase">{data.engine}</span>
-          <span className="text-sm font-bold text-slate-800">{data.name}</span>
+        {/* 3. TYPOGRAPHY (Aligned and crisp) */}
+        <div className="flex flex-col overflow-hidden">
+          <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest truncate">
+            {data.type || 'Database'}
+          </h3>
+          <h2 className="text-sm font-black text-slate-800 truncate">
+            {data.name}
+          </h2>
         </div>
       </div>
+{/* Optional: Add a subtle divider before the metrics */}
+      <div className="h-px w-full bg-slate-100 my-1" />
 
       {/* DB Specific Metadata */}
       {data.status && (

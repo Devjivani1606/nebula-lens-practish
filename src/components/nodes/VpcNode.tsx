@@ -2,8 +2,10 @@
 
 import React, { memo } from 'react';
 import { Handle, Position } from '@xyflow/react';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { useLensVisuals } from '../../hooks/useLensVisuals';
+import Icon from "../../../public/icons/amazon-virtual-private-cloud.svg"
 function VpcNode({ id, data, selected }: { id: string; data: any; selected?: boolean }) {
   const { opacity, isHighlighted, isDimmed } = useLensVisuals(id);
   return (
