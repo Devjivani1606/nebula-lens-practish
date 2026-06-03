@@ -6,6 +6,8 @@ import { Cloud, RefreshCw, Bell } from 'lucide-react';
 import { Button } from "./button";
 import { Badge } from "./badge";
 import { Separator } from "./separator";
+import Image from 'next/image';
+
 export default function TopNav() {
   const isLoading = useCanvasStore((state) => state.isLoading);
   const fetchInfrastructure = useCanvasStore((state) => state.fetchInfrastructure);
@@ -15,16 +17,35 @@ export default function TopNav() {
 
       {/* Left: Branding & Logo */}
       <div className="flex items-center gap-3">
-        <div className="bg-indigo-600 p-1.5 rounded-lg shadow-sm shadow-indigo-200">
-          <Cloud className="w-5 h-5 text-white" />
-        </div>
-        <span className="font-black text-lg text-slate-800 tracking-tight">
-          Gravity Lens
-        </span>
-        <Badge variant="outline" className="ml-2 bg-slate-100 text-slate-500 text-[10px] uppercase font-black rounded-md border-slate-200 tracking-widest px-2 py-0.5 h-auto">
-          MVP Phase
-        </Badge>
-      </div>
+
+  {/* 1. THE LOGO FIX */}
+  <div className="flex items-center justify-center shrink-0 overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-slate-900/5">
+    <Image
+      src="/logo/singleLogo.svg"
+      alt="Gravity Lens Logo"
+      width={36}
+      height={36}
+      // mix-blend-multiply is a CSS trick that makes white backgrounds turn transparent!
+      className="object-contain mix-blend-multiply"
+      priority
+    />
+  </div>
+
+  {/* 2. THE TYPOGRAPHY & NEW BADGE */}
+  <div className="flex items-center gap-2.5">
+    <span className="font-black text-xl text-slate-800 tracking-tight">
+      Gravity Lens
+    </span>
+
+    <Badge
+      variant="secondary"
+      className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 text-slate-500 bg-slate-100 hover:bg-slate-200 border border-slate-200/50"
+    >
+      MVP Phase
+    </Badge>
+  </div>
+
+</div>
 
       {/* Sync Controls Tied directly to Zustand */}
       <div className="flex items-center gap-4">
