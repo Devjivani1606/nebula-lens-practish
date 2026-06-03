@@ -75,7 +75,7 @@ export const useCanvasStore = create<CanvasState>()(
         isLoading: false
       });
     } catch (error) {
-      console.error("Hydration Error:", error);
+      console.error("Hydration Error for rendering topology:", error);
       set({ isLoading: false });
     }
   }

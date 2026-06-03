@@ -7,6 +7,7 @@ import { motion } from 'framer-motion';
 import { useLensVisuals } from '../../hooks/useLensVisuals';
 import Icon from "../../../public/icons/amazon-simple-queue-service.svg"
 import { useCanvasStore } from '../../store/useCanvasStore';
+import { Separator } from '../ui/separator';
 
 const springTransition = { type: "spring", stiffness: 400, damping: 30 } as const;
 
@@ -91,7 +92,7 @@ const activeLens = useCanvasStore((state) => state.activeLens); // <-- Add this
         </div>
       </div>
 {/* Optional: Add a subtle divider before the metrics */}
-      <div className="h-px w-full bg-slate-100 my-1" />
+      <Separator className="bg-slate-100 my-1" />
 
       {data.insights && (
         <div className="mt-3 text-xs font-medium text-slate-600 bg-slate-100/50 p-2 rounded-md border border-slate-200/50">

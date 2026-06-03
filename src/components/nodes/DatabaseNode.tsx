@@ -7,6 +7,7 @@ import { motion } from 'framer-motion';
 import { useLensVisuals } from '../../hooks/useLensVisuals';
 import Icon from "../../../public/icons/amazon-dynamodb.svg"
 import { useCanvasStore } from '../../store/useCanvasStore';
+import { Separator } from '../ui/separator';
 
 const springTransition = { type: "spring", stiffness: 400, damping: 30 } as const;
 
@@ -95,7 +96,7 @@ function DatabaseNode({ id, data, selected }: { id: string; data: any; selected?
         </div>
       </div>
 {/* Optional: Add a subtle divider before the metrics */}
-      <div className="h-px w-full bg-slate-100 my-1" />
+      <Separator className="bg-slate-100 my-1" />
 
       {/* DB Specific Metadata */}
       {data.status && (

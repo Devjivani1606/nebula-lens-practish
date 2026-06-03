@@ -16,6 +16,7 @@ import SqsNode from '../nodes/SqsNode';
 import MetricsSidebar from '../ui/MetricsSidebar';
 import LensToolbar from '../ui/LensToolbar';
 import TopNav from '../ui/TopNav';
+import { Button } from '@/components/ui/button';
 
 const nodeTypes = {
   lambdaNode: LambdaNode,
@@ -235,20 +236,22 @@ useEffect(() => {
         {/* <Controls /> */}
 
         <Panel position="top-left" className="bg-white/80 backdrop-blur-md p-2 rounded-xl shadow-sm border border-slate-200 flex gap-2">
-          <button
+          <Button
+            variant="outline"
             onClick={executeUndo}
             disabled={pastStates.length === 0}
-            className="px-4 py-2 text-sm font-bold text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            className="font-bold text-slate-700"
           >
             ↩ Undo
-          </button>
-          <button
+          </Button>
+          <Button
+            variant="outline"
             onClick={executeRedo}
             disabled={futureStates.length === 0}
-            className="px-4 py-2 text-sm font-bold text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            className="font-bold text-slate-700"
           >
             Redo ↪
-          </button>
+          </Button>
 
         </Panel>
 <LensToolbar />

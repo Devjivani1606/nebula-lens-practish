@@ -3,7 +3,9 @@
 import React, { useState } from 'react';
 import { useCanvasStore } from '../../store/useCanvasStore';
 import { Cloud, RefreshCw, Bell } from 'lucide-react';
-
+import { Button } from "./button";
+import { Badge } from "./badge";
+import { Separator } from "./separator";
 export default function TopNav() {
   const isLoading = useCanvasStore((state) => state.isLoading);
   const fetchInfrastructure = useCanvasStore((state) => state.fetchInfrastructure);
@@ -17,29 +19,33 @@ export default function TopNav() {
           <Cloud className="w-5 h-5 text-white" />
         </div>
         <span className="font-black text-lg text-slate-800 tracking-tight">
-          Nebula Lens
+          Gravity Lens
         </span>
-        <span className="ml-2 px-2 py-0.5 bg-slate-100 text-slate-500 text-[10px] uppercase font-black rounded-md border border-slate-200 tracking-widest">
+        <Badge variant="outline" className="ml-2 bg-slate-100 text-slate-500 text-[10px] uppercase font-black rounded-md border-slate-200 tracking-widest px-2 py-0.5 h-auto">
           MVP Phase
-        </span>
+        </Badge>
       </div>
 
       {/* Sync Controls Tied directly to Zustand */}
       <div className="flex items-center gap-4">
-        <button
-          onClick={() => fetchInfrastructure()}
-          disabled={isLoading}
-          className="flex items-center gap-2 px-3 py-1.5 text-sm font-bold text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors shadow-sm disabled:opacity-70"
-        >
-          <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin text-indigo-600' : ''}`} />
-          {isLoading ? 'Scanning AWS Engine...' : 'Sync Infrastructure'}
-        </button>
+        <Button
+  variant="outline"
+  onClick={() => fetchInfrastructure()}
+  disabled={isLoading}
+  className="font-bold text-slate-600"
+  size = "lg"
+>
+  <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin text-indigo-600' : ''}`} />
+  {isLoading ? 'Scanning AWS Engine...' : 'Sync Infrastructure'}
+</Button>
 
-        <div className="w-px h-6 bg-slate-200" />
 
-        <button className="text-slate-400 hover:text-slate-600 transition-colors">
-          <Bell className="w-5 h-5" />
-        </button>
+        <Separator orientation="vertical" className="h-6 bg-slate-200" />
+
+        <Button variant="ghost" size="icon" className="text-slate-400 hover:text-slate-600">
+  <Bell className="w-5 h-5" />
+</Button>
+
 
         {/* User Avatar */}
         <button className="bg-gradient-to-tr from-indigo-500 to-violet-500 w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-black shadow-sm hover:shadow-md transition-shadow">
