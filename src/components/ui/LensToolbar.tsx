@@ -3,10 +3,10 @@
 import { Button } from './button';
 import { useCanvasStore } from '../../store/useCanvasStore';
 import { motion } from 'framer-motion';
-import { Network, Orbit, CircleDollarSign } from 'lucide-react';
+import { Network, Orbit, CircleDollarSign, Download } from 'lucide-react'; // Added Download Icon
 import { Panel } from '@xyflow/react';
+import { toPng } from 'html-to-image'; // Added html-to-image engine
 
-// Define our lenses with their corresponding icons
 const lenses = [
   { id: 'structural', label: 'Structural', icon: Network },
   { id: 'blast-radius', label: 'Blast Radius', icon: Orbit },
@@ -20,13 +20,28 @@ export default function LensToolbar() {
 
   const handleLensChange = (lensId: any) => {
     setActiveLens(lensId);
-    // Pro UX: When switching contexts, clear the current selection so the user
-    // sees the fresh map from a bird's-eye view.
     setSelectedNodeId(null);
   };
 
+  // GPU-Accelerated Image Snapshot Downloader
+  const downloadImage = () => {
+    const viewportElement = document.querySelector('.react-flow__viewport') as HTMLElement;
+
+    if (viewportElement) {
+      toPng(viewportElement, {
+        backgroundColor: '#f8fafc', // Matches base grid slate background
+        quality: 1,                 // Production crisp clarity level
+        pixelRatio: 2               // High-density Retina display ratio scaling
+      }).then((dataUrl) => {
+        const link = document.createElement('a');
+        link.download = `gravity-lens-${activeLens}-snapshot.png`;
+        link.href = dataUrl;
+        link.click();
+      });
+    }
+  };
+
   return (
-    // 2. Use the native React Flow Panel and tell it to go dead center
     <Panel position="top-center" className="pointer-events-auto z-50 mt-4">
       <motion.div
         initial={{ y: -50, opacity: 0 }}
@@ -34,8 +49,9 @@ export default function LensToolbar() {
         transition={{ type: "spring", stiffness: 300, damping: 25, delay: 0.1 }}
       >
         {/* The Premium Glassmorphism Shell */}
-        <div className="flex items-center gap-1 p-1.5 bg-white/60 backdrop-blur-2xl border border-white/60 shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-full">
+        <div className="flex items-center gap-1 p-1.5 bg-white/60 backdrop-blur-2xl border border-white/60 shadow-[0_8px_30px_rgba(0,0,0,0.04)] rounded-full">
 
+          {/* Lens Mapping Loop */}
           {lenses.map(({ id, label, icon: Icon }) => {
             const isActive = activeLens === id;
 
@@ -45,7 +61,7 @@ export default function LensToolbar() {
                 variant="ghost"
                 onClick={() => handleLensChange(id)}
                 className={`
-                  relative flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold transition-all duration-200 h-auto
+                  relative flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold transition-all duration-200 h-auto select-none
                   ${isActive ? 'text-indigo-700 hover:bg-transparent hover:text-indigo-700' : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100/50'}
                 `}
               >
@@ -61,6 +77,19 @@ export default function LensToolbar() {
               </Button>
             );
           })}
+
+          {/* Elegant Subtle Separator Line */}
+          <div className="w-px h-5 bg-slate-200 mx-1.5 shrink-0 self-center" />
+
+          {/* Export Feature Action Button */}
+          <Button
+            variant="ghost"
+            onClick={downloadImage}
+            className="relative flex items-center justify-center p-2 rounded-full text-slate-400 hover:text-slate-800 hover:bg-slate-100/50 shrink-0 h-9 w-9 transition-all duration-200"
+            title="Download Architecture Snapshot"
+          >
+            <Download className="w-4.5 h-4.5" />
+          </Button>
 
         </div>
       </motion.div>
