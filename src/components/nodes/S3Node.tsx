@@ -60,7 +60,7 @@ function S3Node({ id, data, selected }: { id: string; data: any; selected?: bool
           <span className="text-[10px] font-bold text-slate-500">/mo</span>
         </motion.div>
       )}
-      
+
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full pointer-events-none">
         <Handle type="target" position={Position.Top} className="opacity-0" />
         <Handle type="source" position={Position.Bottom} className="opacity-0" />
@@ -82,7 +82,7 @@ function S3Node({ id, data, selected }: { id: string; data: any; selected?: bool
         {/* 3. TYPOGRAPHY (Aligned and crisp) */}
         <div className="flex flex-col overflow-hidden">
           <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest truncate">
-            {data.type || 'Api Gateway'}
+            {data.type || 'S3 Bucket'}
           </h3>
           <h2 className="text-sm font-black text-slate-800 truncate">
             {data.name}
