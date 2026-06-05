@@ -283,7 +283,7 @@ useEffect(() => {
           )}
 
           {/* 3. The Radar Radar (Bottom Right) */}
-          <MiniMap
+          {/* <MiniMap
             zoomable
             pannable
             nodeColor={(node) => {
@@ -310,7 +310,7 @@ useEffect(() => {
             nodeStrokeWidth={2}
             maskColor="rgba(248, 250, 252, 0.75)"
             className="bg-white border border-slate-200 shadow-sm rounded-xl overflow-hidden"
-          />
+          /> */}
 
       </ReactFlow>
       </div>
