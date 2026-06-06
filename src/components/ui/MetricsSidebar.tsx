@@ -4,168 +4,117 @@ import React from 'react';
 import { useCanvasStore } from '../../store/useCanvasStore';
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Button } from "@/components/ui/button";
-import { Sheet } from "@/components/ui/sheet";
-import { Dialog as SheetPrimitive } from "@base-ui/react/dialog";
-import { motion, AnimatePresence } from 'framer-motion';
-import { X } from 'lucide-react';
-
-// 1. THE FIX: Define exactly what our Node Data looks like
-interface CustomNodeData {
-  name?: string;
-  insights?: string;
-  metrics?: Record<string, string | number>;
-  [key: string]: any; // Catch-all for any other React Flow data
-}
-
-const sidebarSpring = {
-  type: "spring",
-  stiffness: 260,
-  damping: 30,
-  mass: 0.8
-} as const;
-
-const containerVariants = {
-  hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
-    transition: { staggerChildren: 0.04, delayChildren: 0.15 }
-  }
-} as const;
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 12 },
-  show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 350, damping: 25 } }
-} as const;
+import { Activity, LayoutDashboard, Zap, Server } from 'lucide-react';
 
 export default function MetricsSidebar() {
-  const selectedNodeId = useCanvasStore((state) => state.selectedNodeId);
-  const setSelectedNodeId = useCanvasStore((state) => state.setSelectedNodeId);
   const nodes = useCanvasStore((state) => state.nodes);
+  const edges = useCanvasStore((state) => state.edges);
   const activeLens = useCanvasStore((state) => state.activeLens);
 
-  const selectedNode = nodes.find((n) => n.id === selectedNodeId);
+  // Dynamic calculations based on your route.ts data
+  const resourceTypesCount = new Set(nodes.map(n => n.type)).size;
 
-  // 2. THE FIX: Safely check for container types with optional chaining
-  const isContainer = selectedNode?.type?.toLowerCase().includes('vpc') ||
-                      selectedNode?.type?.toLowerCase().includes('subnet');
-
-  const isOpen = !!selectedNode && !isContainer && activeLens !== 'blast-radius';
-
-  // 3. THE FIX: Cast the data to our strict TypeScript interface
-  const data = selectedNode?.data as CustomNodeData | undefined;
-
-  const formatMetricLabel = (str: string) => {
-    const spaced = str.replace(/([A-Z])/g, ' $1');
-    return spaced.charAt(0).toUpperCase() + spaced.slice(1);
-  };
+  // Calculate real total cost by summing up data.metrics.estMonthlyCost from all nodes
+  const estimatedGlobalCost = nodes.reduce((sum, node) => {
+    const cost = (node.data as any)?.metrics?.estMonthlyCost;
+    return sum + (Number(cost) || 0);
+  }, 0);
 
   return (
-    <Sheet open={isOpen} onOpenChange={(open) => { if (!open) setSelectedNodeId(null); }}>
-      <AnimatePresence>
-        {isOpen && selectedNode && data && (
-          <SheetPrimitive.Portal>
-            <SheetPrimitive.Backdrop
-              render={
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="fixed inset-0 z-40 bg-slate-900/10 backdrop-blur-sm"
-                />
-              }
-            />
+    <div className="absolute top-0 left-0 h-full w-72 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl border-r border-slate-200 dark:border-slate-800 z-30 flex flex-col shadow-xl transition-colors duration-300">
 
-            <SheetPrimitive.Popup
-              render={
-                <motion.div
-                  initial={{ x: "100%" }}
-                  animate={{ x: 0 }}
-                  exit={{ x: "100%" }}
-                  transition={sidebarSpring}
-                  className="fixed inset-y-0 right-0 z-50 w-[400px] sm:w-[450px] bg-white/75 backdrop-blur-2xl border-l border-white/40 shadow-2xl flex flex-col"
-                />
-              }
-            >
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setSelectedNodeId(null)}
-                className="absolute top-5 right-5 text-slate-400 hover:text-slate-600 z-50"
-              >
-                <X className="w-4 h-4" />
-              </Button>
+      {/* Header */}
+      <div className="px-5 py-4 border-b border-slate-200 dark:border-slate-800">
+  <div className="flex items-center justify-between">
+    <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+      Global Overview
+    </h2>
+    <span className="text-[10px] font-medium text-slate-400">
+      Live
+    </span>
+  </div>
+</div>
 
-              <motion.div
-                variants={containerVariants}
-                initial="hidden"
-                animate="show"
-                className="flex flex-col h-full p-6 pt-12 overflow-y-auto"
-              >
-                <motion.div variants={itemVariants}>
-                  <div className="flex items-center justify-between mb-4">
-                    <Badge variant="secondary" className="uppercase text-[10px] font-black tracking-widest text-indigo-600 bg-indigo-500/10 border-indigo-200/50 px-2 py-1 shadow-sm">
-                      {/* Safe to use selectedNode.type because of the narrowing above */}
-                      {selectedNode.type?.replace('Node', '') || 'RESOURCE'}
-                    </Badge>
-                    {data.insights?.includes('Warning') && (
-                      <div className="flex items-center gap-2">
-                        <span className="relative flex h-2 w-2">
-                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                          <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
-                        </span>
-                        <span className="text-xs font-bold text-red-600 uppercase tracking-wider">Action Required</span>
-                      </div>
-                    )}
-                  </div>
-                  <h2 className="text-3xl font-black text-slate-800 tracking-tight block">
-                    {data.name || "Unknown Resource"}
-                  </h2>
-                  <p className="text-sm font-medium text-slate-500 mt-2">
-                    {data.insights || "No operational insights available."}
-                  </p>
-                </motion.div>
+      {/* Body */}
+      <div className="flex-1 overflow-y-auto p-5 space-y-6">
 
-                <motion.div variants={itemVariants}>
-                  <Separator className="my-6 bg-slate-200/50" />
-                </motion.div>
+        {/* Environment Status */}
+        <div>
+          <h3 className="text-[10px] font-black text-slate-400 dark:text-slate-500 mb-3 uppercase tracking-widest flex items-center gap-2">
+            <Activity className="w-3 h-3" /> Environment Status
+          </h3>
+          <div className="flex items-center justify-between p-3 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-100 dark:border-emerald-500/20">
+            <span className="text-sm font-bold text-emerald-700 dark:text-emerald-400">System Health</span>
+            <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 text-xs font-bold">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+              </span>
+              OPTIMAL
+            </div>
+          </div>
+        </div>
 
-                <motion.div variants={itemVariants} className="flex-1">
-                  <h3 className="text-[10px] font-black text-slate-400 mb-4 uppercase tracking-widest">
-                    Live Telemetry
-                  </h3>
+        <Separator className="bg-slate-200 dark:bg-slate-800" />
 
-                  <div className="grid grid-cols-2 gap-3">
-                    {data.metrics ? (
-                      Object.entries(data.metrics).map(([key, value]) => (
-                        <motion.div
-                          key={key}
-                          variants={itemVariants}
-                          // 1. THE FIX: Explicitly set the initial state using standard RGBA
-                          initial={{ backgroundColor: "rgba(255, 255, 255, 0.5)" }}
-                          // 2. THE FIX: Animate smoothly to solid RGBA on hover
-                          whileHover={{ scale: 1.02, backgroundColor: "rgba(255, 255, 255, 1)" }}
-                          // 3. THE FIX: Remove 'bg-white/50' from this className string
-                          className="p-4 rounded-xl border border-white/60 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.05)] transition-colors"
-                        >
-                          <p className="text-[11px] text-slate-500 font-bold mb-1 truncate uppercase tracking-wider">
-                            {formatMetricLabel(key)}
-                          </p>
-                          <p className="text-base font-black text-slate-800 truncate" title={String(value)}>
-                            {String(value)}
-                          </p>
-                        </motion.div>
-                      ))
-                    ) : (
-                      <p className="text-sm font-medium text-slate-400 col-span-2">No telemetry data connected.</p>
-                    )}
-                  </div>
-                </motion.div>
-              </motion.div>
-            </SheetPrimitive.Popup>
-          </SheetPrimitive.Portal>
-        )}
-      </AnimatePresence>
-    </Sheet>
+        {/* Topology Metrics */}
+        <div>
+          <h3 className="text-[10px] font-black text-slate-400 dark:text-slate-500 mb-3 uppercase tracking-widest flex items-center gap-2">
+            <Server className="w-3 h-3" /> Topology Metrics
+          </h3>
+          <div className="grid grid-cols-2 gap-3">
+            <MetricCard label="Total Nodes" value={nodes.length} />
+            <MetricCard label="Connections" value={edges.length} />
+            <MetricCard label="Services" value={resourceTypesCount} />
+            <MetricCard label="Active Zones" value="2" />
+          </div>
+        </div>
+
+        <Separator className="bg-slate-200 dark:bg-slate-800" />
+
+        {/* Active Lens Context */}
+        <div>
+          <h3 className="text-[10px] font-black text-slate-400 dark:text-slate-500 mb-3 uppercase tracking-widest flex items-center gap-2">
+            <Zap className="w-3 h-3" /> Active Lens
+          </h3>
+          <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 transition-all duration-300">
+            <Badge variant="outline" className="mb-2 bg-white dark:bg-slate-950 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700">
+              {activeLens.replace('-', ' ').toUpperCase()}
+            </Badge>
+
+            {activeLens === 'cost' && (
+              <div className="mt-2 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1 font-bold">Monthly Run Rate</p>
+                <p className="text-2xl font-black text-slate-800 dark:text-slate-100">
+                  ${estimatedGlobalCost.toLocaleString()}<span className="text-sm text-slate-500 font-medium">/mo</span>
+                </p>
+              </div>
+            )}
+
+            {activeLens === 'structural' && (
+              <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mt-1 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                Viewing standard architectural hierarchy, resource placement, and network routing paths.
+              </p>
+            )}
+
+            {activeLens === 'blast-radius' && (
+              <p className="text-xs text-orange-600 dark:text-orange-400 leading-relaxed mt-1 font-medium animate-in fade-in slide-in-from-bottom-2 duration-300">
+                Select any node on the canvas to simulate a failure and map the downstream impact.
+              </p>
+            )}
+          </div>
+        </div>
+
+      </div>
+    </div>
+  );
+}
+
+function MetricCard({ label, value }: { label: string, value: string | number }) {
+  return (
+    <div className="p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/30">
+      <p className="text-[9px] text-slate-500 dark:text-slate-400 font-bold mb-1 uppercase tracking-wider">{label}</p>
+      <p className="text-lg font-black text-slate-800 dark:text-slate-200">{value}</p>
+    </div>
   );
 }

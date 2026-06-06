@@ -17,7 +17,7 @@ import MetricsSidebar from '../ui/MetricsSidebar';
 import LensToolbar from '../ui/LensToolbar';
 import TopNav from '../ui/TopNav';
 import { Button } from '@/components/ui/button';
-
+import ContextualInspector from '../ui/ContextualInspector';
 import { useTheme } from 'next-themes';
 
 const nodeTypes = {
@@ -229,7 +229,7 @@ useEffect(() => {
     <div className="flex-1 relative w-full h-full">
       {/* Sidebar here! */}
       <MetricsSidebar />
-
+    <div className="flex-1 h-full relative pl-[288px] pr-[320px]"> {/* 288px = w-72, 320px = w-80 */}
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -250,7 +250,7 @@ useEffect(() => {
             gap={20}
             size={2}
           />
-        
+
         {/* <Controls /> */}
 
         <Panel position="top-left" className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md p-2 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 flex gap-2">
@@ -326,7 +326,9 @@ useEffect(() => {
             className="bg-white border border-slate-200 shadow-sm rounded-xl overflow-hidden"
           /> */}
 
-      </ReactFlow>
+        </ReactFlow>
+    </div>
+      <ContextualInspector />
       </div>
     </div>
   );
