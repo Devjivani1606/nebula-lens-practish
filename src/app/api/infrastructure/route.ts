@@ -214,28 +214,32 @@ export async function GET() {
         "source": "api-gateway-ingress",
         "target": "sqs-job-queue",
         "type": "animatedEdge",
-        "label": "POST /jobs"
+        "label": "POST /jobs",
+        "data": { "transferCost": 4 } // Cheap local VPC traffic
       },
       {
         "id": "edge-sqs-to-lambda",
         "source": "sqs-job-queue",
         "target": "lambda-processor",
         "type": "animatedEdge",
-        "label": "Triggers Event"
+        "label": "Triggers Event",
+        "data": { "transferCost": 12 }
       },
       {
         "id": "edge-lambda-to-db",
         "source": "lambda-processor",
         "target": "db-mongo-cluster",
         "type": "animatedEdge",
-        "label": "Reads/Writes State"
+        "label": "Reads/Writes State",
+        "data": { "transferCost": 145 } // 🚨 Expensive Cross-AZ Database Traffic!
       },
       {
         "id": "edge-lambda-to-s3",
         "source": "lambda-processor",
         "target": "s3-asset-bucket",
         "type": "animatedEdge",
-        "label": "Stores Assets"
+        "label": "Stores Assets",
+        "data": { "transferCost": 45 }
       }
     ]
   };

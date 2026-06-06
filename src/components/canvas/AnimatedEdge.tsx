@@ -19,16 +19,17 @@ export default function AnimatedEdge({
   style = {},
   label,
   markerEnd,
+  data, // 🚀 NEW: Added data prop to access our transferCost
 }: EdgeProps) {
   // 1. Hook into React Flow's internal state to watch node coordinates in real-time
   const sourceNode = useInternalNode(source);
   const targetNode = useInternalNode(target);
 
-  //  NEW: Pull the global lens state to determine visibility
+  // Pull the global lens state to determine visibility
   const activeLens = useCanvasStore((state) => state.activeLens);
   const selectedNodeId = useCanvasStore((state) => state.selectedNodeId);
 
-  //  NEW: Calculate if this specific edge should be dimmed
+  // Calculate if this specific edge should be dimmed
   const isBlastRadiusMode = activeLens === 'blast-radius' && selectedNodeId !== null;
   const isConnectedToSelected = source === selectedNodeId || target === selectedNodeId;
 
@@ -87,47 +88,67 @@ export default function AnimatedEdge({
     targetPosition: targetPos,
   });
 
-  // 6. THE UPGRADE: Parse the semantic telemetry context
+  // 6. DEFAULT STRUCTURAL STYLING: Parse the semantic telemetry context
   const lowerLabel = typeof label === 'string' ? label.toLowerCase() : '';
 
-  let strokeColor = '#cbd5e1';      // Default: Slate 300
+  let strokeColor = '#cbd5e1';    // Default: Slate 300
   let particleColor = '#94a3b8';    // Default: Slate 400
-  let strokeDasharray = undefined;
+  let strokeDasharray: string | undefined = undefined;
   let duration = '3s';              // Transmission latency
   let particleRadius = 3;
+  let edgeWidth = 2;                // Default edge thickness
+  let glowColor = 'transparent';    // No glow in standard mode
 
   if (lowerLabel.includes('post') || lowerLabel.includes('http') || lowerLabel.includes('api')) {
-    // API / Synchronous HTTP traffic: High-frequency cyan pulses
     strokeColor = '#e2e8f0';
     particleColor = '#06b6d4';
     duration = '1.4s';
     particleRadius = 3.5;
   } else if (lowerLabel.includes('trigger') || lowerLabel.includes('event')) {
-    // Event Orchestration: Rapid, snapping orange alert waves
     strokeColor = '#fed7aa';
     particleColor = '#ea580c';
     duration = '0.9s';
     strokeDasharray = '4,4';
   } else if (lowerLabel.includes('read') || lowerLabel.includes('write') || lowerLabel.includes('state')) {
-    // Relational Databases / High-Volume Streams: Fluid blue currents
     strokeColor = '#dbeafe';
     particleColor = '#2563eb';
     duration = '2.4s';
     particleRadius = 4;
   } else if (lowerLabel.includes('store') || lowerLabel.includes('asset') || lowerLabel.includes('s3')) {
-    // Storage Pipelines: Structured green blocks
     strokeColor = '#bbf7d0';
     particleColor = '#16a34a';
     duration = '4s';
     strokeDasharray = '6,6';
   }
 
-  if (activeLens === 'cost') {
-    strokeColor = '#f1f5f9';      // slate-100 (Very faint line)
-    particleColor = '#cbd5e1';    // slate-300 (Subtle gray moving dots)
-    // Optional: You could also dim the duration so they move slower and distract less
-    duration = '4s';
+  // 7. 🚀 THE UPGRADE: Cost Topology Lens Overrides
+  const isCostLens = activeLens === 'cost';
+  const transferCost = (data?.transferCost as number) || 0;
+
+  if (isCostLens) {
+    strokeDasharray = '6,6'; // Dash looks great for financial data pipes
+
+    if (transferCost > 100) {
+      strokeColor = '#ef4444'; // Red
+      particleColor = '#f87171';
+      edgeWidth = 4;           // Thicker pipeline
+      glowColor = 'rgba(239, 68, 68, 0.6)';
+      duration = '1.2s';       // Fast movement for critical alerts
+    } else if (transferCost > 20) {
+      strokeColor = '#f97316'; // Orange
+      particleColor = '#fb923c';
+      edgeWidth = 3;
+      glowColor = 'rgba(249, 115, 22, 0.5)';
+      duration = '2s';
+    } else {
+      strokeColor = '#10b981'; // Green
+      particleColor = '#34d399';
+      edgeWidth = 2;
+      glowColor = 'rgba(16, 185, 129, 0.3)';
+      duration = '3s';
+    }
   }
+
   return (
     <>
       <defs>
@@ -140,7 +161,6 @@ export default function AnimatedEdge({
           markerHeight="5"
           orient="auto-start-reverse"
         >
-          {/* Apply opacity to the arrowhead */}
           <path d="M 0 0 L 10 5 L 0 10 z" fill={strokeColor} fillOpacity={currentOpacity} className="transition-opacity duration-300" />
         </marker>
       </defs>
@@ -152,14 +172,14 @@ export default function AnimatedEdge({
         style={{
           ...style,
           stroke: strokeColor,
-          strokeWidth: 2,
+          strokeWidth: edgeWidth, // 🚀 Dynamic Thickness
           strokeDasharray,
-          opacity: currentOpacity, // <-- Apply opacity to the main line
-          transition: 'stroke 0.3s, stroke-width 0.3s, opacity 0.3s',
+          opacity: currentOpacity,
+          filter: isCostLens ? `drop-shadow(0 0 8px ${glowColor})` : 'none', // 🚀 Neon Glow
+          transition: 'all 0.5s ease-in-out',
         }}
       />
 
-      {/* Apply opacity to the flying data particle */}
       <circle r={particleRadius} fill={particleColor} style={{ opacity: currentOpacity }} className="blur-[0.5px] transition-opacity duration-300">
         <animateMotion
           dur={duration}
@@ -168,23 +188,35 @@ export default function AnimatedEdge({
         />
       </circle>
 
-      {label && (
+      {/* Renders the text label */}
+      {(label || isCostLens) && (
         <EdgeLabelRenderer>
           <div
             style={{
               position: 'absolute',
               transform: `translate(-50%, -50%) translate(${labelX}px,${labelY - 20}px)`,
-              // If dimmed, disable pointer events so the user can't accidentally click a hidden label
               pointerEvents: isDimmed ? 'none' : 'auto',
-              color: particleColor,
+              color: isCostLens && transferCost > 100 ? '#ef4444' : particleColor,
               borderColor: strokeColor,
-              boxShadow: `0 4px 12px -4px ${strokeColor}`,
+              boxShadow: `0 4px 12px -4px ${glowColor !== 'transparent' ? glowColor : strokeColor}`,
               zIndex: 100,
-              opacity: currentOpacity, // <-- Apply opacity to the HTML label
+              opacity: currentOpacity,
             }}
-            className="nodrag nopan bg-white/95 dark:bg-slate-900/90 backdrop-blur-xl px-3 py-1 rounded-full border-2 text-[10px] font-black shadow-sm uppercase tracking-widest transition-all duration-300"
+            className={`nodrag nopan backdrop-blur-xl px-3 py-1 rounded-full border-2 text-[10px] font-black shadow-sm uppercase tracking-widest transition-all duration-300 ${
+              isCostLens
+                ? 'bg-white/95 dark:bg-slate-950/95' // 🚀 FIX: Changed to bg-white for light mode
+                : 'bg-white/95 dark:bg-slate-900/90'
+            }`}
           >
-            {label}
+            {/* 🚀 Dynamic Label text based on active lens */}
+            {isCostLens ? (
+              <span className="flex items-center gap-1">
+                {transferCost > 100 && <span className="animate-pulse text-red-500">⚠️</span>}
+                ${transferCost} <span className="text-[8px] text-slate-500">/mo</span>
+              </span>
+            ) : (
+              label
+            )}
           </div>
         </EdgeLabelRenderer>
       )}
