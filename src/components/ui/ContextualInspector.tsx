@@ -6,6 +6,11 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { AnimatePresence, motion } from 'framer-motion';
 import { X } from 'lucide-react';
+// 🚀 NEW: Import Recharts components
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+
+// A refined color palette for our dynamic charts
+const CHART_COLORS = ['#38bdf8', '#34d399', '#f472b6', '#fbbf24'];
 
 export default function ContextualInspector() {
   const selectedNodeId = useCanvasStore((state) => state.selectedNodeId);
@@ -15,11 +20,15 @@ export default function ContextualInspector() {
   const selectedNode = nodes.find((n) => n.id === selectedNodeId);
   const data = selectedNode?.data as Record<string, any> | undefined;
 
-  // Format camelCase keys (e.g., "memoryUtilization" -> "Memory Utilization")
+  // Format camelCase keys
   const formatMetricLabel = (str: string) => {
     const spaced = str.replace(/([A-Z])/g, ' $1');
     return spaced.charAt(0).toUpperCase() + spaced.slice(1);
   };
+
+  // 🚀 NEW: Dynamically extract chart keys (e.g., ['cpu', 'memory'] or ['requests', 'latency'])
+  const telemetryData = data?.telemetryData;
+  const chartKeys = telemetryData?.[0] ? Object.keys(telemetryData[0]).filter(k => k !== 'time') : [];
 
   return (
     <div className="absolute top-0 right-0 h-full w-80 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl border-l border-slate-200 dark:border-slate-800 z-30 flex flex-col shadow-xl transition-colors duration-300">
@@ -40,7 +49,6 @@ export default function ContextualInspector() {
       <div className="flex-1 overflow-y-auto p-5 relative">
         <AnimatePresence mode="wait">
           {selectedNode && data ? (
-            // 🟢 ACTIVE STATE: The Telemetry Drawer
             <motion.div
               key="selected"
               initial={{ opacity: 0, x: 20 }}
@@ -61,17 +69,71 @@ export default function ContextualInspector() {
                 </p>
               </div>
 
-              {/* Telemetry Chart Placeholder (Next Step: Recharts!) */}
-              <div className="w-full h-32 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex flex-col items-center justify-center border-dashed group relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-t from-blue-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                <span className="text-xs text-slate-400 font-bold uppercase tracking-wider relative z-10">[ CPU Chart Placeholder ]</span>
+              {/* 🚀 NEW: The Recharts Telemetry Graph */}
+              <div>
+                <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Time-Series Telemetry</h4>
+
+                {telemetryData && chartKeys.length > 0 ? (
+                  <div className="w-full h-40">
+                    <ResponsiveContainer width="100%" height={100}>
+                      <AreaChart data={telemetryData} margin={{ top: 5, right: 0, left: -25, bottom: 0 }}>
+                        <defs>
+                          {chartKeys.map((key, index) => (
+                            <linearGradient key={key} id={`color${key}`} x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="5%" stopColor={CHART_COLORS[index % CHART_COLORS.length]} stopOpacity={0.3}/>
+                              <stop offset="95%" stopColor={CHART_COLORS[index % CHART_COLORS.length]} stopOpacity={0}/>
+                            </linearGradient>
+                          ))}
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#334155" opacity={0.5} />
+                        <XAxis dataKey="time" stroke="#64748b" fontSize={10} tickLine={false} axisLine={false} />
+                        <YAxis stroke="#64748b" fontSize={10} tickLine={false} axisLine={false} />
+                        <Tooltip
+                          contentStyle={{ backgroundColor: '#020617', borderColor: '#1e293b', borderRadius: '8px', fontSize: '12px' }}
+                          itemStyle={{ textTransform: 'capitalize' }}
+                        />
+                        {chartKeys.map((key, index) => (
+                          <Area
+                            key={key}
+                            type="monotone"
+                            dataKey={key}
+                            stroke={CHART_COLORS[index % CHART_COLORS.length]}
+                            fillOpacity={1}
+                            fill={`url(#color${key})`}
+                            strokeWidth={2}
+                          />
+                        ))}
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
+                ) : (
+                  <div className="w-full h-32 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-center border-dashed">
+                    <span className="text-xs text-slate-400 font-bold uppercase tracking-wider">No Telemetry Available</span>
+                  </div>
+                )}
               </div>
 
               <Separator className="bg-slate-200 dark:bg-slate-800" />
 
-              {/* Real Metrics mapped from route.ts */}
+              {/* Resource Metadata (Tags) */}
+              {data.tags && (
+                <div>
+                  <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Resource Tags</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {Object.entries(data.tags).map(([key, value]) => (
+                      <span key={key} className="px-2 py-1 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md text-[10px] font-mono text-slate-600 dark:text-slate-300">
+                        <span className="text-slate-400">{key}:</span> {String(value)}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <Separator className="bg-slate-200 dark:bg-slate-800" />
+
+              {/* Live Metrics */}
               <div>
-                <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Live Telemetry</h4>
+                <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Instance Properties</h4>
                 <div className="grid grid-cols-2 gap-3">
                   {data.metrics && Object.entries(data.metrics).map(([key, value]) => (
                     <div key={key} className="p-3 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
@@ -87,7 +149,6 @@ export default function ContextualInspector() {
               </div>
             </motion.div>
           ) : (
-            // ⚪ DEFAULT STATE: Empty Canvas Instruction
             <motion.div
               key="empty"
               initial={{ opacity: 0 }}
