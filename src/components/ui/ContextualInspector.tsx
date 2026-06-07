@@ -11,8 +11,16 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { useBlastRadius } from '../../hooks/useBlastRadius';
 
 const CHART_COLORS = ['#38bdf8', '#34d399', '#f472b6', '#fbbf24'];
-const COST_COLORS = { Base: '#8b5cf6', Compute: '#3b82f6', Network: '#f59e0b', Storage: '#10b981' };
-
+// 🚀 Expand the colors to support deep networking metrics
+const COST_COLORS = {
+  Base: '#8b5cf6',
+  Compute: '#3b82f6',
+  Network: '#f59e0b',
+  Storage: '#10b981',
+  NATGateway: '#ec4899', // Pink for NAT
+  EgressTraffic: '#ef4444', // Red for expensive internet traffic
+  CrossAZ: '#f97316' // Orange for internal hops
+};
 //  BROUGHT OVER: The MetricCard helper from the old sidebar
 function MetricCard({ label, value }: { label: string, value: string | number }) {
   return (
@@ -66,7 +74,16 @@ export default function ContextualInspector() {
       case 's3Node': breakdown = { Storage: total * 0.85, Network: total * 0.15 }; break;
       case 'apiGatewayNode': breakdown = { Compute: total * 0.65, Network: total * 0.35 }; break;
       case 'sqsNode': breakdown = { Base: total * 0.85, Network: total * 0.15 }; break;
-      case 'VPC': case 'Subnet': breakdown = { Base: total * 0.4, Network: total * 0.6 }; break;
+      case 'VPC':
+      case 'Subnet':
+        // Real-world VPC cost distribution
+        breakdown = {
+          NATGateway: total * 0.45,
+          EgressTraffic: total * 0.35,
+          CrossAZ: total * 0.15,
+          Base: total * 0.05 // Minor things like public IPs or VPC endpoints
+        };
+        break;
       default: breakdown = { Base: total * 0.7, Network: total * 0.3 };
     }
     return [{ name: 'Monthly Spend', ...breakdown }];
@@ -76,6 +93,14 @@ export default function ContextualInspector() {
     if (!selectedNode || !isCostLens) return null;
     if (selectedNode.id === 'lambda-processor') return { issue: "Over-provisioned Memory", action: "Downgrade allocated memory from 1024MB to 512MB.", savings: "$160/mo", severity: "high" };
     if (selectedNode.id === 'db-mongo-cluster') return { issue: "Low CPU Utilization (24%)", action: "Downsize from Dedicated M10 to M5.", savings: "$400/mo", severity: "medium" };
+    if (selectedNode.type === 'VPC' || selectedNode.type === 'Subnet') {
+      return {
+        issue: "High NAT Gateway Data Processing",
+        action: "Deploy VPC Gateway Endpoints for S3 and DynamoDB to route traffic internally and bypass NAT hourly/data charges.",
+        savings: "$210/mo",
+        severity: "medium"
+      };
+    }
     return null;
   }, [selectedNode, isCostLens]);
 
@@ -181,15 +206,15 @@ export default function ContextualInspector() {
                     {isCostLens ? 'Financial Breakdown' : 'Time-Series Telemetry'}
                   </h4>
                   {isCostLens ? (
-                    <div className="w-full h-48 bg-slate-50 dark:bg-slate-900/50 rounded-xl p-2 border border-slate-200 dark:border-slate-800 flex flex-col justify-center">
-                      <ResponsiveContainer width="100%" height={196}>
-                        <BarChart layout="vertical" data={costBreakdown} margin={{ top: 10, right: 10, left: -20, bottom: 30 }}>
+                    <div className="w-full bg-slate-50 dark:bg-slate-900/50 rounded-xl p-3 border border-slate-200 dark:border-slate-800 flex flex-col overflow-hidden">
+                      <ResponsiveContainer width="100%" height={180}>
+                        <BarChart layout="vertical" data={costBreakdown} margin={{ top: 5, right: 10, left: -20, bottom: 5 }}>
                           <XAxis type="number" hide />
                           <YAxis dataKey="name" type="category" hide />
                           <Tooltip cursor={{fill: 'transparent'}} contentStyle={{ backgroundColor: '#020617', borderColor: '#1e293b', borderRadius: '8px', fontSize: '12px' }} formatter={(value) => `$${Number(value).toFixed(2)}`} />
-                          <Legend iconType="circle" wrapperStyle={{ fontSize: '10px', paddingTop: '10px' }} verticalAlign="bottom" />
-                          {Object.keys(COST_COLORS).map(key => (
-                            <Bar key={key} dataKey={key} stackId="a" fill={COST_COLORS[key as keyof typeof COST_COLORS]} radius={[0, 0, 0, 0]} />
+                          <Legend iconType="circle" wrapperStyle={{ fontSize: '10px', paddingTop: '8px' }} verticalAlign="bottom" />
+                          {costBreakdown.length > 0 && Object.keys(costBreakdown[0]).filter(k => k !== 'name').map(key => (
+                            <Bar key={key} dataKey={key} stackId="a" fill={COST_COLORS[key as keyof typeof COST_COLORS] || '#94a3b8'} radius={[0, 0, 0, 0]} />
                           ))}
                         </BarChart>
                       </ResponsiveContainer>

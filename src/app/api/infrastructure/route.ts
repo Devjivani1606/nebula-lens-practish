@@ -23,8 +23,19 @@ export async function GET() {
           },
           "metrics": {
             "cidrBlock": "10.0.0.0/16",
-            "region": "ap-south-1"
-          }
+            "region": "ap-south-1",
+            "activeGateways": 2,
+            "vpcEndpoints": 0,
+            "estMonthlyCost": 420 // 🚀 ADDED Cost
+          },
+          "telemetryData": [ // 🚀 ADDED Time-series network data
+            { "time": "08:00", "natTrafficGB": 12, "egressTrafficGB": 8, "crossAzTrafficGB": 5 },
+            { "time": "08:15", "natTrafficGB": 15, "egressTrafficGB": 10, "crossAzTrafficGB": 7 },
+            { "time": "08:30", "natTrafficGB": 18, "egressTrafficGB": 14, "crossAzTrafficGB": 8 },
+            { "time": "08:45", "natTrafficGB": 22, "egressTrafficGB": 18, "crossAzTrafficGB": 10 },
+            { "time": "09:00", "natTrafficGB": 65, "egressTrafficGB": 45, "crossAzTrafficGB": 35 },
+            { "time": "09:15", "natTrafficGB": 24, "egressTrafficGB": 19, "crossAzTrafficGB": 12 }
+          ]
         }
       },
       {
@@ -45,8 +56,18 @@ export async function GET() {
           },
           "metrics": {
             "cidrBlock": "10.0.1.0/24",
-            "availabilityZone": "ap-south-1a"
-          }
+            "availabilityZone": "ap-south-1a",
+            "availableIPs": "184",
+            "estMonthlyCost": 180 // 🚀 ADDED Cost
+          },
+          "telemetryData": [ // 🚀 ADDED Time-series network data
+            { "time": "08:00", "dataTransferIn": 45, "dataTransferOut": 32 },
+            { "time": "08:15", "dataTransferIn": 50, "dataTransferOut": 38 },
+            { "time": "08:30", "dataTransferIn": 55, "dataTransferOut": 45 },
+            { "time": "08:45", "dataTransferIn": 60, "dataTransferOut": 52 },
+            { "time": "09:00", "dataTransferIn": 180, "dataTransferOut": 145 },
+            { "time": "09:15", "dataTransferIn": 65, "dataTransferOut": 48 }
+          ]
         }
       },
       {
