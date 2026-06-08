@@ -5,24 +5,22 @@ import { useCanvasStore } from '../../store/useCanvasStore';
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { AnimatePresence, motion } from 'framer-motion';
-//  ADDED: Server and Zap icons from the old sidebar
 import { X, TrendingDown, AlertTriangle, ShieldAlert, Activity, Server, Zap, Shield } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Legend } from 'recharts';
 import { useBlastRadius } from '../../hooks/useBlastRadius';
 import { useSecurityAudit } from '../../hooks/useSecurityAudit';
 
 const CHART_COLORS = ['#38bdf8', '#34d399', '#f472b6', '#fbbf24'];
-// 🚀 Expand the colors to support deep networking metrics
 const COST_COLORS = {
   Base: '#8b5cf6',
   Compute: '#3b82f6',
   Network: '#f59e0b',
   Storage: '#10b981',
-  NATGateway: '#ec4899', // Pink for NAT
-  EgressTraffic: '#ef4444', // Red for expensive internet traffic
-  CrossAZ: '#f97316' // Orange for internal hops
+  NATGateway: '#ec4899',
+  EgressTraffic: '#ef4444',
+  CrossAZ: '#f97316'
 };
-//  BROUGHT OVER: The MetricCard helper from the old sidebar
+
 function MetricCard({ label, value }: { label: string, value: string | number }) {
   return (
     <div className="p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/30">
@@ -36,7 +34,6 @@ export default function ContextualInspector() {
   const selectedNodeId = useCanvasStore((state) => state.selectedNodeId);
   const setSelectedNodeId = useCanvasStore((state) => state.setSelectedNodeId);
   const nodes = useCanvasStore((state) => state.nodes);
-  //  BROUGHT OVER: Edges required for global metrics
   const edges = useCanvasStore((state) => state.edges);
 
   const activeLens = useCanvasStore((state) => state.activeLens);
@@ -44,21 +41,40 @@ export default function ContextualInspector() {
   const isBlastRadiusLens = activeLens === 'blast-radius';
   const isSecurityLens = activeLens === 'security';
 
+  const complianceFramework = useCanvasStore((state) => state.complianceFramework);
+  const isLiveStreamActive = useCanvasStore((state) => state.isLiveStreamActive);
+  const toggleLiveStream = useCanvasStore((state) => state.toggleLiveStream);
+  const tickTelemetry = useCanvasStore((state) => state.tickTelemetry);
+
   const selectedNode = nodes.find((n) => n.id === selectedNodeId);
   const data = selectedNode?.data as Record<string, any> | undefined;
 
   const { affectedNodes } = useBlastRadius(selectedNodeId);
   const { vulnerabilities, score } = useSecurityAudit();
-  const complianceFramework = useCanvasStore((state) => state.complianceFramework);
-  const nodeVulnerabilities = vulnerabilities.filter(v => v.nodeId === selectedNodeId);
-  //  BROUGHT OVER: Global calculations for the empty state
+
+  // Extract vulnerabilities mapped uniquely to this specific node instance
+  const nodeVulnerabilities = useMemo(() => {
+    return vulnerabilities.filter(v => v.nodeId === selectedNodeId);
+  }, [vulnerabilities, selectedNodeId]);
+
   const resourceTypesCount = new Set(nodes.map(n => n.type)).size;
+
   const estimatedGlobalCost = useMemo(() => {
     return nodes.reduce((sum, node) => {
       const cost = (node.data as any)?.metrics?.estMonthlyCost;
       return sum + (Number(cost) || 0);
     }, 0);
   }, [nodes]);
+
+  React.useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (isLiveStreamActive) {
+      interval = setInterval(() => {
+        tickTelemetry();
+      }, 2500);
+    }
+    return () => clearInterval(interval);
+  }, [isLiveStreamActive, tickTelemetry]);
 
   const formatMetricLabel = (str: string) => {
     const spaced = str.replace(/([A-Z])/g, ' $1');
@@ -80,13 +96,7 @@ export default function ContextualInspector() {
       case 'sqsNode': breakdown = { Base: total * 0.85, Network: total * 0.15 }; break;
       case 'VPC':
       case 'Subnet':
-        // Real-world VPC cost distribution
-        breakdown = {
-          NATGateway: total * 0.45,
-          EgressTraffic: total * 0.35,
-          CrossAZ: total * 0.15,
-          Base: total * 0.05 // Minor things like public IPs or VPC endpoints
-        };
+        breakdown = { NATGateway: total * 0.45, EgressTraffic: total * 0.35, CrossAZ: total * 0.15, Base: total * 0.05 };
         break;
       default: breakdown = { Base: total * 0.7, Network: total * 0.3 };
     }
@@ -98,18 +108,11 @@ export default function ContextualInspector() {
     if (selectedNode.id === 'lambda-processor') return { issue: "Over-provisioned Memory", action: "Downgrade allocated memory from 1024MB to 512MB.", savings: "$160/mo", severity: "high" };
     if (selectedNode.id === 'db-mongo-cluster') return { issue: "Low CPU Utilization (24%)", action: "Downsize from Dedicated M10 to M5.", savings: "$400/mo", severity: "medium" };
     if (selectedNode.type === 'VPC' || selectedNode.type === 'Subnet') {
-      return {
-        issue: "High NAT Gateway Data Processing",
-        action: "Deploy VPC Gateway Endpoints for S3 and DynamoDB to route traffic internally and bypass NAT hourly/data charges.",
-        savings: "$210/mo",
-        severity: "medium"
-      };
+      return { issue: "High NAT Gateway Processing", action: "Deploy VPC Gateway Endpoints for S3 to bypass NAT data transfer processing charges.", savings: "$210/mo", severity: "medium" };
     }
     return null;
   }, [selectedNode, isCostLens]);
 
-
-  // DYNAMIC HEADER COLOR LOGIC
   let headerBg = 'bg-slate-50/50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800';
   let headerText = 'text-slate-500 dark:text-slate-400';
   let panelTitle = 'Resource Inspector';
@@ -123,40 +126,24 @@ export default function ContextualInspector() {
       headerBg = 'bg-red-50/80 dark:bg-red-950/40 border-red-100 dark:border-red-900/50';
       headerText = 'text-red-600 dark:text-red-400';
       panelTitle = 'Impact Analysis Report';
+    } else if (isSecurityLens) {
+      headerBg = 'bg-amber-50/80 dark:bg-amber-950/40 border-amber-100 dark:border-amber-900/50';
+      headerText = 'text-amber-600 dark:text-amber-400';
+      panelTitle = 'Target Security Profile';
     }
-    else {
-      // Global Overview States
-      if (isSecurityLens) {
-        headerBg = 'bg-amber-50/80 dark:bg-amber-950/40 border-amber-100 dark:border-amber-900/50';
-        headerText = 'text-amber-600 dark:text-amber-400';
-        panelTitle = 'Security Posture Report';
-      } else {
-        panelTitle = 'Global Overview';
-      }
+  } else {
+    if (isSecurityLens) {
+      headerBg = 'bg-amber-50/80 dark:bg-amber-950/40 border-amber-100 dark:border-amber-900/50';
+      headerText = 'text-amber-600 dark:text-amber-400';
+      panelTitle = 'Security Posture Report';
+    } else {
+      panelTitle = 'Global Overview';
     }
   }
-
-  // NEW: Pull the Live Stream engine from the store
-  const isLiveStreamActive = useCanvasStore((state) => state.isLiveStreamActive);
-  const toggleLiveStream = useCanvasStore((state) => state.toggleLiveStream);
-  const tickTelemetry = useCanvasStore((state) => state.tickTelemetry);
-
-  // NEW: The React Heartbeat
-  React.useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (isLiveStreamActive) {
-      // Tick every 2.5 seconds when active
-      interval = setInterval(() => {
-        tickTelemetry();
-      }, 2500);
-    }
-    return () => clearInterval(interval);
-  }, [isLiveStreamActive, tickTelemetry]);
 
   return (
     <div className="absolute top-0 right-0 h-full w-80 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl border-l border-slate-200 dark:border-slate-800 z-30 flex flex-col shadow-xl transition-colors duration-300">
 
-      {/* Dynamic Header */}
       <div className={`p-5 border-b transition-colors duration-300 flex justify-between items-center ${headerBg}`}>
         <h2 className={`font-black text-xs uppercase tracking-widest ${headerText}`}>
           {panelTitle}
@@ -173,11 +160,11 @@ export default function ContextualInspector() {
           {selectedNode && data ? (
             <motion.div key="selected" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.2 }} className="space-y-6">
 
-              {/* Contextual Title Area */}
               <div>
                 <Badge variant="secondary" className={`mb-2 ${
                   isCostLens ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30' :
                   isBlastRadiusLens ? 'bg-red-500/20 text-red-600 dark:text-red-400 border border-red-500/30' :
+                  isSecurityLens ? 'bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30' :
                   'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'
                 }`}>
                   {selectedNode.type?.replace('Node', '').toUpperCase() || 'RESOURCE'}
@@ -193,15 +180,18 @@ export default function ContextualInspector() {
                   <p className="text-sm font-bold text-red-500 mt-1 flex items-center gap-1">
                     <ShieldAlert className="w-4 h-4" /> Selected Failure Point
                   </p>
+                ) : isSecurityLens ? (
+                  <p className="text-sm font-bold text-amber-500 mt-1 flex items-center gap-1">
+                    <Shield className="w-4 h-4" /> System Threat Assessment
+                  </p>
                 ) : (
                   <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mt-1">{data.insights}</p>
                 )}
               </div>
 
-              {/* 🚀 THE SRE IMPACT REPORT */}
+              {/* 🚀 THREE-WAY SWITCH FOR ACTIVE VIEWS */}
               {isBlastRadiusLens ? (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
-                  {/* ... Keep your existing Blast Radius UI here ... */}
                   <div className="p-4 rounded-xl border bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-900/50">
                     <h4 className="text-[10px] font-black text-red-600 dark:text-red-400 uppercase tracking-widest mb-3 flex items-center gap-2">
                       <Activity className="w-3 h-3" /> Cascading Failure
@@ -223,11 +213,9 @@ export default function ContextualInspector() {
                     </div>
                   </div>
                 </motion.div>
-
-              // 🚀 NEW: THE SEC-OPS TARGETED NODE PROFILE
               ) : isSecurityLens ? (
+                /* 🚀 FIXED: Renders target vulnerabilities and kill chain when node is selected */
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
-                  {/* Section 1: Active Node Vulnerabilities */}
                   <div className={`p-4 rounded-xl border ${nodeVulnerabilities.length > 0 ? 'bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900/50' : 'bg-emerald-50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-900/50'}`}>
                     <h4 className={`text-[10px] font-black uppercase tracking-widest mb-3 flex items-center gap-2 ${nodeVulnerabilities.length > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
                       {nodeVulnerabilities.length > 0 ? <ShieldAlert className="w-3 h-3" /> : <Shield className="w-3 h-3" />}
@@ -249,7 +237,6 @@ export default function ContextualInspector() {
                     )}
                   </div>
 
-                  {/* Section 2: Lateral Movement (Kill Chain) */}
                   <div className="p-4 rounded-xl border bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-900/50">
                     <h4 className="text-[10px] font-black text-red-600 dark:text-red-400 uppercase tracking-widest mb-2 flex items-center gap-2">
                       <Activity className="w-3 h-3 animate-pulse" /> Lateral Breach Path
@@ -269,23 +256,21 @@ export default function ContextualInspector() {
                     </div>
                   </div>
                 </motion.div>
-
               ) : (
-                /* KEEPING EXISTING RECHARTS COST/TELEMETRY LOGIC UNCHANGED */
                 <div>
                   <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">
                     {isCostLens ? 'Financial Breakdown' : 'Time-Series Telemetry'}
                   </h4>
                   {isCostLens ? (
-                    <div className="w-full bg-slate-50 dark:bg-slate-900/50 rounded-xl p-3 border border-slate-200 dark:border-slate-800 flex flex-col overflow-hidden">
-                      <ResponsiveContainer width="100%" height={180}>
-                        <BarChart layout="vertical" data={costBreakdown} margin={{ top: 5, right: 10, left: -20, bottom: 5 }}>
+                    <div className="w-full h-48 bg-slate-50 dark:bg-slate-900/50 rounded-xl p-2 border border-slate-200 dark:border-slate-800 flex flex-col justify-center">
+                      <ResponsiveContainer width="100%" height={196}>
+                        <BarChart layout="vertical" data={costBreakdown} margin={{ top: 10, right: 10, left: -20, bottom: 30 }}>
                           <XAxis type="number" hide />
                           <YAxis dataKey="name" type="category" hide />
                           <Tooltip cursor={{fill: 'transparent'}} contentStyle={{ backgroundColor: '#020617', borderColor: '#1e293b', borderRadius: '8px', fontSize: '12px' }} formatter={(value) => `$${Number(value).toFixed(2)}`} />
-                          <Legend iconType="circle" wrapperStyle={{ fontSize: '10px', paddingTop: '8px' }} verticalAlign="bottom" />
-                          {costBreakdown.length > 0 && Object.keys(costBreakdown[0]).filter(k => k !== 'name').map(key => (
-                            <Bar key={key} dataKey={key} stackId="a" fill={COST_COLORS[key as keyof typeof COST_COLORS] || '#94a3b8'} radius={[0, 0, 0, 0]} />
+                          <Legend iconType="circle" wrapperStyle={{ fontSize: '10px', paddingTop: '10px' }} verticalAlign="bottom" />
+                          {Object.keys(COST_COLORS).map(key => (
+                            <Bar key={key} dataKey={key} stackId="a" fill={COST_COLORS[key as keyof typeof COST_COLORS]} radius={[0, 0, 0, 0]} />
                           ))}
                         </BarChart>
                       </ResponsiveContainer>
@@ -322,13 +307,8 @@ export default function ContextualInspector() {
                 </div>
               )}
 
-              {/* FINOPS RECOMMENDATIONS AND PROPERTIES UNCHANGED */}
               {isCostLens && finopsRecommendation && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="p-4 rounded-xl border bg-emerald-50 dark:bg-slate-900 border-emerald-200 dark:border-emerald-500/30 relative overflow-hidden group"
-                >
+                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="p-4 rounded-xl border bg-emerald-50 dark:bg-slate-900 border-emerald-200 dark:border-emerald-500/30 relative overflow-hidden group">
                   <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl -mr-10 -mt-10 transition-transform group-hover:scale-110" />
                   <h4 className="text-[10px] font-black text-emerald-700 dark:text-emerald-400 uppercase tracking-widest mb-2 flex items-center gap-1">
                     <TrendingDown className="w-3 h-3" /> Right-Sizing Suggestion
@@ -365,121 +345,65 @@ export default function ContextualInspector() {
 
             </motion.div>
           ) : (
-            // REPLACED: Empty State is now the Global Overview!
+            /* ==========================================
+               EMPTY STATE: GLOBAL OVERVIEW
+               ========================================== */
             <motion.div key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-6">
 
-
-              {/* 🚀 THE CYBER SECURITY REPORT & KILL CHAIN */}
               {isSecurityLens && (
                 <div className="mb-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
-
-                  {/* COMPLIANCE FRAMEWORK TABS */}
                   <div className="flex bg-slate-100 dark:bg-slate-900 rounded-lg p-1 mb-4 border border-slate-200 dark:border-slate-800">
                     {['general', 'soc2', 'hipaa'].map((fw) => (
                       <button
                         key={fw}
                         onClick={() => useCanvasStore.getState().setComplianceFramework(fw as any)}
                         className={`flex-1 text-[10px] font-black uppercase tracking-widest py-1.5 rounded-md transition-all ${
-                            complianceFramework === fw
-                              ? 'bg-white dark:bg-slate-800 text-amber-600 shadow-sm'
-                              : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
-                          }`}
+                          complianceFramework === fw
+                            ? 'bg-white dark:bg-slate-800 text-amber-600 shadow-sm'
+                            : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
+                        }`}
                       >
                         {fw}
                       </button>
                     ))}
                   </div>
 
-                  {/* SELECTED NODE: TARGETED SECURITY PROFILE */}
-                  {selectedNodeId ? (
-                    <div className="space-y-4">
+                  <div className="p-4 rounded-xl border bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900/50">
+                    <div className="flex items-center justify-between mb-4">
+                      <h4 className="text-[10px] font-black text-amber-600 dark:text-amber-400 uppercase tracking-widest flex items-center gap-2">
+                        <Shield className="w-3 h-3" /> Risk Score
+                      </h4>
+                      <span className={`text-2xl font-black ${score > 80 ? 'text-emerald-500' : score > 60 ? 'text-amber-500' : 'text-red-500'}`}>
+                        {score}<span className="text-sm text-slate-500 font-medium">/100</span>
+                      </span>
+                    </div>
 
-                      {/* Section 1: Active Node Vulnerabilities */}
-                      <div className={`p-4 rounded-xl border ${nodeVulnerabilities.length > 0 ? 'bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900/50' : 'bg-emerald-50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-900/50'}`}>
-                        <h4 className={`text-[10px] font-black uppercase tracking-widest mb-3 flex items-center gap-2 ${nodeVulnerabilities.length > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
-                          {nodeVulnerabilities.length > 0 ? <ShieldAlert className="w-3 h-3" /> : <Shield className="w-3 h-3" />}
-                          {nodeVulnerabilities.length > 0 ? 'Active Misconfigurations' : 'Node Secure'}
-                        </h4>
+                    <Separator className="bg-amber-200 dark:bg-amber-900/50 mb-4" />
 
-                        {nodeVulnerabilities.length > 0 ? (
-                          <div className="space-y-3">
-                            {nodeVulnerabilities.map((vuln, idx) => (
-                              <div key={idx} className="p-2 rounded-lg bg-white/50 dark:bg-slate-900/50 border border-amber-100 dark:border-amber-900/30">
-                                <p className="text-[10px] font-bold text-slate-800 dark:text-slate-200 mb-1">{vuln.issue}</p>
-                                <p className="text-[9px] leading-relaxed text-slate-500 dark:text-slate-400 border-l-2 border-amber-300 dark:border-amber-700 pl-2">
-                                  {vuln.remediation}
-                                </p>
-                              </div>
-                            ))}
+                    <div className="space-y-3">
+                      {vulnerabilities.map((vuln, idx) => (
+                        <div key={idx} className="p-3 rounded-lg bg-white/50 dark:bg-slate-900/50 border border-amber-100 dark:border-amber-900/30">
+                          <div className="flex items-center gap-2 mb-1">
+                            <ShieldAlert className={`w-3 h-3 ${vuln.severity === 'critical' ? 'text-red-500' : vuln.severity === 'high' ? 'text-orange-500' : 'text-amber-500'}`} />
+                            <span className="text-xs font-bold text-slate-800 dark:text-slate-200">{vuln.name}</span>
                           </div>
-                        ) : (
-                          <p className="text-xs text-slate-500 dark:text-slate-400 italic">No compliance violations detected on this resource.</p>
-                        )}
-                      </div>
-
-                      {/* Section 2: Lateral Movement (Kill Chain) */}
-                      <div className="p-4 rounded-xl border bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-900/50">
-                        <h4 className="text-[10px] font-black text-red-600 dark:text-red-400 uppercase tracking-widest mb-2 flex items-center gap-2">
-                          <Activity className="w-3 h-3 animate-pulse" /> Lateral Breach Path
-                        </h4>
-                        <p className="text-[10px] text-slate-600 dark:text-slate-400 mb-3 leading-relaxed">
-                          If <strong className="text-slate-900 dark:text-white">{data?.name || selectedNodeId}</strong> is compromised, attackers gain network access to the following downstream targets:
-                        </p>
-
-                        <div className="space-y-2">
-                          {affectedNodes.length > 0 ? affectedNodes.map(node => (
-                            <div key={node.id} className="flex items-center gap-2 p-2 rounded-lg bg-white/50 dark:bg-slate-900/50 border border-red-100 dark:border-red-900/30">
-                               <AlertTriangle className="w-3 h-3 text-red-500" />
-                               <span className="text-xs font-bold text-slate-700 dark:text-slate-300">{(node.data as any)?.name || node.id}</span>
-                            </div>
-                          )) : (
-                            <p className="text-xs text-slate-500 dark:text-slate-400 italic">No downstream network access. Threat contained.</p>
-                          )}
+                          <p className="text-[10px] font-semibold text-slate-600 dark:text-slate-400 mb-2">{vuln.issue}</p>
+                          <p className="text-[9px] leading-relaxed text-slate-500 dark:text-slate-500 border-l-2 border-amber-300 dark:border-amber-700 pl-2">
+                            {vuln.remediation}
+                          </p>
                         </div>
-                      </div>
-
+                      ))}
                     </div>
-                  ) : (
-                    /* EXISTING RISK SCORE & VULNERABILITIES UI GOES HERE */
-                    <div className="p-4 rounded-xl border bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900/50">
-                      <div className="flex items-center justify-between mb-4">
-                        <h4 className="text-[10px] font-black text-amber-600 dark:text-amber-400 uppercase tracking-widest flex items-center gap-2">
-                          <Shield className="w-3 h-3" /> Risk Score
-                        </h4>
-                        <span className={`text-2xl font-black ${score > 80 ? 'text-emerald-500' : score > 60 ? 'text-amber-500' : 'text-red-500'}`}>
-                          {score}<span className="text-sm text-slate-500 font-medium">/100</span>
-                        </span>
-                      </div>
-
-                      <Separator className="bg-amber-200 dark:bg-amber-900/50 mb-4" />
-
-                      <div className="space-y-3">
-                        {vulnerabilities.map((vuln, idx) => (
-                          <div key={idx} className="p-3 rounded-lg bg-white/50 dark:bg-slate-900/50 border border-amber-100 dark:border-amber-900/30">
-                            <div className="flex items-center gap-2 mb-1">
-                              <ShieldAlert className={`w-3 h-3 ${vuln.severity === 'critical' ? 'text-red-500' : vuln.severity === 'high' ? 'text-orange-500' : 'text-amber-500'}`} />
-                              <span className="text-xs font-bold text-slate-800 dark:text-slate-200">{vuln.name}</span>
-                            </div>
-                            <p className="text-[9px] leading-relaxed text-slate-500 dark:text-slate-500 border-l-2 border-amber-300 dark:border-amber-700 pl-2">
-                              {vuln.remediation}
-                            </p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                  </div>
                 </div>
               )}
 
-              {/* Environment Status */}
               <div>
-                {/* 🚀 FIX: Wrap the Header and Button in a flex-between container */}
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest flex items-center gap-2">
                     <Activity className="w-3 h-3" /> Environment Status
                   </h3>
 
-                  {/* The Live Stream Toggle Button */}
                   <button
                     onClick={toggleLiveStream}
                     className={`px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-full transition-all duration-300 border flex items-center gap-2 ${
@@ -496,7 +420,6 @@ export default function ContextualInspector() {
                   </button>
                 </div>
 
-                {/* System Health Box (No separator between the button and this box) */}
                 <div className="flex items-center justify-between p-3 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-100 dark:border-emerald-500/20">
                   <span className="text-sm font-bold text-emerald-700 dark:text-emerald-400">System Health</span>
                   <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 text-xs font-bold">
@@ -509,10 +432,8 @@ export default function ContextualInspector() {
                 </div>
               </div>
 
-
               <Separator className="bg-slate-200 dark:bg-slate-800" />
 
-              {/* Topology Metrics */}
               <div>
                 <h3 className="text-[10px] font-black text-slate-400 dark:text-slate-500 mb-3 uppercase tracking-widest flex items-center gap-2">
                   <Server className="w-3 h-3" /> Topology Metrics
@@ -527,7 +448,6 @@ export default function ContextualInspector() {
 
               <Separator className="bg-slate-200 dark:bg-slate-800" />
 
-              {/* Active Lens Context */}
               <div>
                 <h3 className="text-[10px] font-black text-slate-400 dark:text-slate-500 mb-3 uppercase tracking-widest flex items-center gap-2">
                   <Zap className="w-3 h-3" /> Active Lens
@@ -555,6 +475,12 @@ export default function ContextualInspector() {
                   {activeLens === 'blast-radius' && (
                     <p className="text-xs text-orange-600 dark:text-orange-400 leading-relaxed mt-1 font-medium animate-in fade-in slide-in-from-bottom-2 duration-300">
                       Select any node on the canvas to simulate a failure and map the downstream impact.
+                    </p>
+                  )}
+
+                  {activeLens === 'security' && (
+                    <p className="text-xs text-amber-600 dark:text-amber-400 leading-relaxed mt-1 font-medium animate-in fade-in slide-in-from-bottom-2 duration-300">
+                      Auditing infrastructure endpoints against compliance rules. Select an element to perform an isolated threat vector trace.
                     </p>
                   )}
                 </div>
