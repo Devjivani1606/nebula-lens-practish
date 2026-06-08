@@ -49,6 +49,8 @@ export default function ContextualInspector() {
 
   const { affectedNodes } = useBlastRadius(selectedNodeId);
   const { vulnerabilities, score } = useSecurityAudit();
+  const complianceFramework = useCanvasStore((state) => state.complianceFramework);
+  const nodeVulnerabilities = vulnerabilities.filter(v => v.nodeId === selectedNodeId);
   //  BROUGHT OVER: Global calculations for the empty state
   const resourceTypesCount = new Set(nodes.map(n => n.type)).size;
   const estimatedGlobalCost = useMemo(() => {
@@ -196,28 +198,24 @@ export default function ContextualInspector() {
                 )}
               </div>
 
-              {/* THE SRE IMPACT REPORT */}
+              {/* 🚀 THE SRE IMPACT REPORT */}
               {isBlastRadiusLens ? (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
+                  {/* ... Keep your existing Blast Radius UI here ... */}
                   <div className="p-4 rounded-xl border bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-900/50">
                     <h4 className="text-[10px] font-black text-red-600 dark:text-red-400 uppercase tracking-widest mb-3 flex items-center gap-2">
                       <Activity className="w-3 h-3" /> Cascading Failure
                     </h4>
-
                     <div className="flex items-center justify-between mb-4">
                       <span className="text-sm text-slate-600 dark:text-slate-400 font-medium">Downstream Services Affected</span>
                       <span className="text-2xl font-black text-red-600 dark:text-red-400">{affectedNodes.length}</span>
                     </div>
-
                     <Separator className="bg-red-200 dark:bg-red-900/50 mb-4" />
-
                     <div className="space-y-2">
                       {affectedNodes.length > 0 ? affectedNodes.map(node => (
                         <div key={node.id} className="flex items-center gap-2 p-2 rounded-lg bg-white/50 dark:bg-slate-900/50 border border-red-100 dark:border-red-900/30">
                            <AlertTriangle className="w-3 h-3 text-orange-500" />
-                           <span className="text-xs font-bold text-slate-700 dark:text-slate-300 truncate">
-                             {(node.data as any)?.name || node.id}
-                           </span>
+                           <span className="text-xs font-bold text-slate-700 dark:text-slate-300 truncate">{(node.data as any)?.name || node.id}</span>
                         </div>
                       )) : (
                         <p className="text-xs text-slate-500 dark:text-slate-400 italic">No downstream dependencies. Safe to isolate.</p>
@@ -225,6 +223,53 @@ export default function ContextualInspector() {
                     </div>
                   </div>
                 </motion.div>
+
+              // 🚀 NEW: THE SEC-OPS TARGETED NODE PROFILE
+              ) : isSecurityLens ? (
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
+                  {/* Section 1: Active Node Vulnerabilities */}
+                  <div className={`p-4 rounded-xl border ${nodeVulnerabilities.length > 0 ? 'bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900/50' : 'bg-emerald-50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-900/50'}`}>
+                    <h4 className={`text-[10px] font-black uppercase tracking-widest mb-3 flex items-center gap-2 ${nodeVulnerabilities.length > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
+                      {nodeVulnerabilities.length > 0 ? <ShieldAlert className="w-3 h-3" /> : <Shield className="w-3 h-3" />}
+                      {nodeVulnerabilities.length > 0 ? 'Active Misconfigurations' : 'Node Secure'}
+                    </h4>
+                    {nodeVulnerabilities.length > 0 ? (
+                      <div className="space-y-3">
+                        {nodeVulnerabilities.map((vuln, idx) => (
+                          <div key={idx} className="p-2 rounded-lg bg-white/50 dark:bg-slate-900/50 border border-amber-100 dark:border-amber-900/30">
+                            <p className="text-[10px] font-bold text-slate-800 dark:text-slate-200 mb-1">{vuln.issue}</p>
+                            <p className="text-[9px] leading-relaxed text-slate-500 dark:text-slate-400 border-l-2 border-amber-300 dark:border-amber-700 pl-2">
+                              {vuln.remediation}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-xs text-slate-500 dark:text-slate-400 italic">No compliance violations detected on this resource.</p>
+                    )}
+                  </div>
+
+                  {/* Section 2: Lateral Movement (Kill Chain) */}
+                  <div className="p-4 rounded-xl border bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-900/50">
+                    <h4 className="text-[10px] font-black text-red-600 dark:text-red-400 uppercase tracking-widest mb-2 flex items-center gap-2">
+                      <Activity className="w-3 h-3 animate-pulse" /> Lateral Breach Path
+                    </h4>
+                    <p className="text-[10px] text-slate-600 dark:text-slate-400 mb-3 leading-relaxed">
+                      If compromised, attackers gain network access to the following downstream targets:
+                    </p>
+                    <div className="space-y-2">
+                      {affectedNodes.length > 0 ? affectedNodes.map(node => (
+                        <div key={node.id} className="flex items-center gap-2 p-2 rounded-lg bg-white/50 dark:bg-slate-900/50 border border-red-100 dark:border-red-900/30">
+                           <AlertTriangle className="w-3 h-3 text-red-500" />
+                           <span className="text-xs font-bold text-slate-700 dark:text-slate-300">{(node.data as any)?.name || node.id}</span>
+                        </div>
+                      )) : (
+                        <p className="text-xs text-slate-500 dark:text-slate-400 italic">No downstream network access. Threat contained.</p>
+                      )}
+                    </div>
+                  </div>
+                </motion.div>
+
               ) : (
                 /* KEEPING EXISTING RECHARTS COST/TELEMETRY LOGIC UNCHANGED */
                 <div>
@@ -324,36 +369,105 @@ export default function ContextualInspector() {
             <motion.div key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-6">
 
 
-              {/* 🚀 THE CYBER SECURITY REPORT */}
+              {/* 🚀 THE CYBER SECURITY REPORT & KILL CHAIN */}
               {isSecurityLens && (
                 <div className="mb-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                  <div className="p-4 rounded-xl border bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900/50">
-                    <div className="flex items-center justify-between mb-4">
-                      <h4 className="text-[10px] font-black text-amber-600 dark:text-amber-400 uppercase tracking-widest flex items-center gap-2">
-                        <Shield className="w-3 h-3" /> Risk Score
-                      </h4>
-                      <span className={`text-2xl font-black ${score > 80 ? 'text-emerald-500' : score > 60 ? 'text-amber-500' : 'text-red-500'}`}>
-                        {score}<span className="text-sm text-slate-500 font-medium">/100</span>
-                      </span>
-                    </div>
 
-                    <Separator className="bg-amber-200 dark:bg-amber-900/50 mb-4" />
-
-                    <div className="space-y-3">
-                      {vulnerabilities.map((vuln, idx) => (
-                        <div key={idx} className="p-3 rounded-lg bg-white/50 dark:bg-slate-900/50 border border-amber-100 dark:border-amber-900/30">
-                          <div className="flex items-center gap-2 mb-1">
-                            <ShieldAlert className={`w-3 h-3 ${vuln.severity === 'critical' ? 'text-red-500' : vuln.severity === 'high' ? 'text-orange-500' : 'text-amber-500'}`} />
-                            <span className="text-xs font-bold text-slate-800 dark:text-slate-200">{vuln.name}</span>
-                          </div>
-                          <p className="text-[10px] font-semibold text-slate-600 dark:text-slate-400 mb-2">{vuln.issue}</p>
-                          <p className="text-[9px] leading-relaxed text-slate-500 dark:text-slate-500 border-l-2 border-amber-300 dark:border-amber-700 pl-2">
-                            {vuln.remediation}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
+                  {/* COMPLIANCE FRAMEWORK TABS */}
+                  <div className="flex bg-slate-100 dark:bg-slate-900 rounded-lg p-1 mb-4 border border-slate-200 dark:border-slate-800">
+                    {['general', 'soc2', 'hipaa'].map((fw) => (
+                      <button
+                        key={fw}
+                        onClick={() => useCanvasStore.getState().setComplianceFramework(fw as any)}
+                        className={`flex-1 text-[10px] font-black uppercase tracking-widest py-1.5 rounded-md transition-all ${
+                            complianceFramework === fw
+                              ? 'bg-white dark:bg-slate-800 text-amber-600 shadow-sm'
+                              : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
+                          }`}
+                      >
+                        {fw}
+                      </button>
+                    ))}
                   </div>
+
+                  {/* SELECTED NODE: TARGETED SECURITY PROFILE */}
+                  {selectedNodeId ? (
+                    <div className="space-y-4">
+
+                      {/* Section 1: Active Node Vulnerabilities */}
+                      <div className={`p-4 rounded-xl border ${nodeVulnerabilities.length > 0 ? 'bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900/50' : 'bg-emerald-50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-900/50'}`}>
+                        <h4 className={`text-[10px] font-black uppercase tracking-widest mb-3 flex items-center gap-2 ${nodeVulnerabilities.length > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
+                          {nodeVulnerabilities.length > 0 ? <ShieldAlert className="w-3 h-3" /> : <Shield className="w-3 h-3" />}
+                          {nodeVulnerabilities.length > 0 ? 'Active Misconfigurations' : 'Node Secure'}
+                        </h4>
+
+                        {nodeVulnerabilities.length > 0 ? (
+                          <div className="space-y-3">
+                            {nodeVulnerabilities.map((vuln, idx) => (
+                              <div key={idx} className="p-2 rounded-lg bg-white/50 dark:bg-slate-900/50 border border-amber-100 dark:border-amber-900/30">
+                                <p className="text-[10px] font-bold text-slate-800 dark:text-slate-200 mb-1">{vuln.issue}</p>
+                                <p className="text-[9px] leading-relaxed text-slate-500 dark:text-slate-400 border-l-2 border-amber-300 dark:border-amber-700 pl-2">
+                                  {vuln.remediation}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="text-xs text-slate-500 dark:text-slate-400 italic">No compliance violations detected on this resource.</p>
+                        )}
+                      </div>
+
+                      {/* Section 2: Lateral Movement (Kill Chain) */}
+                      <div className="p-4 rounded-xl border bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-900/50">
+                        <h4 className="text-[10px] font-black text-red-600 dark:text-red-400 uppercase tracking-widest mb-2 flex items-center gap-2">
+                          <Activity className="w-3 h-3 animate-pulse" /> Lateral Breach Path
+                        </h4>
+                        <p className="text-[10px] text-slate-600 dark:text-slate-400 mb-3 leading-relaxed">
+                          If <strong className="text-slate-900 dark:text-white">{data?.name || selectedNodeId}</strong> is compromised, attackers gain network access to the following downstream targets:
+                        </p>
+
+                        <div className="space-y-2">
+                          {affectedNodes.length > 0 ? affectedNodes.map(node => (
+                            <div key={node.id} className="flex items-center gap-2 p-2 rounded-lg bg-white/50 dark:bg-slate-900/50 border border-red-100 dark:border-red-900/30">
+                               <AlertTriangle className="w-3 h-3 text-red-500" />
+                               <span className="text-xs font-bold text-slate-700 dark:text-slate-300">{(node.data as any)?.name || node.id}</span>
+                            </div>
+                          )) : (
+                            <p className="text-xs text-slate-500 dark:text-slate-400 italic">No downstream network access. Threat contained.</p>
+                          )}
+                        </div>
+                      </div>
+
+                    </div>
+                  ) : (
+                    /* EXISTING RISK SCORE & VULNERABILITIES UI GOES HERE */
+                    <div className="p-4 rounded-xl border bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900/50">
+                      <div className="flex items-center justify-between mb-4">
+                        <h4 className="text-[10px] font-black text-amber-600 dark:text-amber-400 uppercase tracking-widest flex items-center gap-2">
+                          <Shield className="w-3 h-3" /> Risk Score
+                        </h4>
+                        <span className={`text-2xl font-black ${score > 80 ? 'text-emerald-500' : score > 60 ? 'text-amber-500' : 'text-red-500'}`}>
+                          {score}<span className="text-sm text-slate-500 font-medium">/100</span>
+                        </span>
+                      </div>
+
+                      <Separator className="bg-amber-200 dark:bg-amber-900/50 mb-4" />
+
+                      <div className="space-y-3">
+                        {vulnerabilities.map((vuln, idx) => (
+                          <div key={idx} className="p-3 rounded-lg bg-white/50 dark:bg-slate-900/50 border border-amber-100 dark:border-amber-900/30">
+                            <div className="flex items-center gap-2 mb-1">
+                              <ShieldAlert className={`w-3 h-3 ${vuln.severity === 'critical' ? 'text-red-500' : vuln.severity === 'high' ? 'text-orange-500' : 'text-amber-500'}`} />
+                              <span className="text-xs font-bold text-slate-800 dark:text-slate-200">{vuln.name}</span>
+                            </div>
+                            <p className="text-[9px] leading-relaxed text-slate-500 dark:text-slate-500 border-l-2 border-amber-300 dark:border-amber-700 pl-2">
+                              {vuln.remediation}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 

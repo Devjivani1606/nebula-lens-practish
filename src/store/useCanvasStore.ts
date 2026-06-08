@@ -36,6 +36,9 @@ type CanvasState = {
   setActiveLens: (lens: LensType) => void;
   focusedNodeId: string | null;
   setFocusedNodeId: (id: string | null) => void;
+  complianceFramework: 'general' | 'soc2' | 'hipaa';
+
+  setComplianceFramework: (framework: 'general' | 'soc2' | 'hipaa') => void;
 
   // Live Stream State
   isLiveStreamActive: boolean;
@@ -69,6 +72,9 @@ export const useCanvasStore = create<CanvasState>()(
 
       focusedNodeId: null,
       setFocusedNodeId: (id) => set({ focusedNodeId: id }),
+
+      complianceFramework: 'general',
+      setComplianceFramework: (framework) => set({ complianceFramework: framework }),
 
       isLiveStreamActive: false,
 

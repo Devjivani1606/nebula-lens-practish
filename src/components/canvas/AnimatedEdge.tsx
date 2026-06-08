@@ -195,21 +195,31 @@ export default function AnimatedEdge({
       duration = '3s';
     }
   }
-  // 🚀 THE SEC-OPS UPGRADE: Cyber Security Lens Overrides
+  // 🚀 THE SEC-OPS UPGRADE: Cyber Security & Kill Chain Overrides
   if (isSecurityLens) {
-    // If this edge points TO or FROM a vulnerable node, highlight it as an Attack Vector
-    if (vulnerableNodeIds.has(source) || vulnerableNodeIds.has(target)) {
+    // KILL CHAIN: If a node is clicked, show the lateral movement paths
+    if (selectedNodeId && isInsideBlastRadius) {
+      strokeColor = '#ef4444'; // Pure Red
+      particleColor = '#dc2626';
+      edgeWidth = 4;
+      glowColor = 'rgba(239, 68, 68, 0.6)';
+      strokeDasharray = '4,4';
+      duration = '1s'; // Very fast attack propagation
+    }
+    // COMPLIANCE: Highlight statically vulnerable connections
+    else if (!selectedNodeId && (vulnerableNodeIds.has(source) || vulnerableNodeIds.has(target))) {
       strokeColor = '#f59e0b'; // Amber warning
-      particleColor = '#ef4444'; // Red malicious traffic
+      particleColor = '#ef4444';
       edgeWidth = 3;
       glowColor = 'rgba(245, 158, 11, 0.4)';
-      strokeDasharray = '4,4'; // Jagged, aggressive dash
-      duration = '1.5s'; // Fast moving threats
-    } else {
-      // Safe paths dim into the background
+      strokeDasharray = '4,4';
+      duration = '1.5s';
+    }
+    // Safe or unselected paths
+    else {
       strokeColor = '#334155';
       particleColor = '#475569';
-      currentOpacity = 0.2;
+      currentOpacity = selectedNodeId ? 0.05 : 0.2; // Dim heavily if a breach is active
     }
   }
 
