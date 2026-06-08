@@ -19,16 +19,20 @@ import { Button } from '@/components/ui/button';
 import ContextualInspector from '../ui/ContextualInspector';
 import { useTheme } from 'next-themes';
 import AvailabilityZoneNode from '../nodes/AvailabilityZoneNode';
+import Ec2Node from '../nodes/Ec2Node';
 
 const nodeTypes = {
   lambdaNode: LambdaNode,
   s3Node: S3Node,
   databaseNode: DatabaseNode,
   VPC: VpcNode,
+  vpcNode: VpcNode,
   IGW: VpcNode,
   Subnet: SubnetNode,
+  subnetNode: SubnetNode,
   apiGatewayNode: ApiGatewayNode,
   sqsNode: SqsNode,
+  ec2Node: Ec2Node,
   AvailabilityZone: AvailabilityZoneNode,
 };
 const edgeTypes = { animatedEdge: AnimatedEdge };

@@ -81,7 +81,7 @@ export async function GET() {
           "name": "Production VPC",
           "insights": "Flow logs enabled.",
           "metrics": { "cidrBlock": "10.0.0.0/16", "region": "ap-south-1", "estMonthlyCost": 420 },
-          "telemetryData": [ { "time": "08:00", "natTrafficGB": 12 }, { "time": "08:15", "natTrafficGB": 15 } ]
+          "telemetryData": [{ "time": "08:00", "natTrafficGB": 12 }, { "time": "08:15", "natTrafficGB": 15 }]
         }
       },
       //  NEW: The Availability Zone Layer
@@ -109,7 +109,7 @@ export async function GET() {
         "data": {
           "name": "Private Compute Subnet",
           "metrics": { "cidrBlock": "10.0.1.0/24", "estMonthlyCost": 180 },
-          "telemetryData": [ { "time": "08:00", "dataTransferIn": 45 }, { "time": "08:15", "dataTransferIn": 50 } ]
+          "telemetryData": [{ "time": "08:00", "dataTransferIn": 45 }, { "time": "08:15", "dataTransferIn": 50 }]
         }
       },
       {
