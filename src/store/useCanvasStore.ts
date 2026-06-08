@@ -34,6 +34,11 @@ type CanvasState = {
   setActiveLens: (lens: LensType) => void;
   focusedNodeId: string | null;
   setFocusedNodeId: (id: string | null) => void;
+
+  // 1. Add these to your interface (if you are using TypeScript)
+  isLiveStreamActive: boolean;
+  toggleLiveStream: () => void;
+  tickTelemetry: () => void;
 };
 
 // 1. Wrap the store creator in `temporal`
@@ -62,6 +67,58 @@ export const useCanvasStore = create<CanvasState>()(
       focusedNodeId: null,
       setFocusedNodeId: (id) => set({ focusedNodeId: id }),
 
+isLiveStreamActive: false,
+
+  toggleLiveStream: () => set((state) => ({ isLiveStreamActive: !state.isLiveStreamActive })),
+
+  tickTelemetry: () => set((state) => {
+    const newNodes = state.nodes.map(node => {
+      // Skip nodes that don't have telemetry (like the AZ wrapper)
+      if (!node.data?.telemetryData || !Array.isArray(node.data.telemetryData)) return node;
+
+      const currentData = [...node.data.telemetryData];
+      const lastPoint = currentData[currentData.length - 1];
+
+      // Generate a live timestamp (HH:MM:SS)
+      const now = new Date();
+      const timeString = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
+
+      const newPoint: any = { time: timeString };
+
+      // Apply +/- 15% random jitter to all numeric metrics to simulate live traffic
+      Object.keys(lastPoint).forEach(key => {
+        if (key !== 'time') {
+          let val = Number(lastPoint[key]);
+          let jitter = 0;
+
+          if (val === 0) {
+            // THE SMART DEFIBRILLATOR:
+            // If a metric naturally hits 0 (like an empty SQS queue), we give it
+            // a 30% chance to randomly spawn 1-5 new events to jump-start the math.
+            jitter = Math.random() > 0.7 ? Math.floor(Math.random() * 5) + 1 : 0;
+          } else {
+            // Normal percentage-based chaos
+            jitter = val * (Math.random() * 1.6 - 0.8);
+          }
+
+          // Apply jitter, ensuring it never goes negative
+          newPoint[key] = Math.max(0, Math.floor(val + jitter));
+        }
+      });
+
+      // Append new data and keep the array constrained to 6 data points to prevent memory leaks
+      currentData.push(newPoint);
+      if (currentData.length > 6) currentData.shift();
+
+      return {
+        ...node,
+        data: { ...node.data, telemetryData: currentData }
+      };
+    });
+
+    return { nodes: newNodes };
+  }),
+
       fetchInfrastructure: async () => {
     set({ isLoading: true });
     try {
@@ -81,6 +138,8 @@ export const useCanvasStore = create<CanvasState>()(
   }
 
     }),
+
+
 
 
     {

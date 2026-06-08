@@ -30,6 +30,13 @@ export default function AnimatedEdge({
   const selectedNodeId = useCanvasStore((state) => state.selectedNodeId);
 
   const { affectedNodeIds } = useBlastRadius(selectedNodeId);
+
+  // NEW: Get the absolute latest live metrics from the source node
+  const globalNodes = useCanvasStore((state) => state.nodes);
+  const actualSourceNode = globalNodes.find(n => n.id === source);
+  const liveTelemetry = actualSourceNode?.data?.telemetryData as any[];
+  const currentTraffic = liveTelemetry ? liveTelemetry[liveTelemetry.length - 1] : null;
+
   // Calculate if this specific edge should be dimmed
   // Check if BOTH the source and target are inside the blast radius path
   const isBlastRadiusMode = activeLens === 'blast-radius' && selectedNodeId !== null;
@@ -125,8 +132,40 @@ export default function AnimatedEdge({
     strokeDasharray = '6,6';
   }
 
+
+  // 🚀 NEW: The Dynamic Speed Multiplier Engine
+    // We parse duration (e.g., "3s") to a number, adjust it based on traffic, and stick the "s" back on.
+    let baseSeconds = parseFloat(duration);
+
+    const isCostLens = activeLens === 'cost';
+
+    if (currentTraffic && !isCostLens) {
+      // Find the primary metric driving this node (requests, cpu, readOps, etc)
+      const primaryMetricValue = Number(
+        currentTraffic.requests ||
+        currentTraffic.cpu ||
+        currentTraffic.connections ||
+        currentTraffic.readOps ||
+        currentTraffic.messages || 50
+      );
+
+      // If traffic is heavily spiking, particles move twice as fast!
+      if (primaryMetricValue > 800 || primaryMetricValue > 80) {
+        baseSeconds = baseSeconds * 0.4;
+        particleRadius = particleRadius * 1.5; // Swell the particle size under heavy load
+        particleColor = '#ef4444'; // Flash red under load
+      }
+      // If traffic is dead, they move sluggishly
+      else if (primaryMetricValue < 100 || primaryMetricValue < 20) {
+        baseSeconds = baseSeconds * 1.8;
+      }
+    }
+
+    // Reassign the modified duration back to the string React expects
+    duration = `${baseSeconds}s`;
+
   // 7.  THE UPGRADE: Cost Topology Lens Overrides
-  const isCostLens = activeLens === 'cost';
+
   const transferCost = (data?.transferCost as number) || 0;
 
   if (isCostLens) {
@@ -184,7 +223,7 @@ export default function AnimatedEdge({
         }}
       />
 
-      <circle r={particleRadius} fill={particleColor} style={{ opacity: currentOpacity }} className="blur-[0.5px] transition-opacity duration-300">
+      <circle key={duration} r={particleRadius} fill={particleColor} style={{ opacity: currentOpacity }} className="blur-[0.5px] transition-opacity duration-300">
         <animateMotion
           dur={duration}
           repeatCount="indefinite"

@@ -120,10 +120,24 @@ export default function ContextualInspector() {
       headerText = 'text-red-600 dark:text-red-400';
       panelTitle = 'Impact Analysis Report';
     }
-  } else {
-    // 🚀 CHANGED: Title updates to Global Overview when nothing is selected
-    panelTitle = 'Global Overview';
   }
+
+  // NEW: Pull the Live Stream engine from the store
+  const isLiveStreamActive = useCanvasStore((state) => state.isLiveStreamActive);
+  const toggleLiveStream = useCanvasStore((state) => state.toggleLiveStream);
+  const tickTelemetry = useCanvasStore((state) => state.tickTelemetry);
+
+  // NEW: The React Heartbeat
+  React.useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (isLiveStreamActive) {
+      // Tick every 2.5 seconds when active
+      interval = setInterval(() => {
+        tickTelemetry();
+      }, 2500);
+    }
+    return () => clearInterval(interval);
+  }, [isLiveStreamActive, tickTelemetry]);
 
   return (
     <div className="absolute top-0 right-0 h-full w-80 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl border-l border-slate-200 dark:border-slate-800 z-30 flex flex-col shadow-xl transition-colors duration-300">
@@ -299,9 +313,30 @@ export default function ContextualInspector() {
 
               {/* Environment Status */}
               <div>
-                <h3 className="text-[10px] font-black text-slate-400 dark:text-slate-500 mb-3 uppercase tracking-widest flex items-center gap-2">
-                  <Activity className="w-3 h-3" /> Environment Status
-                </h3>
+                {/* 🚀 FIX: Wrap the Header and Button in a flex-between container */}
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                    <Activity className="w-3 h-3" /> Environment Status
+                  </h3>
+
+                  {/* The Live Stream Toggle Button */}
+                  <button
+                    onClick={toggleLiveStream}
+                    className={`px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-full transition-all duration-300 border flex items-center gap-2 ${
+                      isLiveStreamActive
+                        ? 'bg-red-500/10 text-red-500 border-red-500/30 hover:bg-red-500/20 shadow-[0_0_15px_rgba(239,68,68,0.2)]'
+                        : 'bg-slate-100 dark:bg-slate-800 text-slate-500 border-slate-200 dark:border-slate-700 hover:text-slate-700 dark:hover:text-slate-300'
+                    }`}
+                  >
+                    {isLiveStreamActive ? (
+                      <><span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" /> Live Stream ON</>
+                    ) : (
+                      <><span className="w-2 h-2 rounded-full bg-slate-500 dark:bg-slate-400" /> Live Stream OFF</>
+                    )}
+                  </button>
+                </div>
+
+                {/* System Health Box (No separator between the button and this box) */}
                 <div className="flex items-center justify-between p-3 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-100 dark:border-emerald-500/20">
                   <span className="text-sm font-bold text-emerald-700 dark:text-emerald-400">System Health</span>
                   <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 text-xs font-bold">
@@ -313,6 +348,7 @@ export default function ContextualInspector() {
                   </div>
                 </div>
               </div>
+
 
               <Separator className="bg-slate-200 dark:bg-slate-800" />
 
