@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useCanvasStore } from '../../store/useCanvasStore';
-import { Cloud, RefreshCw, Bell } from 'lucide-react';
+import { Cloud, RefreshCw, Bell, RotateCcw } from 'lucide-react';
 import { Button } from "./button";
 import { Badge } from "./badge";
 import { Separator } from "./separator";
@@ -11,9 +11,16 @@ import { ThemeToggle } from './ToggleButton';
 export default function TopNav() {
   const isLoading = useCanvasStore((state) => state.isLoading);
   const fetchInfrastructure = useCanvasStore((state) => state.fetchInfrastructure);
+  const setTourActive = useCanvasStore((state) => state.setTourActive);
+
+  const replayTour = () => {
+    localStorage.removeItem('gravity-lens-tour-complete');
+    setTourActive(true);
+    window.dispatchEvent(new CustomEvent('replay-tour'));
+  };
 
   return (
-    <header className="flex items-center justify-between px-6 py-3 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 z-50">
+    <header data-tour-id="top-nav" className="flex items-center justify-between px-6 py-3 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 z-50">
 
       {/* Left: Branding & Logo */}
       <div className="flex items-center gap-3">
@@ -66,6 +73,16 @@ export default function TopNav() {
         <Button variant="ghost" size="icon" className="text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300">
   <Bell className="w-5 h-5" />
 </Button>
+
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={replayTour}
+          className="text-slate-400 dark:text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400"
+          title="Replay Product Tour"
+        >
+          <RotateCcw className="w-4 h-4" />
+        </Button>
 
 
         <ThemeToggle />

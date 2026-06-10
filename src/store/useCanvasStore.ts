@@ -44,6 +44,10 @@ type CanvasState = {
   isLiveStreamActive: boolean;
   toggleLiveStream: () => void;
   tickTelemetry: () => void;
+
+  // Tour State
+  isTourActive: boolean;
+  setTourActive: (active: boolean) => void;
 };
 
 // Wrap the store creator in `temporal`
@@ -79,6 +83,9 @@ export const useCanvasStore = create<CanvasState>()(
       isLiveStreamActive: false,
 
       toggleLiveStream: () => set((state) => ({ isLiveStreamActive: !state.isLiveStreamActive })),
+
+      isTourActive: false,
+      setTourActive: (active) => set({ isTourActive: active }),
 
       tickTelemetry: () => set((state) => {
         const newNodes = state.nodes.map(node => {

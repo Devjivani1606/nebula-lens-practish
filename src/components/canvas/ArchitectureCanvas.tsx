@@ -233,7 +233,7 @@ useEffect(() => {
     {/* 3. Wrap React Flow in a flex-1 container so it fills the remaining height */}
     <div className="flex-1 relative w-full h-full">
 
-    <div className="flex-1 h-full relative  pr-[320px]"> {/* 288px = w-72, 320px = w-80 */}
+    <div data-tour-id="canvas-viewport" className="flex-1 h-full relative  pr-[320px]"> {/* 288px = w-72, 320px = w-80 */}
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -257,7 +257,7 @@ useEffect(() => {
 
         {/* <Controls /> */}
 
-        <Panel position="top-left" className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md p-2 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 flex gap-2">
+        <Panel position="top-left" data-tour-id="undo-redo-panel" className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md p-2 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 flex gap-2">
           <Button
             variant="outline"
             onClick={executeUndo}

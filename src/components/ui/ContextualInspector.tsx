@@ -142,7 +142,7 @@ export default function ContextualInspector() {
   }
 
   return (
-    <div className="absolute top-0 right-0 h-full w-80 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl border-l border-slate-200 dark:border-slate-800 z-30 flex flex-col shadow-xl transition-colors duration-300">
+    <div data-tour-id="inspector-panel" className="absolute top-0 right-0 h-full w-80 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl border-l border-slate-200 dark:border-slate-800 z-30 flex flex-col shadow-xl transition-colors duration-300">
 
       <div className={`p-5 border-b transition-colors duration-300 flex justify-between items-center ${headerBg}`}>
         <h2 className={`font-black text-xs uppercase tracking-widest ${headerText}`}>
@@ -161,12 +161,11 @@ export default function ContextualInspector() {
             <motion.div key="selected" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.2 }} className="space-y-6">
 
               <div>
-                <Badge variant="secondary" className={`mb-2 ${
-                  isCostLens ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30' :
-                  isBlastRadiusLens ? 'bg-red-500/20 text-red-600 dark:text-red-400 border border-red-500/30' :
-                  isSecurityLens ? 'bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30' :
-                  'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'
-                }`}>
+                <Badge variant="secondary" className={`mb-2 ${isCostLens ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30' :
+                    isBlastRadiusLens ? 'bg-red-500/20 text-red-600 dark:text-red-400 border border-red-500/30' :
+                      isSecurityLens ? 'bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30' :
+                        'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'
+                  }`}>
                   {selectedNode.type?.replace('Node', '').toUpperCase() || 'RESOURCE'}
                 </Badge>
 
@@ -204,8 +203,8 @@ export default function ContextualInspector() {
                     <div className="space-y-2">
                       {affectedNodes.length > 0 ? affectedNodes.map(node => (
                         <div key={node.id} className="flex items-center gap-2 p-2 rounded-lg bg-white/50 dark:bg-slate-900/50 border border-red-100 dark:border-red-900/30">
-                           <AlertTriangle className="w-3 h-3 text-orange-500" />
-                           <span className="text-xs font-bold text-slate-700 dark:text-slate-300 truncate">{(node.data as any)?.name || node.id}</span>
+                          <AlertTriangle className="w-3 h-3 text-orange-500" />
+                          <span className="text-xs font-bold text-slate-700 dark:text-slate-300 truncate">{(node.data as any)?.name || node.id}</span>
                         </div>
                       )) : (
                         <p className="text-xs text-slate-500 dark:text-slate-400 italic">No downstream dependencies. Safe to isolate.</p>
@@ -247,8 +246,8 @@ export default function ContextualInspector() {
                     <div className="space-y-2">
                       {affectedNodes.length > 0 ? affectedNodes.map(node => (
                         <div key={node.id} className="flex items-center gap-2 p-2 rounded-lg bg-white/50 dark:bg-slate-900/50 border border-red-100 dark:border-red-900/30">
-                           <AlertTriangle className="w-3 h-3 text-red-500" />
-                           <span className="text-xs font-bold text-slate-700 dark:text-slate-300">{(node.data as any)?.name || node.id}</span>
+                          <AlertTriangle className="w-3 h-3 text-red-500" />
+                          <span className="text-xs font-bold text-slate-700 dark:text-slate-300">{(node.data as any)?.name || node.id}</span>
                         </div>
                       )) : (
                         <p className="text-xs text-slate-500 dark:text-slate-400 italic">No downstream network access. Threat contained.</p>
@@ -267,7 +266,7 @@ export default function ContextualInspector() {
                         <BarChart layout="vertical" data={costBreakdown} margin={{ top: 10, right: 10, left: -20, bottom: 30 }}>
                           <XAxis type="number" hide />
                           <YAxis dataKey="name" type="category" hide />
-                          <Tooltip cursor={{fill: 'transparent'}} contentStyle={{ backgroundColor: '#020617', borderColor: '#1e293b', borderRadius: '8px', fontSize: '12px' }} formatter={(value) => `$${Number(value).toFixed(2)}`} />
+                          <Tooltip cursor={{ fill: 'transparent' }} contentStyle={{ backgroundColor: '#020617', borderColor: '#1e293b', borderRadius: '8px', fontSize: '12px' }} formatter={(value) => `$${Number(value).toFixed(2)}`} />
                           <Legend iconType="circle" wrapperStyle={{ fontSize: '10px', paddingTop: '10px' }} verticalAlign="bottom" />
                           {Object.keys(COST_COLORS).map(key => (
                             <Bar key={key} dataKey={key} stackId="a" fill={COST_COLORS[key as keyof typeof COST_COLORS]} radius={[0, 0, 0, 0]} />
@@ -283,8 +282,8 @@ export default function ContextualInspector() {
                             <defs>
                               {chartKeys.map((index, key) => (
                                 <linearGradient key={key} id={`color${key}`} x1="0" y1="0" x2="0" y2="1">
-                                  <stop offset="5%" stopColor={CHART_COLORS[Number(index) % CHART_COLORS.length]} stopOpacity={0.3}/>
-                                  <stop offset="95%" stopColor={CHART_COLORS[Number(index) % CHART_COLORS.length]} stopOpacity={0}/>
+                                  <stop offset="5%" stopColor={CHART_COLORS[Number(index) % CHART_COLORS.length]} stopOpacity={0.3} />
+                                  <stop offset="95%" stopColor={CHART_COLORS[Number(index) % CHART_COLORS.length]} stopOpacity={0} />
                                 </linearGradient>
                               ))}
                             </defs>
@@ -352,16 +351,15 @@ export default function ContextualInspector() {
 
               {isSecurityLens && (
                 <div className="mb-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                  <div className="flex bg-slate-100 dark:bg-slate-900 rounded-lg p-1 mb-4 border border-slate-200 dark:border-slate-800">
+                  <div data-tour-id="compliance-tabs" className="flex bg-slate-100 dark:bg-slate-900 rounded-lg p-1 mb-4 border border-slate-200 dark:border-slate-800">
                     {['general', 'soc2', 'hipaa'].map((fw) => (
                       <button
                         key={fw}
                         onClick={() => useCanvasStore.getState().setComplianceFramework(fw as any)}
-                        className={`flex-1 text-[10px] font-black uppercase tracking-widest py-1.5 rounded-md transition-all ${
-                          complianceFramework === fw
+                        className={`flex-1 text-[10px] font-black uppercase tracking-widest py-1.5 rounded-md transition-all ${complianceFramework === fw
                             ? 'bg-white dark:bg-slate-800 text-amber-600 shadow-sm'
                             : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
-                        }`}
+                          }`}
                       >
                         {fw}
                       </button>
@@ -405,12 +403,12 @@ export default function ContextualInspector() {
                   </h3>
 
                   <button
+                    data-tour-id="live-stream-toggle"
                     onClick={toggleLiveStream}
-                    className={`px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-full transition-all duration-300 border flex items-center gap-2 ${
-                      isLiveStreamActive
+                    className={`px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-full transition-all duration-300 border flex items-center gap-2 ${isLiveStreamActive
                         ? 'bg-red-500/10 text-red-500 border-red-500/30 hover:bg-red-500/20 shadow-[0_0_15px_rgba(239,68,68,0.2)]'
                         : 'bg-slate-100 dark:bg-slate-800 text-slate-500 border-slate-200 dark:border-slate-700 hover:text-slate-700 dark:hover:text-slate-300'
-                    }`}
+                      }`}
                   >
                     {isLiveStreamActive ? (
                       <><span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" /> Live Stream ON</>
