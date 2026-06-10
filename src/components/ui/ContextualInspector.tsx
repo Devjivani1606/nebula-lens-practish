@@ -5,7 +5,7 @@ import { useCanvasStore } from '../../store/useCanvasStore';
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { AnimatePresence, motion } from 'framer-motion';
-import { X, TrendingDown, AlertTriangle, ShieldAlert, Activity, Server, Zap, Shield } from 'lucide-react';
+import { XIcon, TrendDownIcon, WarningIcon, ShieldWarningIcon, PulseIcon, HardDrivesIcon, LightningIcon, ShieldIcon } from '@phosphor-icons/react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Legend } from 'recharts';
 import { useBlastRadius } from '../../hooks/useBlastRadius';
 import { useSecurityAudit } from '../../hooks/useSecurityAudit';
@@ -150,7 +150,7 @@ export default function ContextualInspector() {
         </h2>
         {selectedNode && (
           <button onClick={() => setSelectedNodeId(null)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
-            <X className="w-4 h-4" />
+            <XIcon className="w-4 h-4" />
           </button>
         )}
       </div>
@@ -158,7 +158,7 @@ export default function ContextualInspector() {
       <div className="flex-1 overflow-y-auto p-5 relative" style={{ maskImage: 'linear-gradient(to bottom, transparent 0, black 16px, black calc(100% - 16px), transparent 100%)' }}>
         <AnimatePresence mode="wait">
           {selectedNode && data ? (
-            <motion.div key="selected" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.2 }} className="space-y-6">
+            <motion.div key="selected" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ type: "spring", stiffness: 500, damping: 40 }} className="space-y-6">
 
               <div>
                 <Badge variant="secondary" className={`mb-2 ${isCostLens ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30' :
@@ -177,11 +177,11 @@ export default function ContextualInspector() {
                   <p className="text-3xl font-black text-emerald-500 mt-2">${data.metrics.estMonthlyCost}<span className="text-sm text-slate-500 font-medium">/mo</span></p>
                 ) : isBlastRadiusLens ? (
                   <p className="text-sm font-bold text-red-500 mt-1 flex items-center gap-1">
-                    <ShieldAlert className="w-4 h-4" /> Selected Failure Point
+                    <ShieldWarningIcon weight="duotone" className="w-4 h-4" /> Selected Failure Point
                   </p>
                 ) : isSecurityLens ? (
                   <p className="text-sm font-bold text-amber-500 mt-1 flex items-center gap-1">
-                    <Shield className="w-4 h-4" /> System Threat Assessment
+                    <ShieldIcon weight="duotone" className="w-4 h-4" /> System Threat Assessment
                   </p>
                 ) : (
                   <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mt-1">{data.insights}</p>
@@ -193,7 +193,7 @@ export default function ContextualInspector() {
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
                   <div className="p-4 rounded-xl border bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-900/50">
                     <h4 className="text-[10px] font-black text-red-600 dark:text-red-400 uppercase tracking-widest mb-3 flex items-center gap-2">
-                      <Activity className="w-3 h-3" /> Cascading Failure
+                      <PulseIcon weight="bold" className="w-3 h-3" /> Cascading Failure
                     </h4>
                     <div className="flex items-center justify-between mb-4">
                       <span className="text-sm text-slate-600 dark:text-slate-400 font-medium">Downstream Services Affected</span>
@@ -203,7 +203,7 @@ export default function ContextualInspector() {
                     <div className="space-y-2">
                       {affectedNodes.length > 0 ? affectedNodes.map(node => (
                         <div key={node.id} className="flex items-center gap-2 p-2 rounded-lg bg-white/50 dark:bg-slate-900/50 border border-red-100 dark:border-red-900/30">
-                          <AlertTriangle className="w-3 h-3 text-orange-500" />
+                          <WarningIcon weight="duotone" className="w-3 h-3 text-orange-500" />
                           <span className="text-xs font-bold text-slate-700 dark:text-slate-300 truncate">{(node.data as any)?.name || node.id}</span>
                         </div>
                       )) : (
@@ -217,7 +217,7 @@ export default function ContextualInspector() {
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
                   <div className={`p-4 rounded-xl border ${nodeVulnerabilities.length > 0 ? 'bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900/50' : 'bg-emerald-50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-900/50'}`}>
                     <h4 className={`text-[10px] font-black uppercase tracking-widest mb-3 flex items-center gap-2 ${nodeVulnerabilities.length > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
-                      {nodeVulnerabilities.length > 0 ? <ShieldAlert className="w-3 h-3" /> : <Shield className="w-3 h-3" />}
+                      {nodeVulnerabilities.length > 0 ? <ShieldWarningIcon weight="duotone" className="w-3 h-3" /> : <ShieldIcon weight="duotone" className="w-3 h-3" />}
                       {nodeVulnerabilities.length > 0 ? 'Active Misconfigurations' : 'Node Secure'}
                     </h4>
                     {nodeVulnerabilities.length > 0 ? (
@@ -238,7 +238,7 @@ export default function ContextualInspector() {
 
                   <div className="p-4 rounded-xl border bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-900/50">
                     <h4 className="text-[10px] font-black text-red-600 dark:text-red-400 uppercase tracking-widest mb-2 flex items-center gap-2">
-                      <Activity className="w-3 h-3 animate-pulse" /> Lateral Breach Path
+                      <PulseIcon weight="bold" className="w-3 h-3 animate-pulse" /> Lateral Breach Path
                     </h4>
                     <p className="text-[10px] text-slate-600 dark:text-slate-400 mb-3 leading-relaxed">
                       If compromised, attackers gain network access to the following downstream targets:
@@ -246,7 +246,7 @@ export default function ContextualInspector() {
                     <div className="space-y-2">
                       {affectedNodes.length > 0 ? affectedNodes.map(node => (
                         <div key={node.id} className="flex items-center gap-2 p-2 rounded-lg bg-white/50 dark:bg-slate-900/50 border border-red-100 dark:border-red-900/30">
-                          <AlertTriangle className="w-3 h-3 text-red-500" />
+                          <WarningIcon weight="duotone" className="w-3 h-3 text-red-500" />
                           <span className="text-xs font-bold text-slate-700 dark:text-slate-300">{(node.data as any)?.name || node.id}</span>
                         </div>
                       )) : (
@@ -310,12 +310,12 @@ export default function ContextualInspector() {
                 <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="p-4 rounded-xl border bg-emerald-50 dark:bg-slate-900 border-emerald-200 dark:border-emerald-500/30 relative overflow-hidden group">
                   <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl -mr-10 -mt-10 transition-transform group-hover:scale-110" />
                   <h4 className="text-[10px] font-black text-emerald-700 dark:text-emerald-400 uppercase tracking-widest mb-2 flex items-center gap-1">
-                    <TrendingDown className="w-3 h-3" /> Right-Sizing Suggestion
+                    <TrendDownIcon weight="bold" className="w-3 h-3" /> Right-Sizing Suggestion
                   </h4>
                   <p className="text-sm font-medium text-slate-800 dark:text-white mb-1">{finopsRecommendation.action}</p>
                   <div className="flex items-center justify-between mt-3 pt-3 border-t border-emerald-200 dark:border-slate-800">
                     <span className="text-xs text-slate-600 dark:text-slate-400 flex items-center gap-1">
-                      <AlertTriangle className="w-3 h-3 text-orange-500" /> {finopsRecommendation.issue}
+                      <WarningIcon weight="duotone" className="w-3 h-3 text-orange-500" /> {finopsRecommendation.issue}
                     </span>
                     <span className="text-sm font-black text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
                       Save {finopsRecommendation.savings}
@@ -369,7 +369,7 @@ export default function ContextualInspector() {
                   <div className="p-4 rounded-xl border bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900/50">
                     <div className="flex items-center justify-between mb-4">
                       <h4 className="text-[10px] font-black text-amber-600 dark:text-amber-400 uppercase tracking-widest flex items-center gap-2">
-                        <Shield className="w-3 h-3" /> Risk Score
+                        <ShieldIcon weight="duotone" className="w-3 h-3" /> Risk Score
                       </h4>
                       <span className={`text-2xl font-black ${score > 80 ? 'text-emerald-500' : score > 60 ? 'text-amber-500' : 'text-red-500'}`}>
                         {score}<span className="text-sm text-slate-500 font-medium">/100</span>
@@ -382,7 +382,7 @@ export default function ContextualInspector() {
                       {vulnerabilities.map((vuln, idx) => (
                         <div key={idx} className="p-3 rounded-lg bg-white/50 dark:bg-slate-900/50 border border-amber-100 dark:border-amber-900/30">
                           <div className="flex items-center gap-2 mb-1">
-                            <ShieldAlert className={`w-3 h-3 ${vuln.severity === 'critical' ? 'text-red-500' : vuln.severity === 'high' ? 'text-orange-500' : 'text-amber-500'}`} />
+                            <ShieldWarningIcon weight="duotone" className={`w-3 h-3 ${vuln.severity === 'critical' ? 'text-red-500' : vuln.severity === 'high' ? 'text-orange-500' : 'text-amber-500'}`} />
                             <span className="text-xs font-bold text-slate-800 dark:text-slate-200">{vuln.name}</span>
                           </div>
                           <p className="text-[10px] font-semibold text-slate-600 dark:text-slate-400 mb-2">{vuln.issue}</p>
@@ -399,7 +399,7 @@ export default function ContextualInspector() {
               <div>
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest flex items-center gap-2">
-                    <Activity className="w-3 h-3" /> Environment Status
+                    <PulseIcon weight="bold" className="w-3 h-3" /> Environment Status
                   </h3>
 
                   <button
@@ -434,7 +434,7 @@ export default function ContextualInspector() {
 
               <div>
                 <h3 className="text-[10px] font-black text-slate-400 dark:text-slate-500 mb-3 uppercase tracking-widest flex items-center gap-2">
-                  <Server className="w-3 h-3" /> Topology Metrics
+                  <HardDrivesIcon weight="duotone" className="w-3 h-3" /> Topology Metrics
                 </h3>
                 <div className="grid grid-cols-2 gap-3">
                   <MetricCard label="Total Nodes" value={nodes.length} />
@@ -448,7 +448,7 @@ export default function ContextualInspector() {
 
               <div>
                 <h3 className="text-[10px] font-black text-slate-400 dark:text-slate-500 mb-3 uppercase tracking-widest flex items-center gap-2">
-                  <Zap className="w-3 h-3" /> Active Lens
+                  <LightningIcon weight="fill" className="w-3 h-3" /> Active Lens
                 </h3>
                 <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 transition-all duration-300">
                   <Badge variant="outline" className="mb-2 bg-white dark:bg-slate-950 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700">

@@ -22,6 +22,7 @@ import { useTheme } from 'next-themes';
 import AvailabilityZoneNode from '../nodes/AvailabilityZoneNode';
 import Ec2Node from '../nodes/Ec2Node';
 import CanvasSkeleton from '../ui/CanvasSkeleton';
+import CommandPalette from '../ui/CommandPalette';
 
 const nodeTypes = {
   lambdaNode: LambdaNode,
@@ -284,6 +285,7 @@ useEffect(() => {
 
         </Panel>
         <LensToolbar />
+        <CommandPalette />
         {/* FinOps Cost Legend — Animated */}
           <AnimatePresence>
             {activeLens === 'cost' && (

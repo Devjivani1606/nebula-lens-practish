@@ -3,15 +3,15 @@
 import { Button } from './button';
 import { useCanvasStore } from '../../store/useCanvasStore';
 import { motion } from 'framer-motion';
-import { Network, Orbit, CircleDollarSign, Download, ShieldCheck } from 'lucide-react';// Added Download Icon
+import { GraphIcon, PlanetIcon, CurrencyDollarIcon, DownloadSimpleIcon, ShieldCheckIcon } from '@phosphor-icons/react';
 import { Panel } from '@xyflow/react';
 import { toPng } from 'html-to-image'; // Added html-to-image engine
 
 const lenses = [
-  { id: 'structural', label: 'Structural', icon: Network },
-  { id: 'blast-radius', label: 'Blast Radius', icon: Orbit },
-  { id: 'cost', label: 'Cost Topology', icon: CircleDollarSign },
-  { id: 'security', label: 'Security Posture', icon: ShieldCheck },
+  { id: 'structural', label: 'Structural', icon: GraphIcon },
+  { id: 'blast-radius', label: 'Blast Radius', icon: PlanetIcon },
+  { id: 'cost', label: 'Cost Topology', icon: CurrencyDollarIcon },
+  { id: 'security', label: 'Security Posture', icon: ShieldCheckIcon },
 ] as const;
 
 export default function LensToolbar() {
@@ -57,25 +57,26 @@ export default function LensToolbar() {
             const isActive = activeLens === id;
 
             return (
-              <Button
-                key={id}
-                variant="ghost"
-                onClick={() => handleLensChange(id)}
-                className={`
-                  relative flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold transition-all duration-200 h-auto select-none
-                  ${isActive ? 'text-indigo-700 dark:text-indigo-400 hover:bg-transparent hover:text-indigo-700 dark:hover:text-indigo-400' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100/50 dark:hover:bg-slate-800/50'}
-                `}
-              >
-                {isActive && (
-                  <motion.div
-                    layoutId="active-lens-pill"
-                    className="absolute inset-0 bg-white dark:bg-slate-800 rounded-full shadow-sm border border-indigo-100/40 dark:border-indigo-900/40"
-                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                  />
-                )}
-                <Icon className={`w-4 h-4 relative z-10 ${isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400 dark:text-slate-500'}`} />
-                <span className="relative z-10">{label}</span>
-              </Button>
+              <motion.div key={id} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Button
+                  variant="ghost"
+                  onClick={() => handleLensChange(id)}
+                  className={`
+                    relative flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold transition-all duration-200 h-auto select-none
+                    ${isActive ? 'text-indigo-700 dark:text-indigo-400 hover:bg-transparent hover:text-indigo-700 dark:hover:text-indigo-400' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100/50 dark:hover:bg-slate-800/50'}
+                  `}
+                >
+                  {isActive && (
+                    <motion.div
+                      layoutId="active-lens-pill"
+                      className="absolute inset-0 bg-white dark:bg-slate-800 rounded-full shadow-sm border border-indigo-100/40 dark:border-indigo-900/40"
+                      transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                    />
+                  )}
+                  <Icon weight={isActive ? "fill" : "duotone"} className={`w-4 h-4 relative z-10 ${isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400 dark:text-slate-500'}`} />
+                  <span className="relative z-10">{label}</span>
+                </Button>
+              </motion.div>
             );
           })}
 
@@ -83,15 +84,17 @@ export default function LensToolbar() {
           <div className="w-px h-5 bg-slate-200 dark:bg-slate-700 mx-1.5 shrink-0 self-center" />
 
           {/* Export Feature Action Button */}
-          <Button
-            data-tour-id="export-button"
-            variant="ghost"
-            onClick={downloadImage}
-            className="relative flex items-center justify-center p-2 rounded-full text-slate-400 dark:text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100/50 dark:hover:bg-slate-800/50 shrink-0 h-9 w-9 transition-all duration-200"
-            title="Download Architecture Snapshot"
-          >
-            <Download className="w-4.5 h-4.5" />
-          </Button>
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Button
+              data-tour-id="export-button"
+              variant="ghost"
+              onClick={downloadImage}
+              className="relative flex items-center justify-center p-2 rounded-full text-slate-400 dark:text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100/50 dark:hover:bg-slate-800/50 shrink-0 h-9 w-9 transition-all duration-200"
+              title="Download Architecture Snapshot"
+            >
+              <DownloadSimpleIcon weight="bold" className="w-4.5 h-4.5" />
+            </Button>
+          </motion.div>
 
         </div>
       </motion.div>

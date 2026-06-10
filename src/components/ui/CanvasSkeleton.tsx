@@ -3,6 +3,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import TopNav from './TopNav';
+import { Atom } from '@phosphor-icons/react';
 
 // Dummy node positions to mirror a typical layout
 const skeletonNodes = [
@@ -27,9 +28,9 @@ export default function CanvasSkeleton() {
       <div className="flex-1 relative w-full h-full">
         {/* Mock React Flow Canvas Area */}
         <div className="flex-1 h-full relative pr-[320px] bg-slate-50 dark:bg-slate-950 overflow-hidden">
-          
+
           {/* Background dots (simulated) */}
-          <div 
+          <div
             className="absolute inset-0 opacity-20 dark:opacity-10 pointer-events-none"
             style={{
               backgroundImage: 'radial-gradient(circle at 2px 2px, #94a3b8 1px, transparent 0)',
@@ -67,12 +68,12 @@ export default function CanvasSkeleton() {
                 }}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ 
-                  delay: i * 0.1, 
-                  duration: 0.5, 
-                  repeat: Infinity, 
-                  repeatType: "reverse", 
-                  ease: "easeInOut" 
+                transition={{
+                  delay: i * 0.1,
+                  duration: 0.5,
+                  repeat: Infinity,
+                  repeatType: "reverse",
+                  ease: "easeInOut"
                 }}
               >
                 <div className="flex items-center gap-3">
@@ -91,7 +92,7 @@ export default function CanvasSkeleton() {
               </motion.div>
             ))}
           </div>
-          
+
           {/* Mock UI Elements */}
           <div className="absolute top-4 left-4 p-2 w-32 h-10 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md rounded-xl border border-slate-200 dark:border-slate-800 animate-pulse" />
           <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-64 h-12 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md rounded-full border border-slate-200 dark:border-slate-800 animate-pulse" />
@@ -113,14 +114,41 @@ export default function CanvasSkeleton() {
            </div>
         </div>
 
-        {/* Loading Overlay */}
-        <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-white/20 dark:bg-slate-950/20 backdrop-blur-[2px]">
-          <div className="bg-white/90 dark:bg-slate-900/90 shadow-2xl rounded-2xl p-6 border border-slate-200 dark:border-slate-800 flex flex-col items-center gap-4">
-             <div className="w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin" />
-             <p className="text-sm font-black text-slate-600 dark:text-slate-300 uppercase tracking-widest animate-pulse">
-               Parsing AWS Topology...
-             </p>
+        {/*  UPGRADED: Apple-Style Loading Overlay */}
+        <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-white/10 dark:bg-[#0A0A0A]/20 backdrop-blur-[4px]">
+
+          <div className="relative flex flex-col items-center">
+            {/* Glowing Backdrop */}
+            <motion.div
+              animate={{ scale: [1, 1.5, 1], opacity: [0.1, 0.2, 0.1] }}
+              transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+              className="absolute w-32 h-32 bg-indigo-500 rounded-full blur-[60px]"
+            />
+
+            {/* The Floating Glass Icon */}
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 12, repeat: Infinity, ease: 'linear' }}
+              className="relative z-10 p-4 rounded-3xl bg-white/40 dark:bg-white/[0.05] border border-white/60 dark:border-white/[0.1] shadow-2xl backdrop-blur-xl mb-4"
+            >
+              <Atom weight="duotone" className="w-8 h-8 text-indigo-600 dark:text-indigo-400" />
+            </motion.div>
+
+            {/* Typographic Loading Text with Staggered Dots */}
+            <div className="relative z-10 flex flex-col items-center gap-2 bg-white/60 dark:bg-[#0A0A0A]/60 px-6 py-2 rounded-full border border-slate-200 dark:border-white/[0.05] backdrop-blur-md shadow-lg">
+              <div className="flex items-center gap-3">
+                <span className="text-[10px] font-black text-slate-700 dark:text-slate-300 uppercase tracking-widest">
+                  Parsing AWS Topology
+                </span>
+                <div className="flex items-center gap-1">
+                  <motion.div animate={{ opacity: [0.2, 1, 0.2] }} transition={{ duration: 1.5, repeat: Infinity, delay: 0 }} className="w-1 h-1 rounded-full bg-indigo-500" />
+                  <motion.div animate={{ opacity: [0.2, 1, 0.2] }} transition={{ duration: 1.5, repeat: Infinity, delay: 0.2 }} className="w-1 h-1 rounded-full bg-indigo-500" />
+                  <motion.div animate={{ opacity: [0.2, 1, 0.2] }} transition={{ duration: 1.5, repeat: Infinity, delay: 0.4 }} className="w-1 h-1 rounded-full bg-indigo-500" />
+                </div>
+              </div>
+            </div>
           </div>
+
         </div>
 
       </div>

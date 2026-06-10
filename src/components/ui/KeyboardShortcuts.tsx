@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Keyboard } from 'lucide-react';
+import { XIcon, KeyboardIcon } from '@phosphor-icons/react';
 
 const SHORTCUTS = [
   { keys: ['Ctrl', 'Z'], description: 'Undo last action' },
@@ -55,25 +55,27 @@ export default function KeyboardShortcuts() {
             initial={{ opacity: 0, scale: 0.92, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 10 }}
-            transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+            transition={{ type: 'spring', stiffness: 500, damping: 35 }}
             className="fixed z-[501] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[380px] bg-white/[0.97] dark:bg-slate-950/[0.97] backdrop-blur-2xl border border-slate-200/80 dark:border-slate-700/60 rounded-2xl shadow-[0_20px_60px_-12px_rgba(0,0,0,0.25)] overflow-hidden"
           >
             {/* Header */}
             <div className="flex items-center justify-between px-5 pt-5 pb-3">
               <div className="flex items-center gap-2.5">
                 <div className="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/20 flex items-center justify-center">
-                  <Keyboard className="w-4 h-4 text-indigo-500" />
+                  <KeyboardIcon weight="duotone" className="w-4 h-4 text-indigo-500" />
                 </div>
                 <h2 className="text-sm font-black text-slate-800 dark:text-slate-200 uppercase tracking-widest">
                   Keyboard Shortcuts
                 </h2>
               </div>
-              <button
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
                 onClick={() => setIsOpen(false)}
                 className="w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
               >
-                <X className="w-4 h-4" />
-              </button>
+                <XIcon weight="bold" className="w-4 h-4" />
+              </motion.button>
             </div>
 
             {/* Shortcuts Grid */}

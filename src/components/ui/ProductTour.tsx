@@ -3,11 +3,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCanvasStore } from '../../store/useCanvasStore';
-import {
-  Network, Orbit, CircleDollarSign, ShieldCheck,
-  ArrowRight, ArrowLeft, X, Play, Sparkles, MousePointerClick,
-  Activity, Download, Undo2, Eye, Shield
-} from 'lucide-react';
+import { GraphIcon, PlanetIcon, CurrencyDollarIcon, ShieldCheckIcon, ArrowRightIcon, ArrowLeftIcon, XIcon, PlayIcon, SparkleIcon, CursorClickIcon, PulseIcon, DownloadSimpleIcon, ArrowUUpLeftIcon, EyeIcon, ShieldIcon } from '@phosphor-icons/react';
 
 // ────────────────────────────────────────────────────────────────────────────
 // TYPES
@@ -54,7 +50,7 @@ const TOUR_STEPS: TourStep[] = [
     id: 'welcome',
     title: 'Welcome to Gravity Lens',
     description: 'This is your live cloud architecture canvas. Pan, zoom, and drag any node to rearrange your infrastructure topology. Let\'s walk through every powerful feature.',
-    icon: Sparkles,
+    icon: SparkleIcon,
     targetId: null,
     placement: 'center',
     action: (store) => {
@@ -66,7 +62,7 @@ const TOUR_STEPS: TourStep[] = [
     id: 'structural-mode',
     title: 'Structural Mode',
     description: 'The Lens Toolbar lets you switch perspectives. Right now, we are in the Structural Mode, which shows how your resources are connected.',
-    icon: Network,
+    icon: GraphIcon,
     targetId: 'lens-toolbar',
     placement: 'bottom',
     spotlightPadding: 8,
@@ -81,7 +77,7 @@ const TOUR_STEPS: TourStep[] = [
     id: 's3-node-highlight',
     title: 'Node Deep Dive',
     description: 'We just clicked the S3 Asset Storage bucket. Notice how it is selected on the canvas.',
-    icon: MousePointerClick,
+    icon: CursorClickIcon,
     targetId: 's3-asset-bucket',
     placement: 'top',
     spotlightPadding: 8,
@@ -96,7 +92,7 @@ const TOUR_STEPS: TourStep[] = [
     id: 's3-sidebar-highlight',
     title: 'Resource Inspector',
     description: 'Selecting a node opens the Resource Inspector sidebar, revealing its specific properties, metadata, and static metrics.',
-    icon: Activity,
+    icon: PulseIcon,
     targetId: 'inspector-panel',
     placement: 'left',
     spotlightPadding: 4,
@@ -111,7 +107,7 @@ const TOUR_STEPS: TourStep[] = [
     id: 'live-stream',
     title: 'Live Telemetry Stream',
     description: 'See this Live Stream toggle? It connects directly to your infrastructure to pull real-time metrics. We deselected the node so you can see it clearly.',
-    icon: Activity,
+    icon: PulseIcon,
     targetId: 'live-stream-toggle',
     placement: 'left',
     spotlightPadding: 12,
@@ -128,7 +124,7 @@ const TOUR_STEPS: TourStep[] = [
     id: 'live-stream-clicked',
     title: 'Activating Live Telemetry',
     description: 'We just flipped the switch. Gravity Lens is now streaming CPU utilization, queue depths, and memory usage live.',
-    icon: Play,
+    icon: PlayIcon,
     targetId: 'live-stream-toggle',
     placement: 'left',
     spotlightPadding: 12,
@@ -145,7 +141,7 @@ const TOUR_STEPS: TourStep[] = [
     id: 'live-stream-s3',
     title: 'Live Telemetry in Action',
     description: 'Watch the inspector charts! They are now updating in real-time with fresh streaming data from the selected S3 bucket.',
-    icon: Activity,
+    icon: PulseIcon,
     targetId: 'inspector-panel',
     placement: 'left',
     spotlightPadding: 4,
@@ -162,7 +158,7 @@ const TOUR_STEPS: TourStep[] = [
     id: 'live-stream-off',
     title: 'Telemetry Deactivated',
     description: 'We turned the telemetry off to keep the canvas quiet while we explore the other lenses.',
-    icon: Activity,
+    icon: PulseIcon,
     targetId: 'live-stream-toggle',
     placement: 'left',
     spotlightPadding: 12,
@@ -179,7 +175,7 @@ const TOUR_STEPS: TourStep[] = [
     id: 'blast-radius-lens',
     title: 'SRE: Blast Radius',
     description: 'Switch to the Blast Radius lens to simulate outages. The entire canvas transforms to support SRE workflows.',
-    icon: Eye,
+    icon: EyeIcon,
     targetId: 'canvas-viewport',
     placement: 'right',
     spotlightPadding: 0,
@@ -194,7 +190,7 @@ const TOUR_STEPS: TourStep[] = [
     id: 'api-gateway-clicked',
     title: 'Simulate Failure',
     description: 'We just selected the API Gateway as a failure point. The custom BFS algorithm instantly highlights every downstream service that would cascade into failure.',
-    icon: Orbit,
+    icon: PlanetIcon,
     targetId: 'canvas-viewport',
     placement: 'right',
     spotlightPadding: 0,
@@ -208,7 +204,7 @@ const TOUR_STEPS: TourStep[] = [
     id: 'blast-inspector',
     title: 'Impact Analysis Report',
     description: 'The inspector panel shows every affected downstream node, the total count of cascading failures, and the full impact chain. This is your SRE war-room view for outage simulation.',
-    icon: Activity,
+    icon: PulseIcon,
     targetId: 'inspector-panel',
     placement: 'left',
     spotlightPadding: 4,
@@ -223,7 +219,7 @@ const TOUR_STEPS: TourStep[] = [
     id: 'cost-lens',
     title: 'FinOps: Cost Topology',
     description: 'Every node now reveals its estimated monthly cost. Red glowing borders = critical spend (>$500/mo), orange = warning, green = optimized. The legend in the bottom-left explains it all.',
-    icon: CircleDollarSign,
+    icon: CurrencyDollarIcon,
     targetId: 'canvas-viewport',
     placement: 'right',
     spotlightPadding: 0,
@@ -237,7 +233,7 @@ const TOUR_STEPS: TourStep[] = [
     id: 'cost-node-interaction',
     title: 'Cost Inspector: Node Deep Dive',
     description: 'We just selected the Lambda Processor. The inspector shows its financial breakdown — compute, storage, and network costs as a stacked bar chart, plus AI-powered rightsizing recommendations.',
-    icon: MousePointerClick,
+    icon: CursorClickIcon,
     targetId: 'inspector-panel',
     placement: 'left',
     spotlightPadding: 4,
@@ -252,7 +248,7 @@ const TOUR_STEPS: TourStep[] = [
     id: 'security-lens',
     title: 'SecOps: Security Posture',
     description: 'The security lens audits your infrastructure for misconfigurations. Amber borders flag compliance violations, and red dashed lines trace lateral breach paths an attacker could exploit.',
-    icon: ShieldCheck,
+    icon: ShieldCheckIcon,
     targetId: 'canvas-viewport',
     placement: 'right',
     spotlightPadding: 0,
@@ -267,7 +263,7 @@ const TOUR_STEPS: TourStep[] = [
     id: 'frameworks-intro',
     title: 'Regulatory Frameworks',
     description: 'Notice these tabs in the Global Overview? They let you switch between different compliance standards. Let\'s highlight them so you know exactly where to look.',
-    icon: Shield,
+    icon: ShieldIcon,
     targetId: 'compliance-tabs',
     placement: 'left',
     spotlightPadding: 4,
@@ -282,7 +278,7 @@ const TOUR_STEPS: TourStep[] = [
     id: 'compliance-frameworks',
     title: 'Compliance Framework Switching',
     description: 'Watch the tabs cycle through General → SOC2 → HIPAA. Each framework audits against different regulatory standards, revealing unique violations and remediation steps.',
-    icon: Shield,
+    icon: ShieldIcon,
     targetId: 'compliance-tabs',
     placement: 'left',
     disableDimming: true,
@@ -296,7 +292,7 @@ const TOUR_STEPS: TourStep[] = [
     id: 'undo-redo',
     title: 'Undo / Redo with Animation',
     description: 'Dragged a node by accident? Use these buttons or keyboard shortcuts (Ctrl+Z / Ctrl+Y). Every layout change is tracked with smooth spring-animated transitions.',
-    icon: Undo2,
+    icon: ArrowUUpLeftIcon,
     targetId: 'undo-redo-panel',
     placement: 'bottom',
     spotlightPadding: 10,
@@ -310,7 +306,7 @@ const TOUR_STEPS: TourStep[] = [
     id: 'export',
     title: 'Export High-Res Snapshot',
     description: 'Download a production-quality PNG snapshot of any lens view at 2× Retina resolution. Perfect for architecture reviews, documentation, and presentations.',
-    icon: Download,
+    icon: DownloadSimpleIcon,
     targetId: 'export-button',
     placement: 'bottom',
     spotlightPadding: 12,
@@ -324,7 +320,7 @@ const TOUR_STEPS: TourStep[] = [
     id: 'complete',
     title: 'You\'re All Set! 🚀',
     description: 'You now know every feature of Gravity Lens. Start exploring your architecture — and click the replay button (↺) in the top nav anytime to revisit this tour.',
-    icon: Play,
+    icon: PlayIcon,
     targetId: null,
     placement: 'center',
     action: (store) => {
@@ -436,12 +432,11 @@ function SpotlightOverlay({
           style={{ borderRadius: borderRadius + 4 }}
           animate={{
             boxShadow: [
-              '0 0 0 0px rgba(129, 140, 248, 0.35)',
-              '0 0 0 6px rgba(129, 140, 248, 0)',
-              '0 0 0 0px rgba(129, 140, 248, 0)',
+              '0 0 0 0px rgba(99, 102, 241, 0.2)',
+              '0 0 0 12px rgba(99, 102, 241, 0)',
             ],
           }}
-          transition={{ duration: 2.2, repeat: Infinity, ease: 'easeInOut' }}
+          transition={{ duration: 2.5, repeat: Infinity, ease: 'easeOut' }}
         />
       </motion.div>
     </motion.div>
@@ -749,7 +744,7 @@ export default function ProductTour() {
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex items-center gap-3">
                         <div className={`p-2 rounded-xl border ${accent.iconBg} ${accent.iconBorder} shrink-0`}>
-                          <StepIcon className={`w-5 h-5 ${accent.text}`} />
+                          <StepIcon weight="duotone" className={`w-5 h-5 ${accent.text}`} />
                         </div>
                         <div className="min-w-0">
                           <p className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400 dark:text-slate-500 mb-0.5">
@@ -760,12 +755,14 @@ export default function ProductTour() {
                           </h3>
                         </div>
                       </div>
-                      <button
+                      <motion.button
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
                         onClick={endTour}
                         className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors p-1.5 -mr-1.5 -mt-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800"
                       >
-                        <X className="w-4 h-4" />
-                      </button>
+                        <XIcon weight="bold" className="w-4 h-4" />
+                      </motion.button>
                     </div>
 
                     {/* Description */}
@@ -800,23 +797,27 @@ export default function ProductTour() {
                       </button>
 
                       <div className="flex gap-2">
-                        <button
+                        <motion.button
+                          whileHover={currentStep !== 0 ? { scale: 1.05 } : {}}
+                          whileTap={currentStep !== 0 ? { scale: 0.95 } : {}}
                           onClick={handlePrev}
                           disabled={currentStep === 0}
                           className="p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-25 disabled:cursor-not-allowed transition-all"
                         >
-                          <ArrowLeft className="w-4 h-4" />
-                        </button>
-                        <button
+                          <ArrowLeftIcon weight="bold" className="w-4 h-4" />
+                        </motion.button>
+                        <motion.button
+                          whileHover={{ scale: 1.03 }}
+                          whileTap={{ scale: 0.97 }}
                           onClick={handleNext}
-                          className="flex items-center gap-2 px-5 py-2 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white text-xs font-bold rounded-lg transition-all shadow-lg shadow-indigo-500/25 active:scale-[0.97]"
+                          className="flex items-center gap-2 px-5 py-2 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white text-xs font-bold rounded-lg transition-all shadow-lg shadow-indigo-500/25"
                         >
                           {currentStep === TOUR_STEPS.length - 1 ? 'Start Exploring' : 'Next'}
                           {currentStep === TOUR_STEPS.length - 1
-                            ? <Play className="w-3 h-3 fill-current" />
-                            : <ArrowRight className="w-3 h-3" />
+                            ? <PlayIcon weight="fill" className="w-3 h-3" />
+                            : <ArrowRightIcon weight="bold" className="w-3 h-3" />
                           }
-                        </button>
+                        </motion.button>
                       </div>
                     </div>
                   </div>

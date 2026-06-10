@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useCanvasStore } from '../../store/useCanvasStore';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Cloud, RefreshCw, Bell, RotateCcw } from 'lucide-react';
+import { CloudIcon, ArrowsClockwiseIcon, BellIcon, ArrowCounterClockwiseIcon } from '@phosphor-icons/react';
 import { Button } from "./button";
 import { Badge } from "./badge";
 import { Separator } from "./separator";
@@ -58,30 +58,39 @@ export default function TopNav() {
 
       {/* Sync Controls Tied directly to Zustand */}
       <div className="flex items-center gap-4">
-        <Button
-  variant="outline"
-  onClick={() => fetchInfrastructure()}
-  disabled={isLoading}
-  className="font-bold text-slate-600 dark:text-slate-300 dark:border-slate-700 dark:hover:bg-slate-800"
-  size = "lg"
->
-  <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin text-indigo-600 dark:text-indigo-400' : ''}`} />
-  {isLoading ? 'Scanning AWS Engine...' : 'Sync Infrastructure'}
-</Button>
+        <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+          <Button
+            variant="outline"
+            onClick={() => fetchInfrastructure()}
+            disabled={isLoading}
+            className="font-bold text-slate-600 dark:text-slate-300 dark:border-slate-700 dark:hover:bg-slate-800"
+            size="lg"
+          >
+            <ArrowsClockwiseIcon weight="bold" className={`w-4 h-4 ${isLoading ? 'animate-spin text-indigo-600 dark:text-indigo-400' : ''}`} />
+            {isLoading ? 'Scanning AWS Engine...' : 'Sync Infrastructure'}
+          </Button>
+        </motion.div>
 
 
         <Separator orientation="vertical" className="h-6 bg-slate-200 dark:bg-slate-700" />
 
         <div className="relative">
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
-            className={`text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 relative ${isNotificationsOpen ? 'bg-slate-100 dark:bg-slate-800' : ''}`}
-          >
-            <Bell className="w-5 h-5" />
-            <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full animate-pulse border-2 border-white dark:border-slate-900" />
-          </Button>
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
+              className={`text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 relative ${isNotificationsOpen ? 'bg-slate-100 dark:bg-slate-800' : ''}`}
+            >
+              <motion.div
+                whileHover={{ rotate: [0, -15, 15, -15, 0] }}
+                transition={{ duration: 0.4 }}
+              >
+                <BellIcon weight={isNotificationsOpen ? "fill" : "duotone"} className="w-5 h-5" />
+              </motion.div>
+              <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full animate-pulse border-2 border-white dark:border-slate-900" />
+            </Button>
+          </motion.div>
 
           <AnimatePresence>
             {isNotificationsOpen && (
@@ -134,15 +143,17 @@ export default function TopNav() {
           </AnimatePresence>
         </div>
 
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={replayTour}
-          className="text-slate-400 dark:text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400"
-          title="Replay Product Tour"
-        >
-          <RotateCcw className="w-4 h-4" />
-        </Button>
+        <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={replayTour}
+            className="text-slate-400 dark:text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400"
+            title="Replay Product Tour"
+          >
+            <ArrowCounterClockwiseIcon weight="bold" className="w-4 h-4 text-white" />
+          </Button>
+        </motion.div>
 
 
         <ThemeToggle />
