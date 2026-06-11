@@ -2,7 +2,7 @@
 
 import React, { useEffect, useCallback, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ReactFlow, Background, Controls, Panel, MiniMap} from '@xyflow/react';
+import { ReactFlow, Background, Controls, Panel, MiniMap } from '@xyflow/react';
 import { useStore } from 'zustand';
 import { useCanvasStore } from '../../store/useCanvasStore';
 
@@ -15,7 +15,6 @@ import SubnetNode from '../nodes/SubnetNode';
 import ApiGatewayNode from '../nodes/ApiGatewayNode';
 import SqsNode from '../nodes/SqsNode';
 import LensToolbar from '../ui/LensToolbar';
-import TopNav from '../ui/TopNav';
 import { Button } from '@/components/ui/button';
 import ContextualInspector from '../ui/ContextualInspector';
 import { useTheme } from 'next-themes';
@@ -105,10 +104,10 @@ export default function ArchitectureCanvas() {
         if (!oldPos) return node;
 
         if (
-        oldPos.x === node.position.x &&
-        oldPos.y === node.position.y
+          oldPos.x === node.position.x &&
+          oldPos.y === node.position.y
         ) {
-        return node;
+          return node;
         }
 
         const x = oldPos.x + (node.position.x - oldPos.x) * eased;
@@ -173,7 +172,7 @@ export default function ArchitectureCanvas() {
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
 
-// Ignore shortcuts when user is typing in inputs
+      // Ignore shortcuts when user is typing in inputs
       if (
         event.target instanceof HTMLInputElement ||
         event.target instanceof HTMLTextAreaElement
@@ -211,7 +210,7 @@ export default function ArchitectureCanvas() {
   }, []);
 
 
-useEffect(() => {
+  useEffect(() => {
     fetchInfrastructure();
   }, [fetchInfrastructure]);
 
@@ -233,138 +232,134 @@ useEffect(() => {
 
 
   return (
-    <div className="flex flex-col w-full h-screen bg-slate-50 dark:bg-slate-950 transition-colors duration-300 overflow-hidden">
+    <div className="flex flex-col w-full h-screen bg-[var(--gl-bg-base)] transition-colors duration-300 overflow-hidden">
 
-      {/* TopNav at the very top */}
-    <TopNav />
+      {/* 3. Wrap React Flow in a flex-1 container so it fills the remaining height */}
+      <div className="flex-1 relative w-full h-full">
 
-    {/* 3. Wrap React Flow in a flex-1 container so it fills the remaining height */}
-    <div className="flex-1 relative w-full h-full">
-
-    <div data-tour-id="canvas-viewport" className="flex-1 h-full relative  pr-[320px]"> {/* 288px = w-72, 320px = w-80 */}
-      <ReactFlow
-        nodes={nodes}
-        edges={edges}
-        nodeTypes={nodeTypes}
-        edgeTypes={edgeTypes}
-        onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
-        onConnect={onConnect}
-        fitView
-        defaultEdgeOptions={{ type: 'animatedEdge' }}
-        onNodeClick={(event, node) => setSelectedNodeId(node.id)}
-        onPaneClick={() => setSelectedNodeId(null)}
-      >
-
-        {/* Dynamic dot colors based on the theme! */}
-          <Background
-            color={mounted && resolvedTheme === 'dark' ? '#334155' : '#cbd5e1'}
-            gap={20}
-            size={2}
-          />
-
-        {/* <Controls /> */}
-
-        <Panel position="top-left" data-tour-id="undo-redo-panel" className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md p-2 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 flex gap-2">
-          <Button
-            variant="outline"
-            onClick={executeUndo}
-            disabled={pastStates.length === 0}
-            className="font-bold text-slate-700 dark:text-slate-300 dark:border-slate-700 dark:hover:bg-slate-800"
+        <div data-tour-id="canvas-viewport" className={`flex-1 h-full relative transition-all duration-300 ${selectedNodeId ? 'pr-[320px]' : 'pr-12'}`}>
+          <ReactFlow
+            nodes={nodes}
+            edges={edges}
+            nodeTypes={nodeTypes}
+            edgeTypes={edgeTypes}
+            onNodesChange={onNodesChange}
+            onEdgesChange={onEdgesChange}
+            onConnect={onConnect}
+            fitView
+            defaultEdgeOptions={{ type: 'animatedEdge' }}
+            onNodeClick={(event, node) => setSelectedNodeId(node.id)}
+            onPaneClick={() => setSelectedNodeId(null)}
           >
-            ↩ Undo
-          </Button>
-          <Button
-            variant="outline"
-            onClick={executeRedo}
-            disabled={futureStates.length === 0}
-            className="font-bold text-slate-700 dark:text-slate-300 dark:border-slate-700 dark:hover:bg-slate-800"
-          >
-            Redo ↪
-          </Button>
 
-        </Panel>
-        <LensToolbar />
-        <CommandPalette />
-        {/* FinOps Cost Legend — Animated */}
-          <AnimatePresence>
-            {activeLens === 'cost' && (
-              <motion.div
-                key="cost-legend"
-                initial={{ opacity: 0, y: 30, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 20, scale: 0.95 }}
-                transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-                className="absolute bottom-8 left-8 z-40 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-white dark:border-slate-700 shadow-xl rounded-2xl p-4 w-64"
+            {/* Dynamic dot colors based on the theme! */}
+            <Background
+              color={mounted && resolvedTheme === 'dark' ? '#334155' : '#cbd5e1'}
+              gap={20}
+              size={2}
+            />
+
+            {/* <Controls /> */}
+
+            <Panel position="top-left" data-tour-id="undo-redo-panel" className="bg-white/80 dark:bg-[#111111]/80 backdrop-blur-md p-2 rounded-xl shadow-sm border border-slate-200 dark:border-[#222222] flex gap-2">
+              <Button
+                variant="outline"
+                onClick={executeUndo}
+                disabled={pastStates.length === 0}
+                className="font-bold text-slate-700 dark:text-slate-300 dark:border-[#333333] dark:hover:bg-[#222222] dark:bg-transparent"
               >
-                <h3 className="text-xs font-black text-slate-800 dark:text-slate-200 uppercase tracking-widest mb-3">
-                  Monthly Run Rate
-                </h3>
-                <div className="flex flex-col gap-2">
-                  <div className="flex items-center gap-3">
-                    <div className="w-3 h-3 rounded-full bg-red-500/20 border border-red-500 shadow-[0_0_10px_rgba(239,68,68,0.4)]" />
-                    <span className="text-xs font-bold text-slate-600 dark:text-slate-400">Critical (&gt; $500/mo)</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <div className="w-3 h-3 rounded-full bg-orange-500/20 border border-orange-500 shadow-[0_0_10px_rgba(249,115,22,0.4)]" />
-                    <span className="text-xs font-bold text-slate-600 dark:text-slate-400">Warning (&gt; $100/mo)</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <div className="w-3 h-3 rounded-full bg-green-500/20 border border-green-500 shadow-[0_0_10px_rgba(34,197,94,0.4)]" />
-                    <span className="text-xs font-bold text-slate-600 dark:text-slate-400">Optimized</span>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+                ↩ Undo
+              </Button>
+              <Button
+                variant="outline"
+                onClick={executeRedo}
+                disabled={futureStates.length === 0}
+                className="font-bold text-slate-700 dark:text-slate-300 dark:border-[#333333] dark:hover:bg-[#222222] dark:bg-transparent"
+              >
+                Redo ↪
+              </Button>
 
-          {/* Lens Transition Pulse Overlay */}
-          <AnimatePresence>
-            {lensFlash && (
-              <motion.div
-                key="lens-pulse"
-                initial={{ opacity: 0.15 }}
-                animate={{ opacity: 0 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.35, ease: 'easeOut' }}
-                className={`absolute inset-0 z-30 pointer-events-none rounded-none ${
-                  activeLens === 'blast-radius' ? 'bg-orange-500' :
-                  activeLens === 'cost' ? 'bg-emerald-500' :
-                  activeLens === 'security' ? 'bg-amber-500' :
-                  'bg-indigo-500'
-                }`}
-              />
-            )}
-          </AnimatePresence>
+            </Panel>
+            <LensToolbar />
+            <CommandPalette />
+            {/* FinOps Cost Legend — Animated */}
+            <AnimatePresence>
+              {activeLens === 'cost' && (
+                <motion.div
+                  key="cost-legend"
+                  initial={{ opacity: 0, y: 30, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 20, scale: 0.95 }}
+                  transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                  className="absolute bottom-8 left-8 z-40 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-white dark:border-slate-700 shadow-xl rounded-2xl p-4 w-64"
+                >
+                  <h3 className="text-xs font-black text-slate-800 dark:text-slate-200 uppercase tracking-widest mb-3">
+                    Monthly Run Rate
+                  </h3>
+                  <div className="flex flex-col gap-2">
+                    <div className="flex items-center gap-3">
+                      <div className="w-3 h-3 rounded-full bg-red-500/20 border border-red-500 shadow-[0_0_10px_rgba(239,68,68,0.4)]" />
+                      <span className="text-xs font-bold text-slate-600 dark:text-slate-400">Critical (&gt; $500/mo)</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="w-3 h-3 rounded-full bg-orange-500/20 border border-orange-500 shadow-[0_0_10px_rgba(249,115,22,0.4)]" />
+                      <span className="text-xs font-bold text-slate-600 dark:text-slate-400">Warning (&gt; $100/mo)</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="w-3 h-3 rounded-full bg-green-500/20 border border-green-500 shadow-[0_0_10px_rgba(34,197,94,0.4)]" />
+                      <span className="text-xs font-bold text-slate-600 dark:text-slate-400">Optimized</span>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
-          {/* MiniMap Radar */}
-          <MiniMap
-            zoomable
-            pannable
-            nodeColor={(node) => {
-              const type = node.type?.toLowerCase() || '';
-              if (type.includes('vpc') || type.includes('subnet') || type.includes('availabilityzone')) return 'transparent';
-              if (type.includes('api')) return '#a855f7';
-              if (type.includes('sqs')) return '#d946ef';
-              if (type.includes('lambda')) return '#f97316';
-              if (type.includes('database')) return '#3b82f6';
-              if (type.includes('s3')) return '#22c55e';
-              if (type.includes('ec2')) return '#06b6d4';
-              return '#cbd5e1';
-            }}
-            nodeStrokeColor={(node) => {
-              const type = node.type?.toLowerCase() || '';
-              if (type.includes('vpc') || type.includes('subnet')) return '#8b5cf6';
-              return 'transparent';
-            }}
-            nodeStrokeWidth={2}
-            maskColor={mounted && resolvedTheme === 'dark' ? 'rgba(2, 6, 23, 0.75)' : 'rgba(248, 250, 252, 0.75)'}
-            className="!bg-white dark:!bg-slate-900 !border !border-slate-200 dark:!border-slate-800 !shadow-sm !rounded-xl overflow-hidden"
-          />
+            {/* Lens Transition Pulse Overlay */}
+            <AnimatePresence>
+              {lensFlash && (
+                <motion.div
+                  key="lens-pulse"
+                  initial={{ opacity: 0.15 }}
+                  animate={{ opacity: 0 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.35, ease: 'easeOut' }}
+                  className={`absolute inset-0 z-30 pointer-events-none rounded-none ${activeLens === 'blast-radius' ? 'bg-orange-500' :
+                      activeLens === 'cost' ? 'bg-emerald-500' :
+                        activeLens === 'security' ? 'bg-amber-500' :
+                          'bg-indigo-500'
+                    }`}
+                />
+              )}
+            </AnimatePresence>
 
-        </ReactFlow>
-    </div>
-      <ContextualInspector />
+            {/* MiniMap Radar */}
+            <MiniMap
+              zoomable
+              pannable
+              nodeColor={(node) => {
+                const type = node.type?.toLowerCase() || '';
+                if (type.includes('vpc') || type.includes('subnet') || type.includes('availabilityzone')) return 'transparent';
+                if (type.includes('api')) return '#a855f7';
+                if (type.includes('sqs')) return '#d946ef';
+                if (type.includes('lambda')) return '#f97316';
+                if (type.includes('database')) return '#3b82f6';
+                if (type.includes('s3')) return '#22c55e';
+                if (type.includes('ec2')) return '#06b6d4';
+                return '#cbd5e1';
+              }}
+              nodeStrokeColor={(node) => {
+                const type = node.type?.toLowerCase() || '';
+                if (type.includes('vpc') || type.includes('subnet')) return '#8b5cf6';
+                return 'transparent';
+              }}
+              nodeStrokeWidth={2}
+              maskColor={mounted && resolvedTheme === 'dark' ? 'rgba(2, 6, 23, 0.75)' : 'rgba(248, 250, 252, 0.75)'}
+              className="!bg-white dark:!bg-slate-900 !border !border-slate-200 dark:!border-slate-800 !shadow-sm !rounded-xl overflow-hidden"
+            />
+
+          </ReactFlow>
+        </div>
+        <ContextualInspector />
       </div>
     </div>
   );

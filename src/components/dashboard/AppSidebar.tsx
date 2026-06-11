@@ -25,20 +25,20 @@ const MOCK_USER = {
 };
 
 const navigationItems: NavMainItem[] = [
-  { title: "Overview",              id: "overview", icon: SquaresFour },
+  { title: "Overview", id: "overview", icon: SquaresFour },
   {
     title: "Infrastructure Canvas",
     icon: TreeStructure,
     items: [
-      { title: "Structural View",  id: "canvas" },
-      { title: "Blast Radius",     id: "blast-radius" },
-      { title: "Cost Topology",    id: "cost" },
+      { title: "Structural View", id: "canvas" },
+      { title: "Blast Radius", id: "blast-radius" },
+      { title: "Cost Topology", id: "cost" },
       { title: "Security Posture", id: "alerts" },
     ],
   },
-  { title: "Live Logs",         id: "logs",     icon: Scroll },
+  { title: "Live Logs", id: "logs", icon: Scroll },
   { title: "Timeline Scrubber", id: "timeline", icon: Clock },
-  { title: "Settings",          id: "settings", icon: Gear },
+  { title: "Settings", id: "settings", icon: Gear },
 ];
 
 /** Inner component — needs to live inside SidebarProvider to call useSidebar */
@@ -47,7 +47,7 @@ function AppSidebarInner(props: React.ComponentProps<typeof Sidebar>) {
 
   // Track whether the current open state was triggered by hover (not a user pin-click)
   const hoverOpenedRef = React.useRef(false);
-  const enterTimerRef  = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  const enterTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleMouseEnter = React.useCallback(() => {
     if (!open) {
@@ -91,9 +91,9 @@ function AppSidebarInner(props: React.ComponentProps<typeof Sidebar>) {
         <div className="flex items-center gap-2 select-none group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:gap-0 w-full">
           <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/20 shrink-0">
             <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
-              <circle cx="12" cy="12" r="4"/>
-              <path d="M12 2v4M12 18v4M2 12h4M18 12h4"/>
-              <path d="M5.64 5.64l2.83 2.83M15.54 15.54l2.83 2.83M5.64 18.36l2.83-2.83M15.54 8.46l2.83-2.83"/>
+              <circle cx="12" cy="12" r="4" />
+              <path d="M12 2v4M12 18v4M2 12h4M18 12h4" />
+              <path d="M5.64 5.64l2.83 2.83M15.54 15.54l2.83 2.83M5.64 18.36l2.83-2.83M15.54 8.46l2.83-2.83" />
             </svg>
           </div>
           <span className="text-sm font-bold text-[var(--gl-text-primary)] tracking-tight group-data-[collapsible=icon]:hidden">

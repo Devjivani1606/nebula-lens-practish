@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useRef, useEffect } from 'react';
 import { useCanvasStore } from '../../store/useCanvasStore';
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { AnimatePresence, motion } from 'framer-motion';
-import { XIcon, TrendDownIcon, WarningIcon, ShieldWarningIcon, PulseIcon, HardDrivesIcon, LightningIcon, ShieldIcon } from '@phosphor-icons/react';
+import { XIcon, TrendDownIcon, WarningIcon, ShieldWarningIcon, PulseIcon, HardDrivesIcon, LightningIcon, ShieldIcon, InfoIcon } from '@phosphor-icons/react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Legend } from 'recharts';
 import { useBlastRadius } from '../../hooks/useBlastRadius';
 import { useSecurityAudit } from '../../hooks/useSecurityAudit';
@@ -46,8 +46,30 @@ export default function ContextualInspector() {
   const toggleLiveStream = useCanvasStore((state) => state.toggleLiveStream);
   const tickTelemetry = useCanvasStore((state) => state.tickTelemetry);
 
+  const [isPinned, setIsPinned] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+  const hoverTimer = useRef<NodeJS.Timeout | null>(null);
+
   const selectedNode = nodes.find((n) => n.id === selectedNodeId);
   const data = selectedNode?.data as Record<string, any> | undefined;
+
+  const isExpanded = isPinned || isHovered || selectedNode !== undefined;
+
+  const handleMouseEnter = () => {
+    if (hoverTimer.current) clearTimeout(hoverTimer.current);
+    hoverTimer.current = setTimeout(() => setIsHovered(true), 150);
+  };
+
+  const handleMouseLeave = () => {
+    if (hoverTimer.current) clearTimeout(hoverTimer.current);
+    setIsHovered(false);
+  };
+
+  const handleClick = () => {
+    if (!isExpanded) {
+      setIsPinned(true);
+    }
+  };
 
   const { affectedNodes } = useBlastRadius(selectedNodeId);
   const { vulnerabilities, score } = useSecurityAudit();
@@ -113,7 +135,7 @@ export default function ContextualInspector() {
     return null;
   }, [selectedNode, isCostLens]);
 
-  let headerBg = 'bg-slate-50/50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800';
+  let headerBg = 'bg-slate-50/50 dark:bg-[#111111] border-slate-200 dark:border-slate-800';
   let headerText = 'text-slate-500 dark:text-slate-400';
   let panelTitle = 'Resource Inspector';
 
@@ -142,29 +164,50 @@ export default function ContextualInspector() {
   }
 
   return (
-    <div data-tour-id="inspector-panel" className="absolute top-0 right-0 h-full w-80 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl border-l border-slate-200 dark:border-slate-800 z-30 flex flex-col shadow-xl transition-colors duration-300">
+    <div 
+      data-tour-id="inspector-panel" 
+      className={`absolute top-0 right-0 h-full ${isExpanded ? 'w-80' : 'w-12 cursor-pointer'} bg-white/80 dark:bg-[#111111] backdrop-blur-xl border-l border-slate-200 dark:border-slate-800 z-30 flex flex-col shadow-xl transition-all duration-300 overflow-hidden`}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      onClick={handleClick}
+    >
+      {!isExpanded ? (
+        <div className="flex-1 w-full flex flex-col items-center py-6 text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 transition-colors">
+          <InfoIcon className="w-5 h-5 mb-6" />
+          <div className="[writing-mode:vertical-lr] text-[10px] font-black uppercase tracking-widest rotate-180">
+            {panelTitle}
+          </div>
+        </div>
+      ) : (
+        <>
+          <div className={`p-5 border-b transition-colors duration-300 flex justify-between items-center ${headerBg} shrink-0 w-80`}>
+            <h2 className={`font-black text-xs uppercase tracking-widest ${headerText}`}>
+              {panelTitle}
+            </h2>
+            <div className="flex items-center gap-2">
+              {!selectedNode && (
+                <button onClick={(e) => { e.stopPropagation(); setIsPinned(!isPinned); }} className="text-[var(--gl-text-muted)] hover:text-[var(--gl-text-primary)] transition-colors" title={isPinned ? "Unpin" : "Pin"}>
+                  <InfoIcon className={`w-4 h-4 ${isPinned ? 'text-indigo-500' : ''}`} />
+                </button>
+              )}
+              {selectedNode && (
+                <button onClick={(e) => { e.stopPropagation(); setSelectedNodeId(null); setIsPinned(false); setIsHovered(false); }} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
+                  <XIcon className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+          </div>
 
-      <div className={`p-5 border-b transition-colors duration-300 flex justify-between items-center ${headerBg}`}>
-        <h2 className={`font-black text-xs uppercase tracking-widest ${headerText}`}>
-          {panelTitle}
-        </h2>
-        {selectedNode && (
-          <button onClick={() => setSelectedNodeId(null)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
-            <XIcon className="w-4 h-4" />
-          </button>
-        )}
-      </div>
-
-      <div className="flex-1 overflow-y-auto p-5 relative" style={{ maskImage: 'linear-gradient(to bottom, transparent 0, black 16px, black calc(100% - 16px), transparent 100%)' }}>
+          <div className="flex-1 overflow-y-auto p-5 relative w-80" style={{ maskImage: 'linear-gradient(to bottom, transparent 0, black 16px, black calc(100% - 16px), transparent 100%)' }}>
         <AnimatePresence mode="wait">
           {selectedNode && data ? (
             <motion.div key="selected" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ type: "spring", stiffness: 500, damping: 40 }} className="space-y-6">
 
               <div>
                 <Badge variant="secondary" className={`mb-2 ${isCostLens ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30' :
-                    isBlastRadiusLens ? 'bg-red-500/20 text-red-600 dark:text-red-400 border border-red-500/30' :
-                      isSecurityLens ? 'bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30' :
-                        'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'
+                  isBlastRadiusLens ? 'bg-red-500/20 text-red-600 dark:text-red-400 border border-red-500/30' :
+                    isSecurityLens ? 'bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30' :
+                      'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'
                   }`}>
                   {selectedNode.type?.replace('Node', '').toUpperCase() || 'RESOURCE'}
                 </Badge>
@@ -351,14 +394,14 @@ export default function ContextualInspector() {
 
               {isSecurityLens && (
                 <div className="mb-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                  <div data-tour-id="compliance-tabs" className="flex bg-slate-100 dark:bg-slate-900 rounded-lg p-1 mb-4 border border-slate-200 dark:border-slate-800">
+                  <div data-tour-id="compliance-tabs" className="flex bg-slate-100 dark:bg-[#111111] rounded-lg p-1 mb-4 border border-slate-200 dark:border-slate-800">
                     {['general', 'soc2', 'hipaa'].map((fw) => (
                       <button
                         key={fw}
                         onClick={() => useCanvasStore.getState().setComplianceFramework(fw as any)}
                         className={`flex-1 text-[10px] font-black uppercase tracking-widest py-1.5 rounded-md transition-all ${complianceFramework === fw
-                            ? 'bg-white dark:bg-slate-800 text-amber-600 shadow-sm'
-                            : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
+                          ? 'bg-white dark:bg-slate-800 text-amber-600 shadow-sm'
+                          : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
                           }`}
                       >
                         {fw}
@@ -406,8 +449,8 @@ export default function ContextualInspector() {
                     data-tour-id="live-stream-toggle"
                     onClick={toggleLiveStream}
                     className={`px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-full transition-all duration-300 border flex items-center gap-2 ${isLiveStreamActive
-                        ? 'bg-red-500/10 text-red-500 border-red-500/30 hover:bg-red-500/20 shadow-[0_0_15px_rgba(239,68,68,0.2)]'
-                        : 'bg-slate-100 dark:bg-slate-800 text-slate-500 border-slate-200 dark:border-slate-700 hover:text-slate-700 dark:hover:text-slate-300'
+                      ? 'bg-red-500/10 text-red-500 border-red-500/30 hover:bg-red-500/20 shadow-[0_0_15px_rgba(239,68,68,0.2)]'
+                      : 'bg-slate-100 dark:bg-slate-800 text-slate-500 border-slate-200 dark:border-slate-700 hover:text-slate-700 dark:hover:text-slate-300'
                       }`}
                   >
                     {isLiveStreamActive ? (
@@ -488,6 +531,8 @@ export default function ContextualInspector() {
           )}
         </AnimatePresence>
       </div>
+      </>
+      )}
     </div>
   );
 }

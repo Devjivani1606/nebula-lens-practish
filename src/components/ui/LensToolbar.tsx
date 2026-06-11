@@ -50,7 +50,7 @@ export default function LensToolbar() {
         transition={{ type: "spring", stiffness: 300, damping: 25, delay: 0.1 }}
       >
         {/* The Premium Glassmorphism Shell */}
-        <div data-tour-id="lens-toolbar" className="flex items-center gap-1 p-1.5 bg-white/60 dark:bg-slate-900/60 backdrop-blur-2xl border border-white/60 dark:border-slate-700/50 shadow-[0_8px_30px_rgba(0,0,0,0.04)] rounded-full">
+        <div data-tour-id="lens-toolbar" className="flex items-center gap-1 p-1.5 bg-white/60 dark:bg-[#111111]/80 backdrop-blur-2xl border border-white/60 dark:border-slate-800/50 shadow-[0_8px_30px_rgba(0,0,0,0.04)] rounded-full">
 
           {/* Lens Mapping Loop */}
           {lenses.map(({ id, label, icon: Icon }) => {
@@ -63,13 +63,13 @@ export default function LensToolbar() {
                   onClick={() => handleLensChange(id)}
                   className={`
                     relative flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold transition-all duration-200 h-auto select-none
-                    ${isActive ? 'text-indigo-700 dark:text-indigo-400 hover:bg-transparent hover:text-indigo-700 dark:hover:text-indigo-400' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100/50 dark:hover:bg-slate-800/50'}
+                    ${isActive ? 'text-indigo-700 dark:text-indigo-400 hover:bg-transparent hover:text-indigo-700 dark:hover:text-indigo-400' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100/50 dark:hover:bg-[#222222]/50'}
                   `}
                 >
                   {isActive && (
                     <motion.div
                       layoutId="active-lens-pill"
-                      className="absolute inset-0 bg-white dark:bg-slate-800 rounded-full shadow-sm border border-indigo-100/40 dark:border-indigo-900/40"
+                      className="absolute inset-0 bg-white dark:bg-[#222222] rounded-full shadow-sm border border-indigo-100/40 dark:border-indigo-900/40"
                       transition={{ type: "spring", stiffness: 400, damping: 30 }}
                     />
                   )}
@@ -81,7 +81,7 @@ export default function LensToolbar() {
           })}
 
           {/* Elegant Subtle Separator Line */}
-          <div className="w-px h-5 bg-slate-200 dark:bg-slate-700 mx-1.5 shrink-0 self-center" />
+          <div className="w-px h-5 bg-slate-200 dark:bg-slate-800 mx-1.5 shrink-0 self-center" />
 
           {/* Export Feature Action Button */}
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
@@ -89,7 +89,7 @@ export default function LensToolbar() {
               data-tour-id="export-button"
               variant="ghost"
               onClick={downloadImage}
-              className="relative flex items-center justify-center p-2 rounded-full text-slate-400 dark:text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100/50 dark:hover:bg-slate-800/50 shrink-0 h-9 w-9 transition-all duration-200"
+              className="relative flex items-center justify-center p-2 rounded-full text-slate-400 dark:text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100/50 dark:hover:bg-[#222222]/50 shrink-0 h-9 w-9 transition-all duration-200"
               title="Download Architecture Snapshot"
             >
               <DownloadSimpleIcon weight="bold" className="w-4.5 h-4.5" />

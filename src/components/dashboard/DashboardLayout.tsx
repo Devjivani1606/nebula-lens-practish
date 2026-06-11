@@ -1,8 +1,8 @@
 "use client";
 
 import React from "react";
-import { TopHeader }   from "./TopHeader";
-import { AppSidebar }  from "./AppSidebar";
+import { TopHeader } from "./TopHeader";
+import { AppSidebar } from "./AppSidebar";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
