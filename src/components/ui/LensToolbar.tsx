@@ -62,7 +62,7 @@ export default function LensToolbar() {
                   variant="ghost"
                   onClick={() => handleLensChange(id)}
                   className={`
-                    relative flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold transition-all duration-200 h-auto select-none
+                    relative flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 h-auto select-none
                     ${isActive ? 'text-indigo-700 dark:text-indigo-400 hover:bg-transparent hover:text-indigo-700 dark:hover:text-indigo-400' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100/50 dark:hover:bg-[#222222]/50'}
                   `}
                 >

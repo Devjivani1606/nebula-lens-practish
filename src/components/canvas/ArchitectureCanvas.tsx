@@ -277,7 +277,7 @@ export default function ArchitectureCanvas() {
                 variant="outline"
                 onClick={executeUndo}
                 disabled={pastStates.length === 0}
-                className="font-bold text-slate-700 dark:text-slate-300 dark:border-[#333333] dark:hover:bg-[#222222] dark:bg-transparent"
+                className="font-medium text-slate-700 dark:text-slate-300 dark:border-[#333333] dark:hover:bg-[#222222] dark:bg-transparent"
               >
                 ↩ Undo
               </Button>
@@ -285,7 +285,7 @@ export default function ArchitectureCanvas() {
                 variant="outline"
                 onClick={executeRedo}
                 disabled={futureStates.length === 0}
-                className="font-bold text-slate-700 dark:text-slate-300 dark:border-[#333333] dark:hover:bg-[#222222] dark:bg-transparent"
+                className="font-medium text-slate-700 dark:text-slate-300 dark:border-[#333333] dark:hover:bg-[#222222] dark:bg-transparent"
               >
                 Redo ↪
               </Button>
@@ -302,9 +302,9 @@ export default function ArchitectureCanvas() {
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: 20, scale: 0.95 }}
                   transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-                  className="absolute bottom-8 left-8 z-40 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-white dark:border-slate-700 shadow-xl rounded-2xl p-4 w-64"
+                  className="absolute bottom-8 left-8 z-40 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-white dark:border-slate-700 shadow-lg rounded-2xl p-4 w-64"
                 >
-                  <h3 className="text-xs font-black text-slate-800 dark:text-slate-200 uppercase tracking-widest mb-3">
+                  <h3 className="text-xs font-medium text-slate-800 dark:text-slate-200 uppercase tracking-widest mb-3">
                     Monthly Run Rate
                   </h3>
                   <div className="flex flex-col gap-2">

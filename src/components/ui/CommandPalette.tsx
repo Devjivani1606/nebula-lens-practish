@@ -79,7 +79,7 @@ export default function CommandPalette() {
 
   const focusNode = (node: any) => {
     setSelectedNodeId(node.id);
-    setCenter(node.position.x + 100, node.position.y + 50, { zoom: 1.2, duration: 800 });
+    setCenter(node.position.x + 100, node.position.y + 50, { zoom: 1.2, duration: 400 });
     closePalette();
   };
 
@@ -162,7 +162,7 @@ export default function CommandPalette() {
             initial="hidden"
             animate="visible"
             exit="exit"
-            className="relative z-[101] w-full max-w-2xl overflow-hidden rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)] bg-white/70 dark:bg-[#0A0A0A]/70 backdrop-blur-3xl saturate-[1.2] border border-white/60 dark:border-white/[0.08] pointer-events-auto"
+            className="relative z-[101] w-full max-w-2xl overflow-hidden rounded-2xl shadow-[0_12px_24px_rgba(0,0,0,0.15)] dark:shadow-[0_12px_24px_rgba(0,0,0,0.5)] bg-white/70 dark:bg-[#0A0A0A]/70 backdrop-blur-3xl saturate-[1.2] border border-white/60 dark:border-white/[0.08] pointer-events-auto"
           >
             {/* Search Input */}
             <div className="flex items-center px-4 border-b border-slate-200/50 dark:border-white/[0.05]">
@@ -176,7 +176,7 @@ export default function CommandPalette() {
                 className="w-full bg-transparent border-0 py-4 pl-3 pr-4 text-[15px] font-medium text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-0"
               />
               <div className="flex items-center gap-1 shrink-0">
-                <kbd className="px-2 py-1 text-[10px] font-bold text-slate-500 bg-slate-100 dark:bg-white/5 rounded-md">ESC</kbd>
+                <kbd className="px-2 py-1 text-[10px] font-medium text-slate-500 bg-slate-100 dark:bg-white/5 rounded-md">ESC</kbd>
               </div>
             </div>
 

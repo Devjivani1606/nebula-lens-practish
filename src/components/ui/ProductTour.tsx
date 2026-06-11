@@ -598,7 +598,7 @@ export default function ProductTour() {
           <motion.button
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.5, duration: 0.5 }}
+            transition={{ delay: 0.5, duration: 0.4 }}
             onClick={endTour}
             className="fixed top-6 right-8 z-[305] text-[12px] font-medium text-slate-400 hover:text-slate-200 transition-colors pointer-events-auto"
           >

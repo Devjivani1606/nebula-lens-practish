@@ -65,7 +65,7 @@ function ComplianceProgressBar({ label, percentage }: { label: string, percentag
           className="h-full bg-indigo-500 rounded-full"
           initial={{ width: 0 }}
           animate={{ width: `${percentage}%` }}
-          transition={{ duration: 0.6, ease: "easeOut", delay: 0.2 }}
+          transition={{ duration: 0.4, ease: "easeOut", delay: 0.2 }}
         />
       </div>
     </motion.div>
@@ -361,20 +361,20 @@ export default function ContextualInspector() {
                             </h3>
                             <div className="grid grid-cols-2 gap-3">
                               <div className="p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/30">
-                                <p className="text-[9px] text-slate-500 dark:text-slate-400 font-bold mb-1 uppercase tracking-wider">Total Nodes</p>
-                                <p className="text-lg font-black text-slate-800 dark:text-slate-200"><AnimatedCounter value={nodes.length} /></p>
+                                <p className="text-[9px] text-slate-500 dark:text-slate-400 font-medium mb-1 uppercase tracking-wider">Total Nodes</p>
+                                <p className="text-lg font-medium text-slate-800 dark:text-slate-200"><AnimatedCounter value={nodes.length} /></p>
                               </div>
-                              <div className="p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/30">
-                                <p className="text-[9px] text-slate-500 dark:text-slate-400 font-bold mb-1 uppercase tracking-wider">Connections</p>
-                                <p className="text-lg font-black text-slate-800 dark:text-slate-200"><AnimatedCounter value={edges.length} /></p>
+                              <div className="bg-slate-100 dark:bg-[#111111] border border-slate-200 dark:border-[#222222] rounded-xl p-3 shadow-sm">
+                                <p className="text-[9px] text-slate-500 dark:text-slate-400 font-medium mb-1 uppercase tracking-wider">Connections</p>
+                                <p className="text-lg font-medium text-slate-800 dark:text-slate-200"><AnimatedCounter value={edges.length} /></p>
                               </div>
-                              <div className="p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/30">
-                                <p className="text-[9px] text-slate-500 dark:text-slate-400 font-bold mb-1 uppercase tracking-wider">Services</p>
-                                <p className="text-lg font-black text-slate-800 dark:text-slate-200"><AnimatedCounter value={resourceTypesCount} /></p>
+                              <div className="bg-slate-100 dark:bg-[#111111] border border-slate-200 dark:border-[#222222] rounded-xl p-3 shadow-sm">
+                                <p className="text-[9px] text-slate-500 dark:text-slate-400 font-medium mb-1 uppercase tracking-wider">Services</p>
+                                <p className="text-lg font-medium text-slate-800 dark:text-slate-200"><AnimatedCounter value={resourceTypesCount} /></p>
                               </div>
-                              <div className="p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/30">
-                                <p className="text-[9px] text-slate-500 dark:text-slate-400 font-bold mb-1 uppercase tracking-wider">Active Zones</p>
-                                <p className="text-lg font-black text-slate-800 dark:text-slate-200">2</p>
+                              <div className="bg-slate-100 dark:bg-[#111111] border border-slate-200 dark:border-[#222222] rounded-xl p-3 shadow-sm">
+                                <p className="text-[9px] text-slate-500 dark:text-slate-400 font-medium mb-1 uppercase tracking-wider">Active Zones</p>
+                                <p className="text-lg font-medium text-slate-800 dark:text-slate-200">2</p>
                               </div>
                             </div>
                           </motion.div>
