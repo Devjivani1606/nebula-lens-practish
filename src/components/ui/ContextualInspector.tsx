@@ -100,7 +100,9 @@ export default function ContextualInspector() {
   const selectedNode = nodes.find((n) => n.id === selectedNodeId);
   const data = selectedNode?.data as Record<string, any> | undefined;
 
-  const isExpanded = selectedNode !== undefined || isPinned || isHovered;
+  const isTourActive = useCanvasStore((state) => state.isTourActive);
+
+  const isExpanded = selectedNode !== undefined || isPinned || isHovered || isTourActive;
 
   useEffect(() => {
     if (activeLens === 'security') setActiveTab('Security');
@@ -288,6 +290,36 @@ export default function ContextualInspector() {
                               ))}
                             </div>
                           </motion.div>
+
+                          {telemetryData && chartKeys.length > 0 && (
+                            <>
+                              <Separator className="bg-slate-200 dark:bg-slate-800" />
+                              <motion.div variants={staggerItem}>
+                                <h4 className="text-[11px] font-medium tracking-[0.7px] uppercase text-[var(--gl-text-muted)] mb-3">Time-Series Telemetry</h4>
+                                <div className="w-full h-40">
+                                  <ResponsiveContainer width="100%" height={160}>
+                                    <AreaChart data={telemetryData} margin={{ top: 5, right: 0, left: -25, bottom: 0 }}>
+                                      <defs>
+                                        {chartKeys.map((key, idx) => (
+                                          <linearGradient key={idx} id={`colorGen${idx}`} x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="5%" stopColor={CHART_COLORS[idx % CHART_COLORS.length]} stopOpacity={0.3} />
+                                            <stop offset="95%" stopColor={CHART_COLORS[idx % CHART_COLORS.length]} stopOpacity={0} />
+                                          </linearGradient>
+                                        ))}
+                                      </defs>
+                                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#334155" opacity={0.5} />
+                                      <XAxis dataKey="time" stroke="#64748b" fontSize={10} tickLine={false} axisLine={false} />
+                                      <YAxis stroke="#64748b" fontSize={10} tickLine={false} axisLine={false} />
+                                      <Tooltip contentStyle={{ backgroundColor: '#020617', borderColor: '#1e293b', borderRadius: '8px', fontSize: '12px' }} itemStyle={{ textTransform: 'capitalize' }} />
+                                      {chartKeys.map((key, index) => (
+                                        <Area key={key} type="monotone" dataKey={key} stroke={CHART_COLORS[index % CHART_COLORS.length]} fillOpacity={1} fill={`url(#colorGen${index})`} strokeWidth={2} />
+                                      ))}
+                                    </AreaChart>
+                                  </ResponsiveContainer>
+                                </div>
+                              </motion.div>
+                            </>
+                          )}
                         </>
                       ) : (
                         <>

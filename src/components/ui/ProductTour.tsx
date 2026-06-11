@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, Variants, Transition } from 'framer-motion';
 import { useCanvasStore } from '../../store/useCanvasStore';
 import { springSmooth, springSnappy, scaleIn } from '../../lib/motion';
 import { GraphIcon, PlanetIcon, CurrencyDollarIcon, ShieldCheckIcon, ArrowRightIcon, ArrowLeftIcon, XIcon, PlayIcon, SparkleIcon, CursorClickIcon, PulseIcon, DownloadSimpleIcon, ArrowUUpLeftIcon, EyeIcon, ShieldIcon } from '@phosphor-icons/react';
@@ -41,7 +41,7 @@ interface SpotlightRect {
 }
 
 // ────────────────────────────────────────────────────────────────────────────
-// TOUR STEPS 
+// TOUR STEPS
 //   1. Canvas → 2. Live Telemetry → 3. Lens Toolbar → 4. Blast Radius
 //   → 5. Blast Inspector → 6. Cost → 7. Cost Inspector → 8. Security
 //   → 9. Compliance → 10. Undo/Redo → 11. Export → 12. Complete
@@ -75,22 +75,22 @@ const TOUR_STEPS: TourStep[] = [
     }
   },
   {
-    id: 's3-node-highlight',
+    id: 'mongo-node-highlight',
     title: 'Node Deep Dive',
-    description: 'We just clicked the S3 Asset Storage bucket. Notice how it is selected on the canvas.',
+    description: 'We just clicked the MongoDB Atlas database node. Notice how it is selected on the canvas.',
     icon: CursorClickIcon,
-    targetId: 's3-asset-bucket',
+    targetId: 'db-mongo-cluster',
     placement: 'top',
     spotlightPadding: 8,
     spotlightRadius: 12,
     delay: 400,
     action: (store) => {
       store.setActiveLens('structural');
-      store.setSelectedNodeId('s3-asset-bucket');
+      store.setSelectedNodeId('db-mongo-cluster');
     }
   },
   {
-    id: 's3-sidebar-highlight',
+    id: 'mongo-sidebar-highlight',
     title: 'Resource Inspector',
     description: 'Selecting a node opens the Resource Inspector sidebar, revealing its specific properties, metadata, and static metrics.',
     icon: PulseIcon,
@@ -101,75 +101,7 @@ const TOUR_STEPS: TourStep[] = [
     delay: 300,
     action: (store) => {
       store.setActiveLens('structural');
-      store.setSelectedNodeId('s3-asset-bucket');
-    }
-  },
-  {
-    id: 'live-stream',
-    title: 'Live Telemetry Stream',
-    description: 'See this Live Stream toggle? It connects directly to your infrastructure to pull real-time metrics. We deselected the node so you can see it clearly.',
-    icon: PulseIcon,
-    targetId: 'live-stream-toggle',
-    placement: 'left',
-    spotlightPadding: 12,
-    spotlightRadius: 24,
-    delay: 300,
-    action: (store) => {
-      store.setActiveLens('structural');
-      store.setSelectedNodeId(null); // Deselect to reveal toggle
-      const state = useCanvasStore.getState();
-      if (state.isLiveStreamActive) store.toggleLiveStream();
-    }
-  },
-  {
-    id: 'live-stream-clicked',
-    title: 'Activating Live Telemetry',
-    description: 'We just flipped the switch. Gravity Lens is now streaming CPU utilization, queue depths, and memory usage live.',
-    icon: PlayIcon,
-    targetId: 'live-stream-toggle',
-    placement: 'left',
-    spotlightPadding: 12,
-    spotlightRadius: 24,
-    delay: 300,
-    action: (store) => {
-      store.setActiveLens('structural');
-      store.setSelectedNodeId(null); // Keep deselected while clicking
-      const state = useCanvasStore.getState();
-      if (!state.isLiveStreamActive) store.toggleLiveStream();
-    }
-  },
-  {
-    id: 'live-stream-s3',
-    title: 'Live Telemetry in Action',
-    description: 'Watch the inspector charts! They are now updating in real-time with fresh streaming data from the selected S3 bucket.',
-    icon: PulseIcon,
-    targetId: 'inspector-panel',
-    placement: 'left',
-    spotlightPadding: 4,
-    spotlightRadius: 16,
-    delay: 300,
-    action: (store) => {
-      store.setActiveLens('structural');
-      store.setSelectedNodeId('s3-asset-bucket');
-      const state = useCanvasStore.getState();
-      if (!state.isLiveStreamActive) store.toggleLiveStream();
-    }
-  },
-  {
-    id: 'live-stream-off',
-    title: 'Telemetry Deactivated',
-    description: 'We turned the telemetry off to keep the canvas quiet while we explore the other lenses.',
-    icon: PulseIcon,
-    targetId: 'live-stream-toggle',
-    placement: 'left',
-    spotlightPadding: 12,
-    spotlightRadius: 24,
-    delay: 300,
-    action: (store) => {
-      store.setActiveLens('structural');
-      store.setSelectedNodeId('s3-asset-bucket');
-      const state = useCanvasStore.getState();
-      if (state.isLiveStreamActive) store.toggleLiveStream();
+      store.setSelectedNodeId('db-mongo-cluster');
     }
   },
   {
@@ -353,7 +285,7 @@ function SpotlightOverlay({
 
   const vw = typeof window !== 'undefined' ? window.innerWidth : 1920;
   const vh = typeof window !== 'undefined' ? window.innerHeight : 1080;
-  
+
   const targetRect = isFullscreen || !rect ? { x: vw / 2, y: vh / 2, width: 0, height: 0 } : rect;
   const initial = prevRect || targetRect;
 
@@ -364,7 +296,7 @@ function SpotlightOverlay({
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.25 }}
-      className="fixed inset-0 z-[200] pointer-events-none backdrop-blur-[2px]"
+      className="fixed inset-0 z-[200] pointer-events-none"
     >
       <svg width="100%" height="100%" className="absolute inset-0" style={{ pointerEvents: 'auto' }}>
         <defs>
@@ -373,7 +305,7 @@ function SpotlightOverlay({
             <motion.rect
               initial={{ x: initial.x, y: initial.y, width: initial.width, height: initial.height }}
               animate={{ x: targetRect.x, y: targetRect.y, width: targetRect.width, height: targetRect.height }}
-              transition={springSmooth as any}
+              transition={springSmooth as Transition}
               rx={borderRadius}
               ry={borderRadius}
               fill="black"
@@ -386,7 +318,7 @@ function SpotlightOverlay({
         <motion.div
           initial={{ left: initial.x - 5, top: initial.y - 5, width: initial.width + 10, height: initial.height + 10 }}
           animate={{ left: targetRect.x - 5, top: targetRect.y - 5, width: targetRect.width + 10, height: targetRect.height + 10 }}
-          transition={springSmooth as any}
+          transition={springSmooth as Transition}
           className="absolute pointer-events-none"
           style={{ borderRadius: borderRadius + 4 }}
         >
@@ -394,7 +326,7 @@ function SpotlightOverlay({
             className="absolute inset-0 border-2 border-[var(--gl-brand-accent,#7C6FF7)]"
             style={{ borderRadius: borderRadius + 4 }}
             animate={{ boxShadow: ['0 0 0 0px rgba(124, 111, 247, 0.2)', '0 0 0 12px rgba(124, 111, 247, 0)'] }}
-            transition={{ duration: 2.5, repeat: Infinity, ease: 'easeOut' as any }}
+            transition={{ duration: 2.5, repeat: Infinity, ease: 'easeOut' }}
           />
         </motion.div>
       )}
@@ -536,7 +468,7 @@ export default function ProductTour() {
     if (!step) return;
 
     // Phase 1: Hide tooltip, clear old timers
-    setShowTooltip(false);
+    queueMicrotask(() => setShowTooltip(false));
     clearComplianceTimers();
     if (stepTimerRef.current) clearTimeout(stepTimerRef.current);
 
@@ -585,22 +517,6 @@ export default function ProductTour() {
     return () => window.removeEventListener('resize', handleResize);
   }, [isOpen, updateSpotlight]);
 
-  // ──── Navigation ────
-  const handleNext = useCallback(() => {
-    if (currentStep < TOUR_STEPS.length - 1) {
-      setCurrentStep(prev => prev + 1);
-    } else {
-      endTour();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentStep]);
-
-  const handlePrev = useCallback(() => {
-    if (currentStep > 0) {
-      setCurrentStep(prev => prev - 1);
-    }
-  }, [currentStep]);
-
   const endTour = useCallback(() => {
     clearComplianceTimers();
     setIsOpen(false);
@@ -612,6 +528,22 @@ export default function ProductTour() {
     setComplianceFramework('general');
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [clearComplianceTimers, setTourActive, setActiveLens, setSelectedNodeId, setComplianceFramework]);
+
+  // ──── Navigation ────
+  const handleNext = useCallback(() => {
+    if (currentStep < TOUR_STEPS.length - 1) {
+      setCurrentStep(prev => prev + 1);
+    } else {
+      endTour();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentStep, endTour]);
+
+  const handlePrev = useCallback(() => {
+    if (currentStep > 0) {
+      setCurrentStep(prev => prev - 1);
+    }
+  }, [currentStep]);
 
   // ──── Keyboard navigation ────
   useEffect(() => {
@@ -687,9 +619,9 @@ export default function ProductTour() {
             {showTooltip && (
               <motion.div
                 key={`tooltip-${step.id}`}
-                variants={scaleIn as any}
-                initial="hidden"
-                animate="visible"
+                variants={scaleIn as Variants}
+                initial="initial"
+                animate="animate"
                 exit={{ opacity: 0, transition: { duration: 0.1 } }}
                 style={{
                   position: 'fixed',
@@ -732,20 +664,19 @@ export default function ProductTour() {
                         {TOUR_STEPS.map((_, i) => (
                           <motion.div
                             key={i}
-                            className={`rounded-full ${
-                              i === currentStep
+                            className={`rounded-full ${i === currentStep
                                 ? 'bg-[var(--gl-brand-accent,#7C6FF7)]'
                                 : i < currentStep
                                   ? 'bg-[var(--gl-brand-accent,#7C6FF7)] opacity-50'
                                   : 'bg-slate-200 dark:bg-slate-700'
-                            }`}
+                              }`}
                             initial={false}
-                            animate={{ 
+                            animate={{
                               scale: i === currentStep ? 1.4 : 1,
                               width: 6,
                               height: 6
                             }}
-                            transition={springSnappy as any}
+                            transition={springSnappy as Transition}
                           />
                         ))}
                       </div>
