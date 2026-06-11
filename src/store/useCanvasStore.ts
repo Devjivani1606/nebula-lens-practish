@@ -48,6 +48,10 @@ type CanvasState = {
   // Tour State
   isTourActive: boolean;
   setTourActive: (active: boolean) => void;
+
+  // Inspector State
+  isInspectorPinned: boolean;
+  setInspectorPinned: (pinned: boolean) => void;
 };
 
 // Wrap the store creator in `temporal`
@@ -86,6 +90,9 @@ export const useCanvasStore = create<CanvasState>()(
 
       isTourActive: false,
       setTourActive: (active) => set({ isTourActive: active }),
+
+      isInspectorPinned: false,
+      setInspectorPinned: (pinned) => set({ isInspectorPinned: pinned }),
 
       tickTelemetry: () => set((state) => {
         const newNodes = state.nodes.map(node => {

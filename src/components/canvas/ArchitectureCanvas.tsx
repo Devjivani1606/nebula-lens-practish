@@ -2,7 +2,7 @@
 
 import React, { useEffect, useCallback, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ReactFlow, Background, Controls, Panel, MiniMap } from '@xyflow/react';
+import { ReactFlow, Background, Controls, Panel, MiniMap, useReactFlow } from '@xyflow/react';
 import { useStore } from 'zustand';
 import { useCanvasStore } from '../../store/useCanvasStore';
 
@@ -64,8 +64,32 @@ export default function ArchitectureCanvas() {
     activeLens,
     setActiveLens,
     fetchInfrastructure,
-    isLoading
+    isLoading,
+    isInspectorPinned,
+    isTourActive
   } = useCanvasStore();
+
+  const { fitView, setCenter, getNode } = useReactFlow();
+
+  // Smoothly re-center canvas when the inspector panel resizes
+  useEffect(() => {
+    // Wait for the DOM transition (280ms) to finish so React Flow calculates the center based on the final width constraints
+    const timer = setTimeout(() => {
+      if (selectedNodeId) {
+        // If a node is selected, smoothly center it in the newly resized viewport
+        const node = getNode(selectedNodeId);
+        if (node) {
+          const x = node.position.x + (node.measured?.width || 200) / 2;
+          const y = node.position.y + (node.measured?.height || 100) / 2;
+          setCenter(x, y, { duration: 600, zoom: 1 });
+        }
+      } else if (nodes.length > 0) {
+        // If no node is selected but the layout changed (e.g., inspector pinned), fit the whole graph
+        fitView({ padding: 0.2, duration: 600 });
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [selectedNodeId, isInspectorPinned, isTourActive, fitView, setCenter, getNode, nodes.length]);
 
 
 
@@ -180,24 +204,17 @@ export default function ArchitectureCanvas() {
         return;
       }
 
-      const modifier = event.ctrlKey || event.metaKey;
-
-      if (modifier && event.key.toLowerCase() === 'z' && !event.shiftKey) {
-        event.preventDefault();
-        executeUndo();
-      }
-
-      if (
-        (modifier && event.key.toLowerCase() === 'y') ||
-        (modifier && event.key.toLowerCase() === 'z' && event.shiftKey)
-      ) {
-        event.preventDefault();
-        executeRedo();
+      if ((event.metaKey || event.ctrlKey) && event.key === 'z') {
+        if (event.shiftKey) {
+          executeRedo();
+        } else {
+          executeUndo();
+        }
       }
     };
 
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, [executeUndo, executeRedo]);
 
   // Cleanup animation on unmount
@@ -232,7 +249,7 @@ export default function ArchitectureCanvas() {
 
 
   return (
-    <div className="flex flex-col w-full h-screen bg-[var(--gl-bg-base)] transition-colors duration-300 overflow-hidden">
+    <div className="flex flex-col w-full h-full bg-[var(--gl-bg-base)] transition-colors duration-300 overflow-hidden">
 
       {/* 3. Wrap React Flow in a flex-1 container so it fills the remaining height */}
       <div className="flex-1 relative w-full h-full">
@@ -245,7 +262,8 @@ export default function ArchitectureCanvas() {
           initial="initial"
           animate="animate"
           data-tour-id="canvas-viewport" 
-          className={`flex-1 h-full relative transition-[padding] duration-[280ms] ease-in-out ${selectedNodeId ? 'pr-[360px]' : 'pr-12'}`}
+          className="absolute top-0 left-0 bottom-0 transition-all duration-[280ms] ease-in-out"
+          style={{ right: selectedNodeId || isInspectorPinned || isTourActive ? '360px' : '48px' }}
         >
           <ReactFlow
             nodes={nodes}

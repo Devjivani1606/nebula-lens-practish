@@ -93,7 +93,8 @@ export default function ContextualInspector() {
   const toggleLiveStream = useCanvasStore((state) => state.toggleLiveStream);
 
   const [activeTab, setActiveTab] = useState(TABS[0]);
-  const [isPinned, setIsPinned] = useState(false);
+  const isPinned = useCanvasStore((state) => state.isInspectorPinned);
+  const setIsPinned = useCanvasStore((state) => state.setInspectorPinned);
   const [isHovered, setIsHovered] = useState(false);
   const hoverTimer = useRef<NodeJS.Timeout | null>(null);
 
@@ -122,7 +123,7 @@ export default function ContextualInspector() {
   };
 
   const handleClick = () => {
-    if (!isExpanded) setIsPinned(true);
+    if (!isPinned) setIsPinned(true);
   };
 
   const { affectedNodes } = useBlastRadius(selectedNodeId);
