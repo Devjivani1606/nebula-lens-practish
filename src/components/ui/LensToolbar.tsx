@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { GraphIcon, PlanetIcon, CurrencyDollarIcon, DownloadSimpleIcon, ShieldCheckIcon } from '@phosphor-icons/react';
 import { Panel } from '@xyflow/react';
 import { toPng } from 'html-to-image'; // Added html-to-image engine
+import { useTheme } from 'next-themes';
 
 const lenses = [
   { id: 'structural', label: 'Structural', icon: GraphIcon },
@@ -24,13 +25,15 @@ export default function LensToolbar() {
     setSelectedNodeId(null);
   };
 
+  const { resolvedTheme } = useTheme();
+
   // GPU-Accelerated Image Snapshot Downloader
   const downloadImage = () => {
     const viewportElement = document.querySelector('.react-flow__viewport') as HTMLElement;
 
     if (viewportElement) {
       toPng(viewportElement, {
-        backgroundColor: '#f8fafc', // Matches base grid slate background
+        backgroundColor: resolvedTheme === 'dark' ? '#020617' : '#f8fafc', // slate-950 for dark, slate-50 for light
         quality: 1,                 // Production crisp clarity level
         pixelRatio: 2               // High-density Retina display ratio scaling
       }).then((dataUrl) => {

@@ -274,10 +274,10 @@ export default function AnimatedEdge({
                 zIndex: 100,
                 opacity: currentOpacity,
               }}
-            className={`nodrag nopan backdrop-blur-xl px-3 py-1 rounded-full border-2 text-[10px] font-black shadow-sm uppercase tracking-widest transition-all duration-300 ${
+            className={`nodrag nopan px-3 py-1 rounded-full border-2 text-[10px] font-medium shadow-sm uppercase tracking-widest transition-all duration-300 ${
               isCostLens
-                ? 'bg-white/95 dark:bg-slate-950/95' // 🚀 FIX: Changed to bg-white for light mode
-                : 'bg-white/95 dark:bg-slate-900/90'
+                ? 'bg-white dark:bg-slate-950' 
+                : 'bg-white dark:bg-slate-900'
             }`}
           >
             {/*  Dynamic Label text based on active lens */}
