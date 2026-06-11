@@ -85,7 +85,7 @@ export const staggerContainer: MotionVariant = {
   initial: {},
   animate: {
     transition: {
-      staggerChildren: 0.06,
+      staggerChildren: 0.04,
     },
   },
 };

@@ -31,7 +31,7 @@ export default function AnimatedEdge({
   const activeLens = useCanvasStore((state) => state.activeLens);
   const selectedNodeId = useCanvasStore((state) => state.selectedNodeId);
 
-  const { affectedNodeIds } = useBlastRadius(selectedNodeId);
+  const { affectedNodeIds, affectedEdgesMap } = useBlastRadius(selectedNodeId);
 
   // NEW: Get the absolute latest live metrics from the source node
   const globalNodes = useCanvasStore((state) => state.nodes);
@@ -240,6 +240,7 @@ export default function AnimatedEdge({
           strokeWidth: edgeWidth, // 🚀 Dynamic Thickness
           strokeDasharray,
           opacity: currentOpacity,
+          animationDelay: isInsideBlastRadius && affectedEdgesMap.has(id) ? `${affectedEdgesMap.get(id)! * 80}ms` : '0ms',
           filter: isCostLens || glowColor !== 'transparent' ? `drop-shadow(0 0 8px ${glowColor})` : 'none', // 🚀 Neon Glow
         }}
       />

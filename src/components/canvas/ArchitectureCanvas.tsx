@@ -237,7 +237,16 @@ export default function ArchitectureCanvas() {
       {/* 3. Wrap React Flow in a flex-1 container so it fills the remaining height */}
       <div className="flex-1 relative w-full h-full">
 
-        <div data-tour-id="canvas-viewport" className={`flex-1 h-full relative transition-all duration-300 ${selectedNodeId ? 'pr-[320px]' : 'pr-12'}`}>
+        <motion.div 
+          variants={{
+            initial: { opacity: 0 },
+            animate: { opacity: 1, transition: { duration: 0.4, staggerChildren: 0.04 } }
+          }}
+          initial="initial"
+          animate="animate"
+          data-tour-id="canvas-viewport" 
+          className={`flex-1 h-full relative transition-all duration-300 ${selectedNodeId ? 'pr-[320px]' : 'pr-12'}`}
+        >
           <ReactFlow
             nodes={nodes}
             edges={edges}
@@ -247,6 +256,8 @@ export default function ArchitectureCanvas() {
             onEdgesChange={onEdgesChange}
             onConnect={onConnect}
             fitView
+            minZoom={0.3}
+            maxZoom={2.0}
             defaultEdgeOptions={{ type: 'animatedEdge' }}
             onNodeClick={(event, node) => setSelectedNodeId(node.id)}
             onPaneClick={() => setSelectedNodeId(null)}
@@ -358,7 +369,7 @@ export default function ArchitectureCanvas() {
             />
 
           </ReactFlow>
-        </div>
+        </motion.div>
         <ContextualInspector />
       </div>
     </div>
