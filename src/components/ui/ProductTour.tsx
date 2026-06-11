@@ -251,7 +251,7 @@ const TOUR_STEPS: TourStep[] = [
   },
   {
     id: 'complete',
-    title: 'You\'re All Set! 🚀',
+    title: 'You\'re All Set!!!',
     description: 'You now know every feature of Gravity Lens. Start exploring your architecture — and click the replay button (↺) in the top nav anytime to revisit this tour.',
     icon: PlayIcon,
     targetId: null,
