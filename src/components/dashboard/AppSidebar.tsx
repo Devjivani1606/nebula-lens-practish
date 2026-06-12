@@ -36,7 +36,6 @@ const navigationItems: NavMainItem[] = [
       { title: "Security Posture", id: "alerts" },
     ],
   },
-  { title: "Live Logs", id: "logs", icon: Scroll },
   { title: "Timeline Scrubber", id: "timeline", icon: Clock },
   { title: "Settings", id: "settings", icon: Gear },
 ];

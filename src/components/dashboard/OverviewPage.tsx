@@ -487,7 +487,6 @@ export default function OverviewPage() {
           <div className="space-y-2">
             {[
               { label: "View Infrastructure Canvas", icon: Eye, section: "canvas", color: "#6366F1" },
-              { label: "Open Live Logs", icon: Scroll, section: "logs", color: "#10B981" },
               { label: "Explore Timeline", icon: ClockCounterClockwise, section: "timeline", color: "#A855F7" },
               { label: "Review Alerts", icon: Warning, section: "alerts", color: "#EF4444" },
             ].map(({ label, icon: Icon, section, color }) => (
