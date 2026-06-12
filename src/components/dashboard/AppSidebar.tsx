@@ -89,13 +89,11 @@ function AppSidebarInner(props: React.ComponentProps<typeof Sidebar>) {
     >
       <SidebarHeader className="border-b border-[var(--gl-border)] px-4 py-3 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:py-3 flex items-center justify-between group-data-[collapsible=icon]:justify-center">
         <div className="flex items-center gap-2 select-none group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:gap-0 w-full">
-          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/20 shrink-0">
-            <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
-              <circle cx="12" cy="12" r="4" />
-              <path d="M12 2v4M12 18v4M2 12h4M18 12h4" />
-              <path d="M5.64 5.64l2.83 2.83M15.54 15.54l2.83 2.83M5.64 18.36l2.83-2.83M15.54 8.46l2.83-2.83" />
-            </svg>
-          </div>
+          <img
+            src="/logo/singleLogo.svg"
+            alt="GravityLens Logo"
+            className="w-7 h-7 shrink-0 object-contain"
+          />
           <span className="text-sm font-bold text-[var(--gl-text-primary)] tracking-tight group-data-[collapsible=icon]:hidden">
             Gravity<span className="aurora-text">Lens</span>
           </span>
