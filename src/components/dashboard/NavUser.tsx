@@ -58,7 +58,7 @@ export function NavUser({
                   <span className="truncate font-semibold text-[var(--gl-text-primary)]">{user.name}</span>
                   <span className="truncate text-xs text-[var(--gl-text-muted)]">{user.email}</span>
                 </div>
-                <CaretUpDown size={16} className="ml-auto text-[var(--gl-text-muted)]" />
+                <CaretUpDown size={18} className="ml-auto text-[var(--gl-text-muted)]" />
               </SidebarMenuButton>
             }
           />
@@ -84,28 +84,28 @@ export function NavUser({
             <DropdownMenuSeparator className="bg-[var(--gl-border)]" />
             <DropdownMenuGroup>
               <DropdownMenuItem className="hover:bg-[var(--gl-bg-muted)] focus:bg-[var(--gl-bg-muted)] focus:text-[var(--gl-text-primary)] transition-colors">
-                <Sparkle size={16} className="mr-2 text-amber-500" />
+                <Sparkle size={18} className="mr-2 text-amber-500" />
                 Upgrade to Pro
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator className="bg-[var(--gl-border)]" />
             <DropdownMenuGroup>
               <DropdownMenuItem className="hover:bg-[var(--gl-bg-muted)] focus:bg-[var(--gl-bg-muted)] focus:text-[var(--gl-text-primary)] transition-colors">
-                <SealCheck size={16} className="mr-2" />
+                <SealCheck size={18} className="mr-2" />
                 Account
               </DropdownMenuItem>
               <DropdownMenuItem className="hover:bg-[var(--gl-bg-muted)] focus:bg-[var(--gl-bg-muted)] focus:text-[var(--gl-text-primary)] transition-colors">
-                <CreditCard size={16} className="mr-2" />
+                <CreditCard size={18} className="mr-2" />
                 Billing
               </DropdownMenuItem>
               <DropdownMenuItem className="hover:bg-[var(--gl-bg-muted)] focus:bg-[var(--gl-bg-muted)] focus:text-[var(--gl-text-primary)] transition-colors">
-                <Bell size={16} className="mr-2" />
+                <Bell size={18} className="mr-2" />
                 Notifications
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator className="bg-[var(--gl-border)]" />
             <DropdownMenuItem className="text-red-500 hover:bg-red-500/10 focus:bg-red-500/10 focus:text-red-500 transition-colors cursor-pointer">
-              <SignOut size={16} className="mr-2" />
+              <SignOut size={18} className="mr-2" />
               Log out
             </DropdownMenuItem>
           </DropdownMenuContent>

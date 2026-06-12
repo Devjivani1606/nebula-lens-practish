@@ -14,6 +14,7 @@ import { useRouter } from "next/navigation";
 import { staggerContainer, staggerItem } from "../../lib/motion";
 import { useRelativeTime } from "../../hooks/useRelativeTime";
 import { Sparkline } from "./Sparkline";
+import { getContextualGreeting } from "../../lib/greetings";
 
 /* ──────────────── Compact Stat Card (Row 2) ──────────────── */
 interface StatCardProps {
@@ -40,7 +41,7 @@ function CompactStatCard({
       className="bg-[var(--card)] p-4 rounded-xl border-none shadow-none flex flex-col justify-center gap-2 transition-colors hover:bg-[var(--accent)] cursor-pointer"
     >
       <div className="flex items-center gap-2">
-        <Icon size={14} style={{ color: iconColor }} />
+        <Icon size={18} style={{ color: iconColor }} />
         <span className="text-[11px] font-medium text-[var(--gl-text-muted)] leading-tight">{title}</span>
       </div>
       <div className="flex items-end justify-between">
@@ -66,18 +67,17 @@ function CompactStatCard({
             )}
           </div>
           {sub && (
-             <p className="text-[10px] font-medium text-[var(--gl-text-muted)] mt-1">{sub}</p>
+            <p className="text-[10px] font-medium text-[var(--gl-text-muted)] mt-1">{sub}</p>
           )}
         </div>
         {trend && trendValue && (
-          <div className={`flex items-center gap-0.5 text-[10px] font-medium px-1.5 py-0.5 rounded-full ${
-            trend === "up"      ? "text-red-400 bg-red-500/10"
-            : trend === "down"  ? "text-emerald-400 bg-emerald-500/10"
-            : "text-[var(--gl-text-muted)] bg-[var(--gl-bg-muted)]"
-          }`}>
-            {trend === "up"     ? <ArrowUpRight size={10} /> :
-             trend === "down"   ? <ArrowDownRight size={10} /> :
-             <Minus size={10} />}
+          <div className={`flex items-center gap-0.5 text-[10px] font-medium px-1.5 py-0.5 rounded-full ${trend === "up" ? "text-red-400 bg-red-500/10"
+              : trend === "down" ? "text-emerald-400 bg-emerald-500/10"
+                : "text-[var(--gl-text-muted)] bg-[var(--gl-bg-muted)]"
+            }`}>
+            {trend === "up" ? <ArrowUpRight size={10} /> :
+              trend === "down" ? <ArrowDownRight size={10} /> :
+                <Minus size={10} />}
             {trendValue}
           </div>
         )}
@@ -118,17 +118,17 @@ function HealthRing({ score, size = 140 }: { score: number, size?: number }) {
 
 /* ──────────────── Activity Feed ──────────────── */
 const RECENT_ACTIVITY = [
-  { time: "2m ago",  icon: ArrowsClockwise, color: "#6366F1", msg: "Auto-scan completed — 12 resources mapped" },
-  { time: "14m ago", icon: Warning,         color: "#F59E0B", msg: "Lambda error rate above 2% threshold" },
-  { time: "1h ago",  icon: GitBranch,       color: "#10B981", msg: "Snapshot v1.3.1 saved — 1 new resource" },
-  { time: "2h ago",  icon: Warning,         color: "#EF4444", msg: "CloudFront 503 errors detected (5.8%)" },
-  { time: "3h ago",  icon: CurrencyDollar,  color: "#A855F7", msg: "Cost anomaly: Lambda 18% above baseline" },
+  { time: "2m ago", icon: ArrowsClockwise, color: "#6366F1", msg: "Auto-scan completed — 12 resources mapped" },
+  { time: "14m ago", icon: Warning, color: "#F59E0B", msg: "Lambda error rate above 2% threshold" },
+  { time: "1h ago", icon: GitBranch, color: "#10B981", msg: "Snapshot v1.3.1 saved — 1 new resource" },
+  { time: "2h ago", icon: Warning, color: "#EF4444", msg: "CloudFront 503 errors detected (5.8%)" },
+  { time: "3h ago", icon: CurrencyDollar, color: "#A855F7", msg: "Cost anomaly: Lambda 18% above baseline" },
 ];
 
 /* ──────────────── Region Map (text-based) ──────────────── */
 const REGIONS = [
-  { name: "ap-south-a1",    label: "Mumbai",   count: 10, color: "#6366F1" },
-  { name: "global",       label: "Global",         count: 2,  color: "#14B8A6" },
+  { name: "ap-south-a1", label: "Mumbai", count: 10, color: "#6366F1" },
+  { name: "global", label: "Global", count: 2, color: "#14B8A6" },
 ];
 
 /* ──────────────── Animation Variants ──────────────── */
@@ -147,8 +147,6 @@ const activityItem = {
 
 const quickActionVariants = {
   hover: {
-    backgroundColor: "var(--accent)",
-    transition: { duration: 0.1 }
   }
 };
 
@@ -165,16 +163,21 @@ export default function OverviewPage() {
   const [scanTime] = useState(() => new Date(Date.now() - 120000));
   const lastScanText = useRelativeTime(scanTime);
 
-  const totalServices   = MOCK_SERVICES.length;
-  const monthlyCost     = MOCK_SERVICES.reduce((acc, s) => acc + s.cost, 0);
-  const openAlerts      = MOCK_ALERTS.filter((a) => a.status === "open").length;
-  const criticalAlerts  = MOCK_ALERTS.filter((a) => a.severity === "critical" && a.status === "open").length;
-  const highAlerts      = MOCK_ALERTS.filter((a) => a.severity === "high" && a.status === "open").length;
+  const totalServices = MOCK_SERVICES.length;
+  const monthlyCost = MOCK_SERVICES.reduce((acc, s) => acc + s.cost, 0);
+  const openAlerts = MOCK_ALERTS.filter((a) => a.status === "open").length;
+  const criticalAlerts = MOCK_ALERTS.filter((a) => a.severity === "critical" && a.status === "open").length;
+  const highAlerts = MOCK_ALERTS.filter((a) => a.severity === "high" && a.status === "open").length;
 
-  const healthyCount    = MOCK_SERVICES.filter((s) => s.status === "healthy").length;
-  const healthScore     = Math.round((healthyCount / totalServices) * 100);
-  const currentSnap     = MOCK_SNAPSHOTS[MOCK_SNAPSHOTS.length - 1];
-  const recentChanges   = MOCK_SNAPSHOTS.slice(-3).reduce((acc, s) => acc + s.changes.length, 0);
+  const healthyCount = MOCK_SERVICES.filter((s) => s.status === "healthy").length;
+  const healthScore = Math.round((healthyCount / totalServices) * 100);
+  const currentSnap = MOCK_SNAPSHOTS[MOCK_SNAPSHOTS.length - 1];
+  const recentChanges = MOCK_SNAPSHOTS.slice(-3).reduce((acc, s) => acc + s.changes.length, 0);
+
+  const { message: greetingMsg, colorClass: greetingColor } = getContextualGreeting({
+    criticalAlerts,
+    healthScore,
+  });
 
   return (
     <div className="p-6 max-w-[1200px] mx-auto space-y-6">
@@ -190,7 +193,17 @@ export default function OverviewPage() {
           <h1 className="text-xl font-medium text-[var(--gl-text-primary)] tracking-tight">
             Infrastructure <span className="aurora-text">Overview</span>
           </h1>
-          <div className="text-xs font-medium text-[var(--gl-text-muted)] mt-0.5 flex items-center gap-1">
+
+          <motion.div
+            initial={{ opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.2 }}
+            className={`text-sm font-medium mt-1 ${greetingColor}`}
+          >
+            {greetingMsg}
+          </motion.div>
+
+          <div className="text-[11px] font-medium text-[var(--gl-text-muted)] mt-1 flex items-center gap-1">
             <span>{currentSnap.version} · Last scanned </span>
             <AnimatePresence mode="wait">
               <motion.span
@@ -229,9 +242,9 @@ export default function OverviewPage() {
           <div className="relative shrink-0">
             <HealthRing score={healthScore} size={140} />
             <div className="absolute inset-0 flex items-center justify-center">
-               <span className="text-[40px] font-medium font-sans tracking-tight" style={{ color: healthScore >= 80 ? "#10B981" : healthScore >= 60 ? "#F59E0B" : "#EF4444" }}>
-                 {healthScore}%
-               </span>
+              <span className="text-[40px] font-medium font-sans tracking-tight" style={{ color: healthScore >= 80 ? "#10B981" : healthScore >= 60 ? "#F59E0B" : "#EF4444" }}>
+                {healthScore}%
+              </span>
             </div>
           </div>
           <div className="flex-1 text-center md:text-left">
@@ -257,36 +270,38 @@ export default function OverviewPage() {
           className="gl-card border border-[var(--border)] shadow-sm p-6 flex flex-col justify-center md:col-span-2"
         >
           <div className="flex items-center gap-3 mb-4">
-             <div className="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center border border-red-500/20">
-               <Warning size={20} className="text-red-400" />
-             </div>
-             <h2 className="text-sm font-medium text-[var(--gl-text-muted)] uppercase tracking-wider">Open Alerts</h2>
-          </div>
-          <div className="mt-2">
-            <div className="flex items-center gap-4 mb-2">
-              <div className="text-[40px] font-medium leading-none text-[var(--gl-text-primary)]">
-                {openAlerts}
-              </div>
-              <Sparkline data={[15, 13, 14, 11, 9, 6, 2]} color="#10B981" width={64} height={20} />
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center border ${openAlerts > 0 ? "bg-red-500/10 border-red-500/20" : "bg-emerald-500/10 border-emerald-500/20"}`}>
+              {openAlerts > 0 ? <Warning size={18} className="text-red-400" /> : <CheckCircle size={18} className="text-emerald-400" />}
             </div>
-            {(() => {
-              if (criticalAlerts > 0) {
-                return (
+            <h2 className="text-sm font-medium text-[var(--gl-text-muted)] uppercase tracking-wider">Open Alerts</h2>
+          </div>
+          <div className="mt-2 min-h-[64px] flex flex-col justify-center">
+            {openAlerts > 0 ? (
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }}>
+                <div className="flex items-center gap-4 mb-2">
+                  <div className="text-[40px] font-medium leading-none text-[var(--gl-text-primary)]">
+                    {openAlerts}
+                  </div>
+                  <Sparkline data={[15, 13, 14, 11, 9, 6, 2]} color="#10B981" width={64} height={20} />
+                </div>
+                {criticalAlerts > 0 ? (
                   <p className="text-[13px]">
                     <span className="text-red-400 font-medium">{criticalAlerts} critical</span>
                     <span className="text-[var(--gl-text-muted)]">, {highAlerts} high</span>
                   </p>
-                );
-              } else if (openAlerts > 0) {
-                return <p className="text-[13px] text-[var(--gl-text-muted)]">{highAlerts} high alerts</p>;
-              } else {
-                 return (
-                   <p className="text-[13px] text-emerald-400 font-medium flex items-center gap-1.5">
-                     <CheckCircle size={16} /> All clear
-                   </p>
-                 );
-              }
-            })()}
+                ) : (
+                  <p className="text-[13px] text-[var(--gl-text-muted)]">{highAlerts} high alerts</p>
+                )}
+              </motion.div>
+            ) : (
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }} className="flex flex-col gap-2">
+                <div className="flex items-center gap-2 text-emerald-400">
+                  <CheckCircle size={32} />
+                  <span className="text-2xl font-medium tracking-tight">All clear</span>
+                </div>
+                <p className="text-[13px] text-[var(--gl-text-muted)]">No active issues</p>
+              </motion.div>
+            )}
           </div>
         </motion.div>
       </div>
@@ -338,25 +353,37 @@ export default function OverviewPage() {
           animate="animate"
           className="space-y-0"
         >
-          {RECENT_ACTIVITY.map((item, i) => {
-            const Icon = item.icon;
-            return (
-              <motion.div
-                key={i}
-                variants={activityItem}
-                className="flex items-start gap-2.5 py-2 border-b border-[var(--gl-border)] last:border-0"
-              >
-                <div className="w-5 h-5 rounded flex items-center justify-center shrink-0 mt-0.5"
-                  style={{ background: `${item.color}18` }}>
-                  <Icon size={12} style={{ color: item.color }} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-[11px] text-[var(--gl-text-secondary)] leading-snug">{item.msg}</p>
-                </div>
-                <span className="text-[9px] text-[var(--gl-text-muted)] font-sans font-medium whitespace-nowrap">{item.time}</span>
-              </motion.div>
-            );
-          })}
+          {RECENT_ACTIVITY.length > 0 ? (
+            RECENT_ACTIVITY.map((item, i) => {
+              const Icon = item.icon;
+              return (
+                <motion.div
+                  key={i}
+                  variants={activityItem}
+                  className="flex items-start gap-2.5 py-2 border-b border-[var(--gl-border)] last:border-0"
+                >
+                  <div className="w-5 h-5 rounded flex items-center justify-center shrink-0 mt-0.5"
+                    style={{ background: `${item.color}18` }}>
+                    <Icon size={14} style={{ color: item.color }} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[11px] text-[var(--gl-text-secondary)] leading-snug">{item.msg}</p>
+                  </div>
+                  <span className="text-[9px] text-[var(--gl-text-muted)] font-sans font-medium whitespace-nowrap">{item.time}</span>
+                </motion.div>
+              );
+            })
+          ) : (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.2 }}
+              className="flex flex-col items-center justify-center py-8 text-[var(--gl-text-muted)] gap-2"
+            >
+              <ClockCounterClockwise size={24} weight="light" opacity={0.5} />
+              <p className="text-xs font-medium">No recent activity</p>
+            </motion.div>
+          )}
         </motion.div>
       </motion.div>
 
@@ -375,17 +402,17 @@ export default function OverviewPage() {
           </p>
           <div className="space-y-2">
             {[
-              { label: "View Infrastructure Canvas", icon: Eye,                      section: "canvas",   color: "#6366F1" },
-              { label: "Open Live Logs",              icon: Scroll,                  section: "logs",     color: "#10B981" },
-              { label: "Explore Timeline",            icon: ClockCounterClockwise,   section: "timeline", color: "#A855F7" },
-              { label: "Review Alerts",               icon: Warning,                 section: "alerts",   color: "#EF4444" },
+              { label: "View Infrastructure Canvas", icon: Eye, section: "canvas", color: "#6366F1" },
+              { label: "Open Live Logs", icon: Scroll, section: "logs", color: "#10B981" },
+              { label: "Explore Timeline", icon: ClockCounterClockwise, section: "timeline", color: "#A855F7" },
+              { label: "Review Alerts", icon: Warning, section: "alerts", color: "#EF4444" },
             ].map(({ label, icon: Icon, section, color }) => (
               <motion.button
                 key={section}
                 whileHover="hover"
                 variants={quickActionVariants}
                 onClick={() => router.push(`/dashboard/${section}`)}
-                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-[var(--gl-text-secondary)] hover:text-[var(--gl-text-primary)] transition-all group"
+                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-[var(--gl-text-secondary)] hover:text-[var(--gl-text-primary)] hover:bg-[var(--accent)] transition-all group"
               >
                 <motion.div variants={iconVariants}>
                   <Icon size={14} className="shrink-0" style={{ color }} />
@@ -408,36 +435,50 @@ export default function OverviewPage() {
             Resources by Region
           </p>
           <div className="space-y-2">
-            {REGIONS.map((r, i) => (
-              <div key={r.name} className="flex items-center gap-3">
-                <div className="flex items-center gap-2 w-32 shrink-0">
-                  <Globe size={12} style={{ color: r.color }} />
-                  <span className="text-[10px] font-sans font-medium text-[var(--gl-text-secondary)]">{r.label}</span>
+            {REGIONS.length === 1 ? (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.2 }}
+                className="flex items-center gap-2 py-1"
+              >
+                <Globe size={18} style={{ color: REGIONS[0].color }} />
+                <span className="text-sm font-medium text-[var(--gl-text-primary)]">
+                  {REGIONS[0].count} resources mapped in {REGIONS[0].label}
+                </span>
+              </motion.div>
+            ) : (
+              REGIONS.map((r, i) => (
+                <div key={r.name} className="flex items-center gap-3">
+                  <div className="flex items-center gap-2 w-32 shrink-0">
+                    <Globe size={14} style={{ color: r.color }} />
+                    <span className="text-[10px] font-sans font-medium text-[var(--gl-text-secondary)]">{r.label}</span>
+                  </div>
+                  <div className="flex-1 h-1.5 bg-[var(--gl-bg-muted)] rounded-full overflow-hidden">
+                    <motion.div
+                      className="h-full rounded-full"
+                      style={{ background: r.color, opacity: 0.7 }}
+                      initial={{ width: 0 }}
+                      animate={{ width: `${(r.count / totalServices) * 100}%` }}
+                      transition={{ delay: 0.3 + i * 0.3, duration: 0.6, ease: "easeOut" }}
+                    />
+                  </div>
+                  <span className="text-[10px] font-sans font-medium text-[var(--gl-text-muted)] w-6 text-right">{r.count}</span>
                 </div>
-                <div className="flex-1 h-1.5 bg-[var(--gl-bg-muted)] rounded-full overflow-hidden">
-                  <motion.div
-                    className="h-full rounded-full"
-                    style={{ background: r.color, opacity: 0.7 }}
-                    initial={{ width: 0 }}
-                    animate={{ width: `${(r.count / totalServices) * 100}%` }}
-                    transition={{ delay: 0.3 + i * 0.3, duration: 0.6, ease: "easeOut" }}
-                  />
-                </div>
-                <span className="text-[10px] font-sans font-medium text-[var(--gl-text-muted)] w-6 text-right">{r.count}</span>
-              </div>
-            ))}
+              ))
+            )}
           </div>
 
           {/* Service type grid */}
           <div className="mt-4 grid grid-cols-4 gap-2">
             {[
-              { type: "Lambda",     count: 2, color: "#EC4899" },
-              { type: "S3",         count: 2, color: "#10B981" },
-              { type: "RDS",        count: 1, color: "#06B6D4" },
-              { type: "EC2",        count: 1, color: "#F59E0B" },
-              { type: "API GW",     count: 1, color: "#8B5CF6" },
-              { type: "SQS",        count: 1, color: "#F97316" },
-              { type: "DynamoDB",   count: 1, color: "#3B82F6" },
+              { type: "Lambda", count: 2, color: "#EC4899" },
+              { type: "S3", count: 2, color: "#10B981" },
+              { type: "RDS", count: 1, color: "#06B6D4" },
+              { type: "EC2", count: 1, color: "#F59E0B" },
+              { type: "API GW", count: 1, color: "#8B5CF6" },
+              { type: "SQS", count: 1, color: "#F97316" },
+              { type: "DynamoDB", count: 1, color: "#3B82F6" },
               { type: "CloudFront", count: 1, color: "#14B8A6" },
             ].map(({ type, count, color }) => (
               <div key={type} className="bg-[var(--card)] border border-[var(--border)] rounded-lg p-2 text-center">

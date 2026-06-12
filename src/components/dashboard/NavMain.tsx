@@ -69,7 +69,7 @@ export function NavMain({ items }: { items: NavMainItem[] }) {
                       : "text-[var(--gl-text-secondary)] hover:bg-[var(--gl-bg-muted)] hover:text-[var(--gl-text-primary)]"
                   )}
                 >
-                  {item.icon && <item.icon size={16} className="shrink-0" />}
+                  {item.icon && <item.icon size={18} className="shrink-0" />}
                   <span>{item.title}</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -95,9 +95,9 @@ export function NavMain({ items }: { items: NavMainItem[] }) {
                           : "text-[var(--gl-text-secondary)] hover:bg-[var(--gl-bg-muted)] hover:text-[var(--gl-text-primary)]"
                       )}
                     >
-                      {item.icon && <item.icon size={16} className="shrink-0" />}
+                      {item.icon && <item.icon size={18} className="shrink-0" />}
                       <span>{item.title}</span>
-                      <CaretRight size={16} className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                      <CaretRight size={18} className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
                     </SidebarMenuButton>
                   }
                 />
