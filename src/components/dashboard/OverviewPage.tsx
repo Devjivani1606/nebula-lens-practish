@@ -15,6 +15,15 @@ import { staggerContainer, staggerItem } from "../../lib/motion";
 import { useRelativeTime } from "../../hooks/useRelativeTime";
 import { Sparkline } from "./Sparkline";
 import { getContextualGreeting } from "../../lib/greetings";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardAction,
+  CardContent,
+  CardFooter,
+} from "../ui/card";
 
 /* ──────────────── Compact Stat Card (Row 2) ──────────────── */
 interface StatCardProps {
@@ -36,17 +45,30 @@ function CompactStatCard({
   sparklineData, sparklineColor,
 }: StatCardProps) {
   return (
-    <motion.div
-      variants={staggerItem}
-      className="bg-[var(--card)] p-4 rounded-xl border-none shadow-none flex flex-col justify-center gap-2 transition-colors hover:bg-[var(--accent)] cursor-pointer"
-    >
-      <div className="flex items-center gap-2">
-        <Icon size={18} style={{ color: iconColor }} />
-        <span className="text-[11px] font-medium text-[var(--gl-text-muted)] leading-tight">{title}</span>
-      </div>
-      <div className="flex items-end justify-between">
-        <div className="flex flex-col">
-          <div className="text-lg font-medium text-[var(--gl-text-primary)] leading-none tracking-tight flex items-center gap-3">
+    <motion.div variants={staggerItem} className="flex">
+      <Card size="sm" className="w-full flex flex-col justify-between gl-glow-hover transition-all duration-300 cursor-pointer">
+        <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+          <div className="flex items-center gap-2">
+            <Icon size={18} style={{ color: iconColor }} />
+            <span className="text-[11px] font-medium text-muted-foreground leading-tight">{title}</span>
+          </div>
+          {trend && trendValue && (
+            <CardAction>
+              <div className={`flex items-center gap-0.5 text-[10px] font-medium px-1.5 py-0.5 rounded-full ${
+                trend === "up"      ? "text-red-400 bg-red-500/10"
+                : trend === "down"  ? "text-emerald-400 bg-emerald-500/10"
+                : "text-muted-foreground bg-muted"
+              }`}>
+                {trend === "up"     ? <ArrowUpRight size={10} /> :
+                 trend === "down"   ? <ArrowDownRight size={10} /> :
+                 <Minus size={10} />}
+                {trendValue}
+              </div>
+            </CardAction>
+          )}
+        </CardHeader>
+        <CardContent className="pt-0">
+          <div className="text-lg font-medium tracking-tight text-foreground flex items-center gap-3">
             {title === "Last Scan" ? (
               <AnimatePresence mode="wait">
                 <motion.span
@@ -67,21 +89,10 @@ function CompactStatCard({
             )}
           </div>
           {sub && (
-            <p className="text-[10px] font-medium text-[var(--gl-text-muted)] mt-1">{sub}</p>
+            <p className="text-[10px] font-medium text-muted-foreground mt-1">{sub}</p>
           )}
-        </div>
-        {trend && trendValue && (
-          <div className={`flex items-center gap-0.5 text-[10px] font-medium px-1.5 py-0.5 rounded-full ${trend === "up" ? "text-red-400 bg-red-500/10"
-              : trend === "down" ? "text-emerald-400 bg-emerald-500/10"
-                : "text-[var(--gl-text-muted)] bg-[var(--gl-bg-muted)]"
-            }`}>
-            {trend === "up" ? <ArrowUpRight size={10} /> :
-              trend === "down" ? <ArrowDownRight size={10} /> :
-                <Minus size={10} />}
-            {trendValue}
-          </div>
-        )}
-      </div>
+        </CardContent>
+      </Card>
     </motion.div>
   );
 }
@@ -216,7 +227,7 @@ export default function OverviewPage() {
         className="flex items-center justify-between"
       >
         <div>
-          <h1 className="text-xl font-medium text-[var(--gl-text-primary)] tracking-tight">
+          <h1 className="text-xl font-medium text-foreground tracking-tight">
             Infrastructure <span className="aurora-text">Overview</span>
           </h1>
 
@@ -229,7 +240,7 @@ export default function OverviewPage() {
             {greetingMsg}
           </motion.div>
 
-          <div className="text-[11px] font-medium text-[var(--gl-text-muted)] mt-1 flex items-center gap-1">
+          <div className="text-[11px] font-medium text-muted-foreground mt-1 flex items-center gap-1">
             <span>{currentSnap.version} · Last scanned </span>
             <AnimatePresence mode="wait">
               <motion.span
@@ -321,29 +332,31 @@ export default function OverviewPage() {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
-          className="gl-card border border-[var(--border)] shadow-sm p-6 flex flex-col md:flex-row items-center gap-8 md:col-span-3"
+          className="md:col-span-3 flex"
         >
-          <div className="relative shrink-0">
-            <HealthRing score={healthScore} size={140} />
-            <div className="absolute inset-0 flex items-center justify-center">
-              <span className="text-[40px] font-medium font-sans tracking-tight" style={{ color: healthScore >= 80 ? "#10B981" : healthScore >= 60 ? "#F59E0B" : "#EF4444" }}>
-                {healthScore}%
-              </span>
-            </div>
-          </div>
-          <div className="flex-1 text-center md:text-left">
-            <h2 className="text-sm font-medium text-[var(--gl-text-muted)] uppercase tracking-wider mb-2">System Health</h2>
-            <p className="text-[13px] text-[var(--gl-text-muted)] mb-3">
-              {healthyCount}/{totalServices} services healthy
-            </p>
-            <div className="flex flex-wrap justify-center md:justify-start gap-2">
-              {MOCK_SERVICES.filter(s => s.status !== "healthy").map(s => (
-                <span key={s.id} className="text-[11px] px-2 py-1 rounded bg-[var(--card)] text-[var(--muted-foreground)] border border-[var(--border)]">
-                  {s.name.split("-").slice(-1)[0]}
+          <Card className="w-full border border-[var(--border)] shadow-sm p-6 flex flex-col md:flex-row items-center gap-8 gl-glow-hover transition-all duration-300">
+            <div className="relative shrink-0">
+              <HealthRing score={healthScore} size={140} />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <span className="text-[40px] font-medium font-sans tracking-tight" style={{ color: healthScore >= 80 ? "#10B981" : healthScore >= 60 ? "#F59E0B" : "#EF4444" }}>
+                  {healthScore}%
                 </span>
-              ))}
+              </div>
             </div>
-          </div>
+            <div className="flex-1 text-center md:text-left">
+              <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-2">System Health</h2>
+              <p className="text-[13px] text-muted-foreground mb-3">
+                {healthyCount}/{totalServices} services healthy
+              </p>
+              <div className="flex flex-wrap justify-center md:justify-start gap-2">
+                {MOCK_SERVICES.filter(s => s.status !== "healthy").map(s => (
+                  <span key={s.id} className="text-[11px] px-2 py-1 rounded bg-muted text-muted-foreground border border-border">
+                    {s.name.split("-").slice(-1)[0]}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </Card>
         </motion.div>
 
         {/* Open Alerts Hero */}
@@ -351,42 +364,44 @@ export default function OverviewPage() {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1, duration: 0.4 }}
-          className="gl-card border border-[var(--border)] shadow-sm p-6 flex flex-col justify-center md:col-span-2"
+          className="md:col-span-2 flex"
         >
-          <div className="flex items-center gap-3 mb-4">
-            <div className={`w-10 h-10 rounded-xl flex items-center justify-center border ${openAlerts > 0 ? "bg-red-500/10 border-red-500/20" : "bg-emerald-500/10 border-emerald-500/20"}`}>
-              {openAlerts > 0 ? <Warning size={18} className="text-red-400" /> : <CheckCircle size={18} className="text-emerald-400" />}
+          <Card className="w-full border border-[var(--border)] shadow-sm p-6 flex flex-col justify-center gl-glow-hover transition-all duration-300">
+            <div className="flex items-center gap-3 mb-4">
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center border ${openAlerts > 0 ? "bg-red-500/10 border-red-500/20" : "bg-emerald-500/10 border-emerald-500/20"}`}>
+                {openAlerts > 0 ? <Warning size={18} className="text-red-400" /> : <CheckCircle size={18} className="text-emerald-400" />}
+              </div>
+              <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Open Alerts</h2>
             </div>
-            <h2 className="text-sm font-medium text-[var(--gl-text-muted)] uppercase tracking-wider">Open Alerts</h2>
-          </div>
-          <div className="mt-2 min-h-[64px] flex flex-col justify-center">
-            {openAlerts > 0 ? (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }}>
-                <div className="flex items-center gap-4 mb-2">
-                  <div className="text-[40px] font-medium leading-none text-[var(--gl-text-primary)]">
-                    {openAlerts}
+            <div className="mt-2 min-h-[64px] flex flex-col justify-center">
+              {openAlerts > 0 ? (
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }}>
+                  <div className="flex items-center gap-4 mb-2">
+                    <div className="text-[40px] font-medium leading-none text-foreground">
+                      {openAlerts}
+                    </div>
+                    <Sparkline data={[15, 13, 14, 11, 9, 6, 2]} color="#10B981" width={64} height={20} />
                   </div>
-                  <Sparkline data={[15, 13, 14, 11, 9, 6, 2]} color="#10B981" width={64} height={20} />
-                </div>
-                {criticalAlerts > 0 ? (
-                  <p className="text-[13px]">
-                    <span className="text-red-400 font-medium">{criticalAlerts} critical</span>
-                    <span className="text-[var(--gl-text-muted)]">, {highAlerts} high</span>
-                  </p>
-                ) : (
-                  <p className="text-[13px] text-[var(--gl-text-muted)]">{highAlerts} high alerts</p>
-                )}
-              </motion.div>
-            ) : (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }} className="flex flex-col gap-2">
-                <div className="flex items-center gap-2 text-emerald-400">
-                  <CheckCircle size={32} />
-                  <span className="text-2xl font-medium tracking-tight">All clear</span>
-                </div>
-                <p className="text-[13px] text-[var(--gl-text-muted)]">No active issues</p>
-              </motion.div>
-            )}
-          </div>
+                  {criticalAlerts > 0 ? (
+                    <p className="text-[13px]">
+                      <span className="text-red-400 font-medium">{criticalAlerts} critical</span>
+                      <span className="text-muted-foreground">, {highAlerts} high</span>
+                    </p>
+                  ) : (
+                    <p className="text-[13px] text-muted-foreground">{highAlerts} high alerts</p>
+                  )}
+                </motion.div>
+              ) : (
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }} className="flex flex-col gap-2">
+                  <div className="flex items-center gap-2 text-emerald-400">
+                    <CheckCircle size={32} />
+                    <span className="text-2xl font-medium tracking-tight">All clear</span>
+                  </div>
+                  <p className="text-[13px] text-muted-foreground">No active issues</p>
+                </motion.div>
+              )}
+            </div>
+          </Card>
         </motion.div>
       </div>
 
@@ -415,60 +430,65 @@ export default function OverviewPage() {
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.35, duration: 0.4 }}
-        className="gl-card p-4 border border-[var(--border)] shadow-sm"
+        className="flex"
       >
-        <div className="flex items-center justify-between mb-3">
-          <p className="text-xs font-medium text-[var(--gl-text-primary)] uppercase tracking-wider">
-            Recent Activity
-          </p>
-          <div className="flex items-center gap-1 text-[10px] text-[var(--gl-text-muted)]">
-            <motion.div
-              animate={{ opacity: [1, 0.3, 1] }}
-              transition={{ repeat: Infinity, duration: 2 }}
-              className="w-1.5 h-1.5 rounded-full bg-emerald-400"
-            />
-            Live
-          </div>
-        </div>
-
-        <motion.div
-          variants={activityContainer}
-          initial="initial"
-          animate="animate"
-          className="space-y-0"
-        >
-          {RECENT_ACTIVITY.length > 0 ? (
-            RECENT_ACTIVITY.map((item, i) => {
-              const Icon = item.icon;
-              return (
+        <Card className="w-full border border-[var(--border)] shadow-sm gl-glow-hover transition-all duration-300">
+          <CardHeader className="flex flex-row items-center justify-between pb-3">
+            <CardTitle className="text-xs font-medium uppercase tracking-wider text-foreground">
+              Recent Activity
+            </CardTitle>
+            <CardAction>
+              <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
                 <motion.div
-                  key={i}
-                  variants={activityItem}
-                  className="flex items-start gap-2.5 py-2 border-b border-[var(--gl-border)] last:border-0"
-                >
-                  <div className="w-5 h-5 rounded flex items-center justify-center shrink-0 mt-0.5"
-                    style={{ background: `${item.color}18` }}>
-                    <Icon size={14} style={{ color: item.color }} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[11px] text-[var(--gl-text-secondary)] leading-snug">{item.msg}</p>
-                  </div>
-                  <span className="text-[9px] text-[var(--gl-text-muted)] font-sans font-medium whitespace-nowrap">{item.time}</span>
-                </motion.div>
-              );
-            })
-          ) : (
+                  animate={{ opacity: [1, 0.3, 1] }}
+                  transition={{ repeat: Infinity, duration: 2 }}
+                  className="w-1.5 h-1.5 rounded-full bg-emerald-400"
+                />
+                Live
+              </div>
+            </CardAction>
+          </CardHeader>
+          <CardContent>
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.2 }}
-              className="flex flex-col items-center justify-center py-8 text-[var(--gl-text-muted)] gap-2"
+              variants={activityContainer}
+              initial="initial"
+              animate="animate"
+              className="space-y-0"
             >
-              <ClockCounterClockwise size={24} weight="light" opacity={0.5} />
-              <p className="text-xs font-medium">No recent activity</p>
+              {RECENT_ACTIVITY.length > 0 ? (
+                RECENT_ACTIVITY.map((item, i) => {
+                  const Icon = item.icon;
+                  return (
+                    <motion.div
+                      key={i}
+                      variants={activityItem}
+                      className="flex items-start gap-2.5 py-2 border-b border-border last:border-0"
+                    >
+                      <div className="w-5 h-5 rounded flex items-center justify-center shrink-0 mt-0.5"
+                        style={{ background: `${item.color}18` }}>
+                        <Icon size={14} style={{ color: item.color }} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[11px] text-muted-foreground leading-snug">{item.msg}</p>
+                      </div>
+                      <span className="text-[9px] text-muted-foreground font-sans font-medium whitespace-nowrap">{item.time}</span>
+                    </motion.div>
+                  );
+                })
+              ) : (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.2 }}
+                  className="flex flex-col items-center justify-center py-8 text-muted-foreground gap-2"
+                >
+                  <ClockCounterClockwise size={24} weight="light" opacity={0.5} />
+                  <p className="text-xs font-medium">No recent activity</p>
+                </motion.div>
+              )}
             </motion.div>
-          )}
-        </motion.div>
+          </CardContent>
+        </Card>
       </motion.div>
 
       {/* ROW 4: Quick Actions + Regions */}
@@ -479,32 +499,36 @@ export default function OverviewPage() {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
-          className="gl-card bg-[var(--card)] p-5 border-none shadow-none"
+          className="flex"
         >
-          <p className="text-xs font-medium text-[var(--gl-text-primary)] uppercase tracking-wider mb-3">
-            Quick Actions
-          </p>
-          <div className="space-y-2">
-            {[
-              { label: "View Infrastructure Canvas", icon: Eye, section: "canvas", color: "#6366F1" },
-              { label: "Explore Timeline", icon: ClockCounterClockwise, section: "timeline", color: "#A855F7" },
-              { label: "Review Alerts", icon: Warning, section: "alerts", color: "#EF4444" },
-            ].map(({ label, icon: Icon, section, color }) => (
-              <motion.button
-                key={section}
-                whileHover="hover"
-                variants={quickActionVariants}
-                onClick={() => router.push(`/dashboard/${section}`)}
-                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-[var(--gl-text-secondary)] hover:text-[var(--gl-text-primary)] hover:bg-[var(--accent)] transition-all group"
-              >
-                <motion.div variants={iconVariants}>
-                  <Icon size={14} className="shrink-0" style={{ color }} />
-                </motion.div>
-                {label}
-                <ArrowUpRight size={12} className="ml-auto opacity-0 group-hover:opacity-50 transition-opacity" />
-              </motion.button>
-            ))}
-          </div>
+          <Card className="w-full border border-[var(--border)] shadow-sm gl-glow-hover transition-all duration-300">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-xs font-medium uppercase tracking-wider text-foreground">
+                Quick Actions
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {[
+                { label: "View Infrastructure Canvas", icon: Eye, section: "canvas", color: "#6366F1" },
+                { label: "Explore Timeline", icon: ClockCounterClockwise, section: "timeline", color: "#A855F7" },
+                { label: "Review Alerts", icon: Warning, section: "alerts", color: "#EF4444" },
+              ].map(({ label, icon: Icon, section, color }) => (
+                <motion.button
+                  key={section}
+                  whileHover="hover"
+                  variants={quickActionVariants}
+                  onClick={() => router.push(`/dashboard/${section}`)}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-all group"
+                >
+                  <motion.div variants={iconVariants}>
+                    <Icon size={14} className="shrink-0" style={{ color }} />
+                  </motion.div>
+                  {label}
+                  <ArrowUpRight size={12} className="ml-auto opacity-0 group-hover:opacity-50 transition-opacity" />
+                </motion.button>
+              ))}
+            </CardContent>
+          </Card>
         </motion.div>
 
         {/* Regions + Service Type Breakdown */}
@@ -512,64 +536,71 @@ export default function OverviewPage() {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.55 }}
-          className="gl-card bg-[var(--card)] p-5 lg:col-span-2 border-none shadow-none"
+          className="lg:col-span-2 flex"
         >
-          <p className="text-xs font-medium text-[var(--gl-text-primary)] uppercase tracking-wider mb-3">
-            Resources by Region
-          </p>
-          <div className="space-y-2">
-            {REGIONS.length === 1 ? (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.2 }}
-                className="flex items-center gap-2 py-1"
-              >
-                <Globe size={18} style={{ color: REGIONS[0].color }} />
-                <span className="text-sm font-medium text-[var(--gl-text-primary)]">
-                  {REGIONS[0].count} resources mapped in {REGIONS[0].label}
-                </span>
-              </motion.div>
-            ) : (
-              REGIONS.map((r, i) => (
-                <div key={r.name} className="flex items-center gap-3">
-                  <div className="flex items-center gap-2 w-32 shrink-0">
-                    <Globe size={14} style={{ color: r.color }} />
-                    <span className="text-[10px] font-sans font-medium text-[var(--gl-text-secondary)]">{r.label}</span>
-                  </div>
-                  <div className="flex-1 h-1.5 bg-[var(--gl-bg-muted)] rounded-full overflow-hidden">
-                    <motion.div
-                      className="h-full rounded-full"
-                      style={{ background: r.color, opacity: 0.7 }}
-                      initial={{ width: 0 }}
-                      animate={{ width: `${(r.count / totalServices) * 100}%` }}
-                      transition={{ delay: 0.3 + i * 0.3, duration: 0.6, ease: "easeOut" }}
-                    />
-                  </div>
-                  <span className="text-[10px] font-sans font-medium text-[var(--gl-text-muted)] w-6 text-right">{r.count}</span>
-                </div>
-              ))
-            )}
-          </div>
-
-          {/* Service type grid */}
-          <div className="mt-4 grid grid-cols-4 gap-2">
-            {[
-              { type: "Lambda", count: 2, color: "#EC4899" },
-              { type: "S3", count: 2, color: "#10B981" },
-              { type: "RDS", count: 1, color: "#06B6D4" },
-              { type: "EC2", count: 1, color: "#F59E0B" },
-              { type: "API GW", count: 1, color: "#8B5CF6" },
-              { type: "SQS", count: 1, color: "#F97316" },
-              { type: "DynamoDB", count: 1, color: "#3B82F6" },
-              { type: "CloudFront", count: 1, color: "#14B8A6" },
-            ].map(({ type, count, color }) => (
-              <div key={type} className="bg-[var(--card)] border border-[var(--border)] rounded-lg p-2 text-center">
-                <p className="text-[10px] font-medium font-sans text-[var(--primary)]">{count}</p>
-                <p className="text-[8px] text-[var(--muted-foreground)] mt-0.5 leading-tight">{type}</p>
+          <Card className="w-full border border-[var(--border)] shadow-sm gl-glow-hover transition-all duration-300">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-xs font-medium uppercase tracking-wider text-foreground">
+                Resources by Region
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                {REGIONS.length === 1 ? (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.2 }}
+                    className="flex items-center gap-2 py-1"
+                  >
+                    <Globe size={18} style={{ color: REGIONS[0].color }} />
+                    <span className="text-sm font-medium text-foreground">
+                      {REGIONS[0].count} resources mapped in {REGIONS[0].label}
+                    </span>
+                  </motion.div>
+                ) : (
+                  REGIONS.map((r, i) => (
+                    <div key={r.name} className="flex items-center gap-3">
+                      <div className="flex items-center gap-2 w-32 shrink-0">
+                        <Globe size={14} style={{ color: r.color }} />
+                        <span className="text-[10px] font-sans font-medium text-muted-foreground">{r.label}</span>
+                      </div>
+                      <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
+                        <motion.div
+                          className="h-full rounded-full"
+                          style={{ background: r.color, opacity: 0.7 }}
+                          initial={{ width: 0 }}
+                          animate={{ width: `${(r.count / totalServices) * 100}%` }}
+                          transition={{ delay: 0.3 + i * 0.3, duration: 0.6, ease: "easeOut" }}
+                        />
+                      </div>
+                      <span className="text-[10px] font-sans font-medium text-muted-foreground w-6 text-right">{r.count}</span>
+                    </div>
+                  ))
+                )}
               </div>
-            ))}
-          </div>
+
+              {/* Service type grid */}
+              <div className="mt-4 grid grid-cols-4 gap-2">
+                {[
+                  { type: "Lambda", count: 2, color: "#EC4899" },
+                  { type: "S3", count: 2, color: "#10B981" },
+                  { type: "RDS", count: 1, color: "#06B6D4" },
+                  { type: "EC2", count: 1, color: "#F59E0B" },
+                  { type: "API GW", count: 1, color: "#8B5CF6" },
+                  { type: "SQS", count: 1, color: "#F97316" },
+                  { type: "DynamoDB", count: 1, color: "#3B82F6" },
+                  { type: "CloudFront", count: 1, color: "#14B8A6" },
+                ].map(({ type, count, color }) => (
+                  <div key={type} className="bg-card border border-border rounded-lg p-2 text-center"
+                    style={{ background: `${color}10`, border: `1px solid ${color}20` }}>
+                    <p className="text-[10px] font-medium font-sans" style={{ color }}>{count}</p>
+                    <p className="text-[8px] text-muted-foreground mt-0.5 leading-tight">{type}</p>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         </motion.div>
       </div>
     </div>
