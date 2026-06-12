@@ -18,14 +18,14 @@ import { useCanvasStore } from "../../store/useCanvasStore";
 import { Separator } from "@/components/ui/separator";
 
 const SECTION_LABELS: Record<DashboardSection, string> = {
-  overview:  "Overview",
-  canvas:    "Infrastructure Canvas",
+  overview: "Overview",
+  canvas: "Infrastructure Canvas",
   "blast-radius": "Blast Radius",
-  logs:      "Live Logs",
-  timeline:  "Timeline",
-  alerts:    "Alerts",
-  cost:      "Cost Analysis",
-  settings:  "Settings",
+  timeline: "Timeline",
+  alerts: "Alerts",
+  cost: "Cost Analysis",
+  settings: "Settings",
+  logs: ""
 };
 
 export function TopHeader() {
