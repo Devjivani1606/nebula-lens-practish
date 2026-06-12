@@ -13,6 +13,7 @@ import { MOCK_SNAPSHOTS } from "./data/snapshots";
 import { useRouter } from "next/navigation";
 import { staggerContainer, staggerItem } from "../../lib/motion";
 import { useRelativeTime } from "../../hooks/useRelativeTime";
+import { Sparkline } from "./Sparkline";
 
 /* ──────────────── Compact Stat Card (Row 2) ──────────────── */
 interface StatCardProps {
@@ -24,16 +25,19 @@ interface StatCardProps {
   iconBg: string;
   trend?: "up" | "down" | "neutral";
   trendValue?: string;
+  sparklineData?: number[];
+  sparklineColor?: string;
 }
 
 function CompactStatCard({
   title, value, sub, icon: Icon,
   iconColor, trend, trendValue,
+  sparklineData, sparklineColor,
 }: StatCardProps) {
   return (
     <motion.div
       variants={staggerItem}
-      className="bg-[var(--card)] p-3 rounded-xl flex flex-col justify-center gap-2 transition-colors hover:bg-[var(--accent)] cursor-pointer"
+      className="bg-[var(--card)] p-4 rounded-xl border-none shadow-none flex flex-col justify-center gap-2 transition-colors hover:bg-[var(--accent)] cursor-pointer"
     >
       <div className="flex items-center gap-2">
         <Icon size={14} style={{ color: iconColor }} />
@@ -41,7 +45,7 @@ function CompactStatCard({
       </div>
       <div className="flex items-end justify-between">
         <div className="flex flex-col">
-          <div className="text-lg font-medium text-[var(--gl-text-primary)] leading-none tracking-tight">
+          <div className="text-lg font-medium text-[var(--gl-text-primary)] leading-none tracking-tight flex items-center gap-3">
             {title === "Last Scan" ? (
               <AnimatePresence mode="wait">
                 <motion.span
@@ -56,6 +60,9 @@ function CompactStatCard({
               </AnimatePresence>
             ) : (
               value
+            )}
+            {sparklineData && sparklineColor && (
+              <Sparkline data={sparklineData} color={sparklineColor} />
             )}
           </div>
           {sub && (
@@ -256,8 +263,11 @@ export default function OverviewPage() {
              <h2 className="text-sm font-medium text-[var(--gl-text-muted)] uppercase tracking-wider">Open Alerts</h2>
           </div>
           <div className="mt-2">
-            <div className="text-[40px] font-medium leading-none mb-2 text-[var(--gl-text-primary)]">
-              {openAlerts}
+            <div className="flex items-center gap-4 mb-2">
+              <div className="text-[40px] font-medium leading-none text-[var(--gl-text-primary)]">
+                {openAlerts}
+              </div>
+              <Sparkline data={[15, 13, 14, 11, 9, 6, 2]} color="#10B981" width={64} height={20} />
             </div>
             {(() => {
               if (criticalAlerts > 0) {
@@ -291,7 +301,8 @@ export default function OverviewPage() {
         <CompactStatCard title="Total Services" value={totalServices}
           icon={HardDrives} iconColor="#6366F1" iconBg="rgba(99,102,241,0.12)" />
         <CompactStatCard title="Monthly Cost" value={`$${monthlyCost.toFixed(0)}`} sub="est. this month"
-          icon={CurrencyDollar} iconColor="#10B981" iconBg="rgba(16,185,129,0.12)" trend="up" trendValue="+18%" />
+          icon={CurrencyDollar} iconColor="#10B981" iconBg="rgba(16,185,129,0.12)" trend="up" trendValue="+18%"
+          sparklineData={[1120, 1150, 1180, 1200, 1190, 1250, 1280]} sparklineColor="#6366F1" />
         <CompactStatCard title="Last Scan" value={lastScanText} sub="Next in 22 min"
           icon={Clock} iconColor="#06B6D4" iconBg="rgba(6,182,212,0.12)" />
         <CompactStatCard title="Recent Changes" value={recentChanges} sub="past 48 hours"
@@ -357,7 +368,7 @@ export default function OverviewPage() {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
-          className="gl-card p-4 border border-[var(--border)] shadow-sm"
+          className="gl-card bg-[var(--card)] p-5 border-none shadow-none"
         >
           <p className="text-xs font-medium text-[var(--gl-text-primary)] uppercase tracking-wider mb-3">
             Quick Actions
@@ -391,7 +402,7 @@ export default function OverviewPage() {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.55 }}
-          className="gl-card p-4 lg:col-span-2 border border-[var(--border)] shadow-sm"
+          className="gl-card bg-[var(--card)] p-5 lg:col-span-2 border-none shadow-none"
         >
           <p className="text-xs font-medium text-[var(--gl-text-primary)] uppercase tracking-wider mb-3">
             Resources by Region
