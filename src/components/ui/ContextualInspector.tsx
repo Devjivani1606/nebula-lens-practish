@@ -10,6 +10,9 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { useBlastRadius } from '../../hooks/useBlastRadius';
 import { useSecurityAudit } from '../../hooks/useSecurityAudit';
 import { slideInRight, slideOutRight, staggerContainer, staggerItem } from '../../lib/motion';
+import { PieChart } from "@/components/charts/pie-chart";
+import { PieSlice } from "@/components/charts/pie-slice";
+import { PieCenter } from "@/components/charts/pie-center";
 
 const CHART_COLORS = ['#38bdf8', '#34d399', '#f472b6', '#fbbf24'];
 const COST_COLORS = {
@@ -96,6 +99,7 @@ export default function ContextualInspector() {
   const isPinned = useCanvasStore((state) => state.isInspectorPinned);
   const setIsPinned = useCanvasStore((state) => state.setInspectorPinned);
   const [isHovered, setIsHovered] = useState(false);
+  const [hoveredSlice, setHoveredSlice] = useState<number | null>(null);
   const hoverTimer = useRef<NodeJS.Timeout | null>(null);
 
   const selectedNode = nodes.find((n) => n.id === selectedNodeId);
@@ -176,6 +180,17 @@ export default function ContextualInspector() {
     }
     return [{ name: 'Monthly Spend', ...breakdown }];
   }, [data, selectedNode, estimatedGlobalCost]);
+
+  const pieChartData = useMemo(() => {
+    const breakdown = costBreakdown[0];
+    return Object.entries(breakdown)
+      .filter(([key, val]) => key !== 'name' && Number(val) > 0)
+      .map(([key, val]) => ({
+        label: key.toUpperCase(),
+        value: Number(val),
+        color: COST_COLORS[key as keyof typeof COST_COLORS] || '#38bdf8',
+      }));
+  }, [costBreakdown]);
 
   const finopsRecommendation = useMemo(() => {
     if (!selectedNode) return null;
@@ -395,18 +410,40 @@ export default function ContextualInspector() {
 
                       <motion.div variants={staggerItem}>
                         <h4 className="text-[11px] font-medium tracking-[0.7px] uppercase text-[var(--gl-text-muted)] mb-3">Cost Breakdown</h4>
-                        <div className="w-full h-48 bg-slate-50 dark:bg-slate-900/50 rounded-xl p-2 border border-slate-200 dark:border-slate-800 flex flex-col justify-center">
-                          <ResponsiveContainer width="100%" height={196}>
-                            <BarChart layout="vertical" data={costBreakdown} margin={{ top: 10, right: 10, left: -20, bottom: 30 }}>
-                              <XAxis type="number" hide />
-                              <YAxis dataKey="name" type="category" hide />
-                              <Tooltip cursor={{ fill: 'transparent' }} contentStyle={{ backgroundColor: '#020617', borderColor: '#1e293b', borderRadius: '8px', fontSize: '12px' }} formatter={(value) => `$${Number(value).toFixed(2)}`} />
-                              <Legend iconType="circle" wrapperStyle={{ fontSize: '10px', paddingTop: '10px' }} verticalAlign="bottom" />
-                              {Object.keys(COST_COLORS).map(key => (
-                                <Bar key={key} dataKey={key} stackId="a" fill={COST_COLORS[key as keyof typeof COST_COLORS]} radius={[0, 0, 0, 0]} />
+                        <div className="w-full py-4 bg-slate-50 dark:bg-slate-900/30 rounded-xl border border-slate-200 dark:border-slate-800 flex flex-col items-center justify-center">
+                          <div className="w-40 h-40 flex items-center justify-center">
+                            <PieChart
+                              data={pieChartData}
+                              innerRadius={48}
+                              padAngle={0.03}
+                              cornerRadius={4}
+                              hoveredIndex={hoveredSlice}
+                              onHoverChange={setHoveredSlice}
+                            >
+                              {pieChartData.map((slice, idx) => (
+                                <PieSlice key={slice.label} index={idx} hoverEffect="translate" hoverOffset={6} />
                               ))}
-                            </BarChart>
-                          </ResponsiveContainer>
+                              <PieCenter prefix="$" />
+                            </PieChart>
+                          </div>
+                          
+                          {/* Legend / Mini breakdown below */}
+                          <div className="w-full px-4 mt-4 grid grid-cols-2 gap-2">
+                            {pieChartData.map((slice, idx) => (
+                              <div
+                                key={slice.label}
+                                className={`flex items-center gap-2 px-2 py-1 rounded transition-colors ${
+                                  hoveredSlice === idx ? 'bg-slate-200/50 dark:bg-slate-800/50' : ''
+                                }`}
+                                onMouseEnter={() => setHoveredSlice(idx)}
+                                onMouseLeave={() => setHoveredSlice(null)}
+                              >
+                                <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: slice.color }} />
+                                <span className="text-[10px] font-semibold text-[var(--gl-text-muted)] truncate">{slice.label}</span>
+                                <span className="text-[10px] font-bold font-mono text-[var(--gl-text-primary)] ml-auto">${slice.value.toFixed(0)}</span>
+                              </div>
+                            ))}
+                          </div>
                         </div>
                       </motion.div>
 
