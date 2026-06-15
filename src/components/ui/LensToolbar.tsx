@@ -3,7 +3,7 @@
 import { Button } from './button';
 import { useCanvasStore } from '../../store/useCanvasStore';
 import { motion } from 'framer-motion';
-import { GraphIcon, PlanetIcon, CurrencyDollarIcon, DownloadSimpleIcon, ShieldCheckIcon } from '@phosphor-icons/react';
+import { GraphIcon, PlanetIcon, CurrencyDollarIcon, DownloadSimpleIcon, ShieldCheckIcon, TreeStructureIcon } from '@phosphor-icons/react';
 import { Panel } from '@xyflow/react';
 import { toPng } from 'html-to-image'; // Added html-to-image engine
 import { useTheme } from 'next-themes';
@@ -15,7 +15,13 @@ const lenses = [
   { id: 'security', label: 'Security Posture', icon: ShieldCheckIcon },
 ] as const;
 
-export default function LensToolbar() {
+export default function LensToolbar({
+  isLayouting = false,
+  onAutoLayout,
+}: {
+  isLayouting?: boolean;
+  onAutoLayout?: () => void;
+}) {
   const activeLens = useCanvasStore((state) => state.activeLens);
   const setActiveLens = useCanvasStore((state) => state.setActiveLens);
   const setSelectedNodeId = useCanvasStore((state) => state.setSelectedNodeId);
@@ -82,6 +88,33 @@ export default function LensToolbar() {
               </motion.div>
             );
           })}
+
+          {/* Elegant Subtle Separator Line */}
+          <div className="w-px h-5 bg-slate-200 dark:bg-slate-800 mx-1.5 shrink-0 self-center" />
+
+          {/* Auto Layout Button */}
+          {onAutoLayout && (
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Button
+                data-tour-id="auto-layout-button"
+                variant="ghost"
+                onClick={onAutoLayout}
+                disabled={isLayouting}
+                className="relative flex items-center justify-center p-2 rounded-full text-slate-400 dark:text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100/50 dark:hover:bg-[#222222]/50 shrink-0 h-9 w-9 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                title={isLayouting ? 'Arranging…' : 'Auto Layout (Ctrl+Shift+L)'}
+              >
+                <motion.div
+                  animate={isLayouting ? { rotate: 360 } : { rotate: 0 }}
+                  transition={isLayouting
+                    ? { repeat: Infinity, duration: 1, ease: 'linear' }
+                    : { duration: 0.2 }
+                  }
+                >
+                  <TreeStructureIcon weight="bold" className="w-4.5 h-4.5" />
+                </motion.div>
+              </Button>
+            </motion.div>
+          )}
 
           {/* Elegant Subtle Separator Line */}
           <div className="w-px h-5 bg-slate-200 dark:bg-slate-800 mx-1.5 shrink-0 self-center" />
