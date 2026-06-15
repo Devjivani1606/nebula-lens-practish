@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { ReactFlow, Background, Controls, Panel, MiniMap, useReactFlow } from '@xyflow/react';
 import { useStore } from 'zustand';
 import { useCanvasStore } from '../../store/useCanvasStore';
+import { useAutoLayout } from '../../lib/layout/useAutoLayout';
 
 import LambdaNode from '../nodes/LambdaNode';
 import S3Node from '../nodes/S3Node';
@@ -92,15 +93,28 @@ export default function ArchitectureCanvas() {
 
   const animationRef = useRef<number | null>(null);
 
-  // Animate nodes from old positions to new positions by interpolating
+  /**
+   * animateTransition
+   * ─────────────────
+   * Interpolates nodes from oldPositions → targetNodes using springEase.
+   *
+   * @param delayMap  Optional per-node start delay in ms, keyed by node id.
+   *                  Used for depth-staggered auto-layout animation:
+   *                  containers (depth 0-2) animate before resources (depth 3).
+   *                  When omitted, all nodes animate simultaneously (undo/redo).
+   * @param duration  Animation duration in ms (default ANIMATION_DURATION).
+   * @param onComplete  Called once the animation finishes (used for fitView).
+   */
   const animateTransition = useCallback((
     oldPositions: Map<string, { x: number; y: number }>,
-    targetNodes: typeof nodes  // The final target state captured BEFORE animation starts
+    targetNodes: typeof nodes,
+    delayMap?: Map<string, number>,
+    duration: number = ANIMATION_DURATION,
+    onComplete?: () => void,
   ) => {
     // Cancel any running animation
     if (animationRef.current) {
       cancelAnimationFrame(animationRef.current);
-      // If cancelling a previous animation, resume tracking before starting new one
       useCanvasStore.temporal.getState().resume();
     }
 
@@ -111,40 +125,42 @@ export default function ArchitectureCanvas() {
 
     const tick = (now: number) => {
       const elapsed = now - startTime;
-      const progress = Math.min(elapsed / ANIMATION_DURATION, 1);
-      const eased = springEase(progress);
+      // Overall animation is done when the longest-delayed node finishes.
+      // Max delay comes from the deepest depth level.
+      const maxDelay = delayMap ? Math.max(0, ...delayMap.values()) : 0;
+      const totalDuration = duration + maxDelay;
+      const overallProgress = Math.min(elapsed / totalDuration, 1);
 
-      // Interpolate from old → target using the captured snapshot
       const interpolatedNodes = targetNodes.map((node) => {
         const oldPos = oldPositions.get(node.id);
         if (!oldPos) return node;
+        if (oldPos.x === node.position.x && oldPos.y === node.position.y) return node;
 
-        if (
-          oldPos.x === node.position.x &&
-          oldPos.y === node.position.y
-        ) {
-          return node;
-        }
-
-        const x = oldPos.x + (node.position.x - oldPos.x) * eased;
-        const y = oldPos.y + (node.position.y - oldPos.y) * eased;
+        // Per-node progress: gate animation start by this node's delay
+        const nodeDelay = delayMap?.get(node.id) ?? 0;
+        const nodeElapsed = Math.max(0, elapsed - nodeDelay);
+        const nodeProgress = Math.min(nodeElapsed / duration, 1);
+        const eased = springEase(nodeProgress);
 
         return {
           ...node,
-          position: { x, y },
+          position: {
+            x: oldPos.x + (node.position.x - oldPos.x) * eased,
+            y: oldPos.y + (node.position.y - oldPos.y) * eased,
+          },
         };
       });
 
       useCanvasStore.setState({ nodes: interpolatedNodes });
 
-      if (progress < 1) {
+      if (overallProgress < 1) {
         animationRef.current = requestAnimationFrame(tick);
       } else {
         // Land exactly on target positions
         useCanvasStore.setState({ nodes: targetNodes });
         animationRef.current = null;
-        // Resume temporal tracking now that animation is complete
         useCanvasStore.temporal.getState().resume();
+        onComplete?.();
       }
     };
 
@@ -153,19 +169,13 @@ export default function ArchitectureCanvas() {
 
   const executeUndo = useCallback(() => {
     if (pastStates.length > 0) {
-      // 1. Capture current node positions BEFORE undo
       const currentNodes = useCanvasStore.getState().nodes;
       const oldPositions = new Map(
         currentNodes.map((n) => [n.id, { x: n.position.x, y: n.position.y }])
       );
-
-      // 2. Execute undo — nodes jump to previous state instantly
       undo();
-
-      // 3. Capture the target positions AFTER undo (before animation modifies them)
       const targetNodes = [...useCanvasStore.getState().nodes];
-
-      // 4. Animate from old positions to the new (restored) positions
+      // No delayMap for undo — all nodes animate simultaneously
       animateTransition(oldPositions, targetNodes);
     }
   }, [pastStates.length, undo, animateTransition]);
@@ -176,18 +186,61 @@ export default function ArchitectureCanvas() {
       const oldPositions = new Map(
         currentNodes.map((n) => [n.id, { x: n.position.x, y: n.position.y }])
       );
-
       redo();
-
       const targetNodes = [...useCanvasStore.getState().nodes];
       animateTransition(oldPositions, targetNodes);
     }
   }, [futureStates.length, redo, animateTransition]);
 
+  // ── Auto Layout ───────────────────────────────────────────────────────────
+  const { isLayouting, triggerLayout } = useAutoLayout();
+
+  const executeAutoLayout = useCallback(async (opts?: { force?: boolean }) => {
+    const currentNodes = useCanvasStore.getState().nodes;
+    const currentEdges = useCanvasStore.getState().edges;
+
+    // Capture old positions BEFORE running ELK (async — store may not change)
+    const oldPositions = new Map(
+      currentNodes.map((n) => [n.id, { x: n.position.x, y: n.position.y }])
+    );
+
+    const result = await triggerLayout(currentNodes, currentEdges, opts);
+    if (!result) return; // skipped (no change) or failed
+
+    const { nodes: layoutedNodes, depthMap } = result;
+
+    // Build depth-stagger delay map: 30ms per depth level
+    // depth 0 (VPC)            → 0ms delay
+    // depth 1 (AZ)             → 30ms delay
+    // depth 2 (Subnet)         → 60ms delay
+    // depth 3 (resources)      → 90ms delay
+    const DEPTH_STAGGER_MS = 30;
+    const delayMap = new Map<string, number>(
+      layoutedNodes.map((n) => [
+        n.id,
+        (depthMap.get(n.id) ?? 0) * DEPTH_STAGGER_MS,
+      ])
+    );
+
+    // Apply layouted nodes as the target state in the store
+    useCanvasStore.setState({ nodes: layoutedNodes });
+
+    // Animate from old positions → ELK positions with depth stagger
+    // Duration 500ms + easeInOut (springEase approximates cubic-bezier(0.4,0,0.2,1))
+    const ELK_ANIMATION_DURATION = 500;
+    animateTransition(
+      oldPositions,
+      layoutedNodes,
+      delayMap,
+      ELK_ANIMATION_DURATION,
+      // onComplete: sequence fitView to avoid conflict with inspector CSS transition
+      () => setTimeout(() => fitView({ duration: 500, padding: 0.15 }), 300)
+    );
+  }, [triggerLayout, animateTransition, fitView]);
+
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-
       // Ignore shortcuts when user is typing in inputs
       if (
         event.target instanceof HTMLInputElement ||
@@ -203,11 +256,17 @@ export default function ArchitectureCanvas() {
           executeUndo();
         }
       }
+
+      // Ctrl+Shift+L / Cmd+Shift+L → Auto Layout
+      if ((event.metaKey || event.ctrlKey) && event.shiftKey && event.key === 'l') {
+        event.preventDefault();
+        executeAutoLayout({ force: true });
+      }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [executeUndo, executeRedo]);
+  }, [executeUndo, executeRedo, executeAutoLayout]);
 
   // Cleanup animation on unmount
   useEffect(() => {
@@ -300,7 +359,10 @@ export default function ArchitectureCanvas() {
               </Button>
 
             </Panel>
-            <LensToolbar />
+            <LensToolbar
+              isLayouting={isLayouting}
+              onAutoLayout={() => executeAutoLayout({ force: true })}
+            />
             <CommandPalette />
             {/* FinOps Cost Legend — Animated */}
             <AnimatePresence>

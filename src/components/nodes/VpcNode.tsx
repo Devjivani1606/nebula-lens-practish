@@ -7,26 +7,28 @@ import { motion } from 'framer-motion';
 import { scaleIn } from '../../lib/motion';
 import { useLensVisuals } from '../../hooks/useLensVisuals';
 import Icon from "../../../public/icons/amazon-virtual-private-cloud.svg"
+import { Tray } from '@phosphor-icons/react';
 function VpcNode({ id, data, selected, positionAbsoluteX }: { id: string; data: any; selected?: boolean; positionAbsoluteX?: number }) {
   const { opacity, isHighlighted, isDimmed } = useLensVisuals(id);
   return (
     <motion.div
       whileHover={{ 
         scale: 1.01, 
-        borderColor: (selected || isHighlighted) ? "#7C6FF7" : "rgba(255, 255, 255, 0.18)",
+        borderColor: (selected || isHighlighted) ? "#7C6FF7" : "rgba(124, 111, 247, 0.6)",
         transition: { duration: 0.15, ease: "easeOut" }
       }}
       initial={{ opacity: 0 }}
       animate={{
         opacity: opacity,
-        borderColor: (selected || isHighlighted) ? "#7C6FF7" : "rgba(255, 255, 255, 0.08)",
-        borderWidth: (selected || isHighlighted) ? "1px" : "0.5px",
+        borderColor: (selected || isHighlighted) ? "#7C6FF7" : "rgba(124, 111, 247, 0.4)",
+        borderWidth: "1px",
+        borderStyle: "dashed",
         backgroundColor: (selected || isHighlighted)
           ? "rgba(14, 165, 233, 0.05)"
           : "rgba(14, 165, 233, 0.01)",
         boxShadow: (selected || isHighlighted)
           ? "0 0 0 3px rgba(124, 111, 247, 0.15)"
-          : "0px 4px 12px rgba(0, 0, 0, 0.1)"
+          : "none"
       }}
       transition={{ 
         duration: 0.5,
@@ -48,6 +50,18 @@ function VpcNode({ id, data, selected, positionAbsoluteX }: { id: string; data: 
           {data?.name || 'VPC'}
         </span>
       </div>
+
+      {data?.isEmpty && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.2 }}
+          className="absolute inset-0 flex flex-col items-center justify-center text-[var(--gl-text-muted)] gap-2 pointer-events-none"
+        >
+          <Tray className="w-4 h-4 opacity-50" />
+          <span className="text-[11px] font-medium tracking-[0.5px]">No resources detected in this VPC</span>
+        </motion.div>
+      )}
     </motion.div>
   );
 }

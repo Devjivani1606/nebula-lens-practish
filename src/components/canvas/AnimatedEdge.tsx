@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   BaseEdge,
   EdgeLabelRenderer,
@@ -13,6 +13,7 @@ import {
 import { useCanvasStore } from '../../store/useCanvasStore';
 import { useBlastRadius } from '../../hooks/useBlastRadius';
 import { useSecurityAudit } from '../../hooks/useSecurityAudit';
+
 export default function AnimatedEdge({
   id,
   source,
@@ -23,6 +24,8 @@ export default function AnimatedEdge({
   data, // NEW: Added data prop to access our transferCost
   selected, // Destructure selected state
 }: EdgeProps) {
+  const [isHovered, setIsHovered] = useState(false);
+  
   // 1. Hook into React Flow's internal state to watch node coordinates in real-time
   const sourceNode = useInternalNode(source);
   const targetNode = useInternalNode(target);
@@ -94,15 +97,56 @@ export default function AnimatedEdge({
     finalTargetY += dy > 0 ? -(tHeight / 2) : tHeight / 2;
   }
 
-  // 5. Generate the smooth curve based on our dynamic math
-  const [edgePath, labelX, labelY] = getBezierPath({
-    sourceX: finalSourceX,
-    sourceY: finalSourceY,
-    sourcePosition: sourcePos,
-    targetX: finalTargetX,
-    targetY: finalTargetY,
-    targetPosition: targetPos,
-  });
+  // 5. Generate the edge path (ELK orthogonal or fallback bezier)
+  const elkBendPoints = data?.elkBendPoints as {x: number, y: number}[] | undefined;
+  const elkLabelPosition = data?.elkLabelPosition as {x: number, y: number} | undefined;
+
+  let edgePath = '';
+  let labelX = 0;
+  let labelY = 0;
+
+  if (source === target) {
+    // Fallback: Self-loop edges
+    const [bezierPath, bLabelX, bLabelY] = getBezierPath({
+      sourceX: finalSourceX,
+      sourceY: finalSourceY,
+      sourcePosition: sourcePos,
+      targetX: finalTargetX,
+      targetY: finalTargetY,
+      targetPosition: targetPos,
+    });
+    edgePath = bezierPath;
+    labelX = bLabelX;
+    labelY = bLabelY;
+  } else if (elkBendPoints && elkBendPoints.length >= 2) {
+    const start = elkBendPoints[0];
+    edgePath = `M ${start.x} ${start.y}`;
+    for (let i = 1; i < elkBendPoints.length; i++) {
+      edgePath += ` L ${elkBendPoints[i].x} ${elkBendPoints[i].y}`;
+    }
+
+    if (elkLabelPosition) {
+      labelX = elkLabelPosition.x;
+      labelY = elkLabelPosition.y;
+    } else {
+      const mid = Math.floor(elkBendPoints.length / 2);
+      labelX = elkBendPoints[mid].x;
+      labelY = elkBendPoints[mid].y;
+    }
+  } else {
+    // Fallback to smooth curve if layout hasn't run yet
+    const [bezierPath, bLabelX, bLabelY] = getBezierPath({
+      sourceX: finalSourceX,
+      sourceY: finalSourceY,
+      sourcePosition: sourcePos,
+      targetX: finalTargetX,
+      targetY: finalTargetY,
+      targetPosition: targetPos,
+    });
+    edgePath = bezierPath;
+    labelX = bLabelX;
+    labelY = bLabelY;
+  }
 
   // 6. DEFAULT STRUCTURAL STYLING: Parse the semantic telemetry context
   const lowerLabel = typeof label === 'string' ? label.toLowerCase() : '';
@@ -229,41 +273,51 @@ export default function AnimatedEdge({
         </marker>
       </defs>
 
-      <BaseEdge
-        id={id}
-        path={edgePath}
-        markerEnd={`url(#arrow-${id})`}
-        className={`gl-edge-path ${selected ? 'selected' : ''} ${animationClass}`}
-        style={{
-          ...style,
-          stroke: strokeColor,
-          strokeWidth: edgeWidth, // 🚀 Dynamic Thickness
-          strokeDasharray,
-          opacity: currentOpacity,
-          animationDelay: isInsideBlastRadius && affectedEdgesMap.has(id) ? `${affectedEdgesMap.get(id)! * 80}ms` : '0ms',
-          filter: isCostLens || glowColor !== 'transparent' ? `drop-shadow(0 0 8px ${glowColor})` : 'none', // 🚀 Neon Glow
-        }}
-      />
-
-      <circle key={duration} r={particleRadius} fill={particleColor} style={{ opacity: currentOpacity }} className="blur-[0.5px] transition-opacity duration-300">
-        <animateMotion
-          dur={duration}
-          repeatCount="indefinite"
+      <g 
+        onMouseEnter={() => setIsHovered(true)} 
+        onMouseLeave={() => setIsHovered(false)}
+      >
+        <BaseEdge
+          id={id}
           path={edgePath}
+          markerEnd={`url(#arrow-${id})`}
+          className={`gl-edge-path ${selected ? 'selected' : ''} ${animationClass}`}
+          style={{
+            ...style,
+            stroke: strokeColor,
+            strokeWidth: edgeWidth, // 🚀 Dynamic Thickness
+            strokeDasharray,
+            opacity: currentOpacity,
+            animationDelay: isInsideBlastRadius && affectedEdgesMap.has(id) ? `${affectedEdgesMap.get(id)! * 80}ms` : '0ms',
+            filter: isCostLens || glowColor !== 'transparent' ? `drop-shadow(0 0 8px ${glowColor})` : 'none', // 🚀 Neon Glow
+          }}
         />
-      </circle>
+
+        <circle key={duration} r={particleRadius} fill={particleColor} style={{ opacity: currentOpacity }} className="blur-[0.5px] transition-opacity duration-300">
+          <animateMotion
+            dur={duration}
+            repeatCount="indefinite"
+            path={edgePath}
+          />
+        </circle>
+      </g>
 
       {/* Renders the text label */}
       {(label || isCostLens) && (() => {
+        const useElkPos = !!elkLabelPosition;
         // Simple deterministic offset based on edge ID to prevent label stacking
         const hash = id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
         const randVal = ((hash % 100) / 100) * 2 - 1; // range -1 to 1
-        const offsetY = -20 + (randVal * 25); // Scatter Y by +/- 25px
-        const offsetX = randVal * 20;         // Scatter X by +/- 20px
+        const offsetY = useElkPos ? 0 : -20 + (randVal * 25); // Scatter Y by +/- 25px
+        const offsetX = useElkPos ? 0 : randVal * 20;         // Scatter X by +/- 20px
+
+        const isEmphasized = isHovered || selected || isConnectedToSelected;
 
         return (
           <EdgeLabelRenderer>
             <div
+              onMouseEnter={() => setIsHovered(true)}
+              onMouseLeave={() => setIsHovered(false)}
               style={{
                 position: 'absolute',
                 transform: `translate(-50%, -50%) translate(${labelX + offsetX}px,${labelY + offsetY}px)`,
@@ -271,10 +325,12 @@ export default function AnimatedEdge({
                 color: isCostLens && transferCost > 100 ? '#ef4444' : particleColor,
                 borderColor: strokeColor,
                 boxShadow: `0 4px 12px -4px ${glowColor !== 'transparent' ? glowColor : strokeColor}`,
-                zIndex: 100,
-                opacity: currentOpacity,
+                zIndex: isEmphasized ? 101 : 100,
+                opacity: isEmphasized ? 1 : 0.65 * currentOpacity,
+                fontSize: isEmphasized ? '11px' : '9px',
+                transitionDuration: '120ms',
               }}
-            className={`nodrag nopan px-3 py-1 rounded-full border-2 text-[10px] font-medium shadow-sm uppercase tracking-widest transition-all duration-300 ${
+            className={`nodrag nopan px-3 py-1 rounded-full border-2 font-medium shadow-sm uppercase tracking-widest transition-all ${
               isCostLens
                 ? 'bg-white dark:bg-slate-950' 
                 : 'bg-white dark:bg-slate-900'
