@@ -37,7 +37,7 @@ export function TopHeader() {
     activeSection, openAlertCount,
     isAwsConnected, awsRegion,
   } = useDashboardStore();
-
+//test
   const [isNotificationsOpen, setIsNotificationsOpen] = React.useState(false);
   const isLoading = useCanvasStore((state) => state.isLoading);
   const fetchInfrastructure = useCanvasStore((state) => state.fetchInfrastructure);

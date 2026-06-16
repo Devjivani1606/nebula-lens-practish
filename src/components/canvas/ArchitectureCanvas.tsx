@@ -305,14 +305,15 @@ export default function ArchitectureCanvas() {
       {/* 3. Wrap React Flow in a flex-1 container so it fills the remaining height */}
       <div className="flex-1 flex flex-row w-full h-full relative overflow-hidden">
 
-        <motion.div 
+
+        <motion.div
           variants={{
             initial: { opacity: 0 },
             animate: { opacity: 1, transition: { duration: 0.4, staggerChildren: 0.04 } }
           }}
           initial="initial"
           animate="animate"
-          data-tour-id="canvas-viewport" 
+          data-tour-id="canvas-viewport"
           className="relative flex-1 h-full transition-all duration-[280ms] ease-in-out"
         >
           <ReactFlow
