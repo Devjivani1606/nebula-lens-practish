@@ -50,11 +50,11 @@ function CompactStatCard({
         <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
           <div className="flex items-center gap-2">
             <Icon size={18} style={{ color: iconColor }} />
-            <span className="text-[11px] font-medium text-muted-foreground leading-tight">{title}</span>
+            <span className="text-xs font-medium text-muted-foreground leading-tight">{title}</span>
           </div>
           {trend && trendValue && (
             <CardAction>
-              <div className={`flex items-center gap-0.5 text-[10px] font-medium px-1.5 py-0.5 rounded-full ${
+              <div className={`flex items-center gap-0.5 text-xs font-medium px-1.5 py-0.5 rounded-full ${
                 trend === "up"      ? "text-red-400 bg-red-500/10"
                 : trend === "down"  ? "text-emerald-400 bg-emerald-500/10"
                 : "text-muted-foreground bg-muted"
@@ -89,7 +89,7 @@ function CompactStatCard({
             )}
           </div>
           {sub && (
-            <p className="text-[10px] font-medium text-muted-foreground mt-1">{sub}</p>
+            <p className="text-xs font-medium text-muted-foreground mt-1">{sub}</p>
           )}
         </CardContent>
       </Card>
@@ -240,7 +240,7 @@ export default function OverviewPage() {
             {greetingMsg}
           </motion.div>
 
-          <div className="text-[11px] font-medium text-muted-foreground mt-1 flex items-center gap-1">
+          <div className="text-xs font-medium text-muted-foreground mt-1 flex items-center gap-1">
             <span>{currentSnap.version} · Last scanned </span>
             <AnimatePresence mode="wait">
               <motion.span
@@ -338,19 +338,19 @@ export default function OverviewPage() {
             <div className="relative shrink-0">
               <HealthRing score={healthScore} size={140} />
               <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-[40px] font-medium font-sans tracking-tight" style={{ color: healthScore >= 80 ? "#10B981" : healthScore >= 60 ? "#F59E0B" : "#EF4444" }}>
+                <span className="text-4xl font-medium font-sans tracking-tight" style={{ color: healthScore >= 80 ? "#10B981" : healthScore >= 60 ? "#F59E0B" : "#EF4444" }}>
                   {healthScore}%
                 </span>
               </div>
             </div>
             <div className="flex-1 text-center md:text-left">
               <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-2">System Health</h2>
-              <p className="text-[13px] text-muted-foreground mb-3">
+              <p className="text-sm text-muted-foreground mb-3">
                 {healthyCount}/{totalServices} services healthy
               </p>
               <div className="flex flex-wrap justify-center md:justify-start gap-2">
                 {MOCK_SERVICES.filter(s => s.status !== "healthy").map(s => (
-                  <span key={s.id} className="text-[11px] px-2 py-1 rounded bg-muted text-muted-foreground border border-border">
+                  <span key={s.id} className="text-xs px-2 py-1 rounded bg-muted text-muted-foreground border border-border">
                     {s.name.split("-").slice(-1)[0]}
                   </span>
                 ))}
@@ -377,18 +377,18 @@ export default function OverviewPage() {
               {openAlerts > 0 ? (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }}>
                   <div className="flex items-center gap-4 mb-2">
-                    <div className="text-[40px] font-medium leading-none text-foreground">
+                    <div className="text-4xl font-medium leading-none text-foreground">
                       {openAlerts}
                     </div>
                     <Sparkline data={[15, 13, 14, 11, 9, 6, 2]} color="#10B981" width={64} height={20} />
                   </div>
                   {criticalAlerts > 0 ? (
-                    <p className="text-[13px]">
+                    <p className="text-sm">
                       <span className="text-red-400 font-medium">{criticalAlerts} critical</span>
                       <span className="text-muted-foreground">, {highAlerts} high</span>
                     </p>
                   ) : (
-                    <p className="text-[13px] text-muted-foreground">{highAlerts} high alerts</p>
+                    <p className="text-sm text-muted-foreground">{highAlerts} high alerts</p>
                   )}
                 </motion.div>
               ) : (
@@ -397,7 +397,7 @@ export default function OverviewPage() {
                     <CheckCircle size={32} />
                     <span className="text-2xl font-medium tracking-tight">All clear</span>
                   </div>
-                  <p className="text-[13px] text-muted-foreground">No active issues</p>
+                  <p className="text-sm text-muted-foreground">No active issues</p>
                 </motion.div>
               )}
             </div>
@@ -469,9 +469,9 @@ export default function OverviewPage() {
                         <Icon size={14} style={{ color: item.color }} />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-[11px] text-muted-foreground leading-snug">{item.msg}</p>
+                        <p className="text-sm text-muted-foreground leading-snug">{item.msg}</p>
                       </div>
-                      <span className="text-[9px] text-muted-foreground font-sans font-medium whitespace-nowrap">{item.time}</span>
+                      <span className="text-xs text-muted-foreground font-sans font-medium whitespace-nowrap">{item.time}</span>
                     </motion.div>
                   );
                 })

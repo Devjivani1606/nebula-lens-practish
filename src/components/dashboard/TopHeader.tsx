@@ -16,6 +16,7 @@ import type { DashboardSection } from "./useDashboardStore";
 import { useSidebar } from "@/components/ui/sidebar";
 import { useCanvasStore } from "../../store/useCanvasStore";
 import { Separator } from "@/components/ui/separator";
+import { FontSizeControl } from "./FontSizeControl";
 
 const SECTION_LABELS: Record<DashboardSection, string> = {
   overview: "Overview",
@@ -130,6 +131,8 @@ export function TopHeader() {
           </>
         )}
       </div>
+
+      <FontSizeControl />
 
       {/* Alerts Bell (Detailed Dropdown) */}
       <div className="relative">
