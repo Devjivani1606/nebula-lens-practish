@@ -13,7 +13,18 @@ export default function DashboardLayoutWrapper({ children }: { children: React.R
     <div 
       id="gl-dashboard"
       className="dashboard-wrapper h-full w-full" 
+      suppressHydrationWarning
     >
+      <script
+        dangerouslySetInnerHTML={{
+          __html: `
+            try {
+              var saved = localStorage.getItem('gl-font-scale') || 'small';
+              document.getElementById('gl-dashboard').dataset.fontScale = saved;
+            } catch (e) {}
+          `,
+        }}
+      />
       {fontToast}
       <DashboardLayout>{children}</DashboardLayout>
     </div>

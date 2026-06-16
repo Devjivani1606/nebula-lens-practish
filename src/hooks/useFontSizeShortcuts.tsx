@@ -30,21 +30,27 @@ export function useFontSizeShortcuts() {
       if (isMod) {
         if (e.key === '=' || e.key === '+') {
           e.preventDefault();
-          if (scale === 'large') {
-            showToast('Text size: Largest (limit reached)', true);
+          if (scale === 'larger') {
+            showToast("Largest size — can't go bigger", true);
           } else {
             increase();
-            const nextScale = scale === 'small' ? 'Medium' : 'Large';
-            showToast(`Text size: ${nextScale}`, false);
+            const order = ['compact', 'small', 'medium', 'large', 'larger'];
+            const idx = order.indexOf(scale);
+            const nextScale = order[idx + 1] || 'larger';
+            const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+            showToast(`Text: ${capitalize(nextScale)}`, false);
           }
         } else if (e.key === '-') {
           e.preventDefault();
-          if (scale === 'small') {
-            showToast('Text size: Smallest (limit reached)', true);
+          if (scale === 'compact') {
+            showToast("Smallest size — can't go smaller", true);
           } else {
             decrease();
-            const nextScale = scale === 'large' ? 'Medium' : 'Small';
-            showToast(`Text size: ${nextScale}`, false);
+            const order = ['compact', 'small', 'medium', 'large', 'larger'];
+            const idx = order.indexOf(scale);
+            const nextScale = order[idx - 1] || 'compact';
+            const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+            showToast(`Text: ${capitalize(nextScale)}`, false);
           }
         } else if (e.key === '0') {
           e.preventDefault();

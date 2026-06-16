@@ -11,10 +11,12 @@ interface FontSizeSelectorProps {
 export function FontSizeSelector({ layoutIdPrefix }: FontSizeSelectorProps) {
   const { scale, setScale } = useFontScale();
 
-  const scaleOptions: { id: FontScale; label: string; iconSize: string }[] = [
-    { id: 'small', label: 'Smaller', iconSize: '14px' },
-    { id: 'medium', label: 'Medium', iconSize: '18px' },
-    { id: 'large', label: 'Larger', iconSize: '22px' },
+  const scaleOptions: { id: FontScale; label: string; sublabel?: string; isDefault?: boolean; iconSize: string }[] = [
+    { id: 'compact', label: 'Compact', sublabel: 'Dense', iconSize: '11px' },
+    { id: 'small', label: 'Small', isDefault: true, iconSize: '14px' },
+    { id: 'medium', label: 'Medium', iconSize: '17px' },
+    { id: 'large', label: 'Large', iconSize: '20px' },
+    { id: 'larger', label: 'Larger', iconSize: '23px' },
   ];
 
   return (
@@ -25,7 +27,7 @@ export function FontSizeSelector({ layoutIdPrefix }: FontSizeSelectorProps) {
           <button
             key={opt.id}
             onClick={() => setScale(opt.id)}
-            className="relative flex flex-col items-center justify-center w-[72px] h-[64px] rounded-lg hover:bg-[var(--gl-bg-muted)] transition-colors"
+            className="relative flex flex-col items-center justify-start pt-2 pb-4 w-[60px] h-[72px] rounded-lg hover:bg-[var(--gl-bg-muted)] transition-colors"
           >
             <span
               className={`font-semibold mb-1 transition-colors ${
@@ -42,6 +44,16 @@ export function FontSizeSelector({ layoutIdPrefix }: FontSizeSelectorProps) {
             >
               {opt.label}
             </span>
+            {opt.sublabel && (
+               <span className="text-[9px] text-[var(--muted-foreground)] opacity-70">
+                 {opt.sublabel}
+               </span>
+            )}
+            {opt.isDefault && (
+              <span className="text-[8px] font-bold text-indigo-500 bg-indigo-500/10 px-1 rounded uppercase tracking-wider mt-0.5">
+                Default
+              </span>
+            )}
             
             {isActive && (
               <motion.div

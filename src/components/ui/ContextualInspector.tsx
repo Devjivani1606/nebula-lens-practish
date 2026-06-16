@@ -77,9 +77,9 @@ function ComplianceProgressBar({ label, percentage }: { label: string, percentag
 
 const getSeverityStyles = (severity: string) => {
   switch(severity?.toLowerCase()) {
-    case 'critical': return "text-red-500 text-base font-medium";
-    case 'high': return "text-orange-500 text-sm font-medium";
-    case 'medium': return "text-amber-500 text-sm font-normal";
+    case 'critical': return "text-red-500 text-xs font-medium";
+    case 'high': return "text-orange-500 text-xs font-medium";
+    case 'medium': return "text-amber-500 text-xs font-normal";
     default: return "text-slate-500 dark:text-slate-400 text-xs font-normal";
   }
 };
@@ -147,8 +147,11 @@ export default function ContextualInspector() {
   useEffect(() => {
     const el = document.getElementById('gl-inspector');
     if (el) {
-      const saved = localStorage.getItem('gl-font-scale') as string || 'medium';
-      el.dataset.fontScale = saved;
+      const SCALE_ORDER = ['compact', 'small', 'medium', 'large', 'larger'];
+      const saved = (localStorage.getItem('gl-font-scale') as string) || 'small';
+      const idx = Math.max(0, SCALE_ORDER.indexOf(saved) - 1);
+      const inspectorScale = SCALE_ORDER[idx] || 'compact';
+      el.dataset.fontScale = inspectorScale;
     }
   }, []);
 
@@ -276,7 +279,7 @@ export default function ContextualInspector() {
                 <Badge variant="secondary" className="mb-2 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400">
                   {selectedNode ? selectedNode.type?.replace('Node', '').toUpperCase() : 'GLOBAL OVERVIEW'}
                 </Badge>
-                <h3 className="text-base font-medium tracking-[-0.3px] text-[var(--gl-text-primary)]">
+                <h3 className="text-lg font-medium tracking-[-0.3px] text-[var(--gl-text-primary)]">
                   {selectedNode ? (data?.name || selectedNode.id) : 'Infrastructure Posture'}
                 </h3>
               </div>
@@ -300,7 +303,7 @@ export default function ContextualInspector() {
                 <button
                   key={tab}
                   onClick={(e) => { e.stopPropagation(); setActiveTab(tab); }}
-                  className={`relative px-3 py-3 text-xs font-medium tracking-[0.7px] uppercase transition-colors ${
+                  className={`relative px-3 py-3 text-sm font-medium tracking-[0.7px] uppercase transition-colors ${
                     activeTab === tab ? 'text-[var(--gl-text-primary)]' : 'text-[var(--gl-text-muted)] hover:text-slate-600 dark:hover:text-slate-300'
                   }`}
                 >
@@ -343,7 +346,7 @@ export default function ContextualInspector() {
                                   <span className="text-xs text-[var(--gl-text-muted)]">
                                     {formatMetricLabel(key)}
                                   </span>
-                                  <span className="text-base font-medium tracking-[-0.3px] text-[var(--gl-text-primary)]">
+                                  <span className="text-sm font-medium tracking-[-0.3px] text-[var(--gl-text-primary)]">
                                     {!isNaN(Number(value)) && <AnimatedCounter value={Number(value)} />}
                                     {isNaN(Number(value)) && String(value)}
                                   </span>
@@ -404,7 +407,7 @@ export default function ContextualInspector() {
                           </motion.div>
 
                           <motion.div variants={staggerItem} className="flex items-center justify-between p-3 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-100 dark:border-emerald-500/20">
-                            <span className="text-base font-medium tracking-[-0.3px] text-emerald-700 dark:text-emerald-400">System Health</span>
+                            <span className="text-sm font-medium tracking-[-0.3px] text-emerald-700 dark:text-emerald-400">System Health</span>
                             <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 text-xs font-normal">
                               <span className="relative flex h-2 w-2">
                                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
@@ -497,7 +500,7 @@ export default function ContextualInspector() {
                           <h4 className="text-xs font-medium tracking-[0.7px] uppercase text-[var(--gl-text-muted)] mb-2 flex items-center gap-1">
                             <TrendDownIcon weight="bold" className="w-3 h-3 text-emerald-500" /> Right-Sizing Suggestion
                           </h4>
-                          <p className="text-base font-medium tracking-[-0.3px] text-[var(--gl-text-primary)] mb-1">{finopsRecommendation.action}</p>
+                          <p className="text-sm font-medium tracking-[-0.3px] text-[var(--gl-text-primary)] mb-1">{finopsRecommendation.action}</p>
                           <div className="flex items-center justify-between mt-3 pt-3 border-t border-emerald-200 dark:border-slate-800">
                             <span className="text-xs text-[var(--gl-text-muted)] flex items-center gap-1">
                               <WarningIcon weight="duotone" className="w-3 h-3 text-orange-500" /> {finopsRecommendation.issue}
@@ -564,7 +567,7 @@ export default function ContextualInspector() {
                             <h4 className="text-xs font-medium tracking-[0.7px] uppercase text-[var(--gl-text-muted)] flex items-center gap-2">
                               <ShieldIcon weight="duotone" className="w-3 h-3 text-amber-500" /> Risk Score
                             </h4>
-                            <span className="text-xl font-medium tracking-[-0.5px] text-[var(--gl-text-primary)]">
+                            <span className="text-2xl font-medium tracking-[-0.5px] text-[var(--gl-text-primary)]">
                               <AnimatedCounter value={score} /><span className="text-xs text-[var(--gl-text-muted)]">/100</span>
                             </span>
                           </div>
