@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo, useState, useRef, useEffect } from 'react';
+import React, { useMemo, useState, useRef, useEffect, useCallback } from 'react';
 import { useCanvasStore } from '../../store/useCanvasStore';
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
@@ -101,6 +101,34 @@ export default function ContextualInspector() {
   const [isHovered, setIsHovered] = useState(false);
   const [hoveredSlice, setHoveredSlice] = useState<number | null>(null);
   const hoverTimer = useRef<NodeJS.Timeout | null>(null);
+
+  const [width, setWidth] = useState(360);
+  const [isResizing, setIsResizing] = useState(false);
+
+  const startResizing = useCallback((e: React.MouseEvent) => {
+    setIsResizing(true);
+    e.preventDefault();
+  }, []);
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isResizing) return;
+      const newWidth = document.documentElement.clientWidth - e.clientX;
+      if (newWidth >= 280 && newWidth <= 800) {
+        setWidth(newWidth);
+      }
+    };
+    const handleMouseUp = () => setIsResizing(false);
+    
+    if (isResizing) {
+      window.addEventListener('mousemove', handleMouseMove);
+      window.addEventListener('mouseup', handleMouseUp);
+    }
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isResizing]);
 
   const selectedNode = nodes.find((n) => n.id === selectedNodeId);
   const data = selectedNode?.data as Record<string, any> | undefined;
@@ -205,13 +233,21 @@ export default function ContextualInspector() {
   return (
     <div 
       data-tour-id="inspector-panel" 
-      className={`absolute top-6 right-6 max-h-[calc(100%-3rem)] h-auto ${isExpanded ? 'w-[360px]' : 'w-12 cursor-pointer'} bg-white/95 dark:bg-[#111111]/95 backdrop-blur-xl border border-slate-200 dark:border-slate-800 rounded-2xl z-30 flex flex-col shadow-2xl transition-all duration-[280ms] ease-in-out overflow-hidden`}
+      className={`relative h-full ${!isExpanded ? 'cursor-pointer' : ''} bg-white dark:bg-[#111111] border-l border-slate-200 dark:border-slate-800 z-30 flex flex-col shadow-[-10px_0_30px_-15px_rgba(0,0,0,0.1)] ${isResizing ? '' : 'transition-all duration-[280ms] ease-in-out'} shrink-0`}
+      style={{ width: isExpanded ? width : 48 }}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onClick={handleClick}
     >
+      {/* Resizer Handle */}
+      {isExpanded && (
+        <div 
+          className="absolute left-0 top-0 bottom-0 w-1.5 cursor-col-resize hover:bg-indigo-500/50 active:bg-indigo-500 z-40 transition-colors"
+          onMouseDown={startResizing}
+        />
+      )}
       {!isExpanded ? (
-        <div className="w-full flex flex-col items-center py-6 text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 transition-colors">
+        <div className="w-full h-full flex flex-col items-center py-6 text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 transition-colors">
           <InfoIcon className="w-5 h-5 mb-6" />
           <div className="[writing-mode:vertical-lr] text-[11px] font-medium tracking-[0.7px] uppercase rotate-180 text-[var(--gl-text-muted)] whitespace-nowrap">
             GLOBAL OVERVIEW
@@ -223,7 +259,7 @@ export default function ContextualInspector() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1, transition: { duration: 0.2, delay: 0.1 } }}
             exit={{ opacity: 0, transition: { duration: 0.1 } }}
-            className="flex flex-col flex-1 min-h-0 w-[360px]"
+            className="flex flex-col flex-1 min-h-0 w-full"
           >
             {/* Header */}
             <div className="p-5 border-b bg-slate-50/50 dark:bg-[#111111] border-slate-200 dark:border-slate-800 flex justify-between items-start shrink-0">

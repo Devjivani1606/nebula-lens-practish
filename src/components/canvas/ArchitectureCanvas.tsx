@@ -303,7 +303,7 @@ export default function ArchitectureCanvas() {
     <div className="flex flex-col w-full h-full bg-[var(--gl-bg-base)] transition-colors duration-300 overflow-hidden">
 
       {/* 3. Wrap React Flow in a flex-1 container so it fills the remaining height */}
-      <div className="flex-1 relative w-full h-full">
+      <div className="flex-1 flex flex-row w-full h-full relative overflow-hidden">
 
         <motion.div 
           variants={{
@@ -313,7 +313,7 @@ export default function ArchitectureCanvas() {
           initial="initial"
           animate="animate"
           data-tour-id="canvas-viewport" 
-          className="absolute top-0 left-0 right-0 bottom-0 transition-all duration-[280ms] ease-in-out"
+          className="relative flex-1 h-full transition-all duration-[280ms] ease-in-out"
         >
           <ReactFlow
             nodes={nodes}
