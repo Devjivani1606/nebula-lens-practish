@@ -148,6 +148,16 @@
   --input: oklch(0.922 0 0);
   --ring: oklch(0.546 0.245 262.881);
   --radius: 0.625rem;
+  --gl-font-scale: 1;
+
+  /* Semantic font sizes */
+  --gl-text-xs:   calc(0.75rem  * var(--gl-font-scale));   /* 12px at medium */
+  --gl-text-sm:   calc(0.8125rem * var(--gl-font-scale));  /* 13px at medium */
+  --gl-text-base: calc(0.875rem * var(--gl-font-scale));   /* 14px at medium */
+  --gl-text-lg:   calc(1rem     * var(--gl-font-scale));   /* 16px at medium */
+  --gl-text-xl:   calc(1.25rem  * var(--gl-font-scale));   /* 20px at medium */
+  --gl-text-2xl:  calc(1.5rem   * var(--gl-font-scale));   /* 24px at medium */
+  --gl-text-hero: calc(1.75rem  * var(--gl-font-scale));   /* 28px at medium */
 
   --sidebar: oklch(0.97 0 0);
   --sidebar-foreground: oklch(0.145 0 0);

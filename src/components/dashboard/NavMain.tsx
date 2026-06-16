@@ -44,7 +44,7 @@ export function NavMain({ items }: { items: NavMainItem[] }) {
 
   return (
     <SidebarGroup>
-      <SidebarGroupLabel className="text-slate-400 dark:text-slate-500 font-bold tracking-wider uppercase text-[10px]">
+      <SidebarGroupLabel className="text-slate-400 dark:text-slate-500 font-bold tracking-wider uppercase text-xs">
         Platform
       </SidebarGroupLabel>
       <SidebarMenu>
@@ -63,7 +63,7 @@ export function NavMain({ items }: { items: NavMainItem[] }) {
                   tooltip={item.title}
                   render={<Link href={getHref(item.id!)} />}
                   className={cn(
-                    "font-bold transition-all duration-200",
+                    "font-bold transition-all duration-200 text-sm",
                     isMainActive
                       ? "bg-[rgba(59,130,246,0.12)] text-blue-400 hover:text-blue-400 hover:bg-[rgba(59,130,246,0.15)] shadow-[inset_0_0_0_1px_rgba(59,130,246,0.2)]"
                       : "text-[var(--gl-text-secondary)] hover:bg-[var(--gl-bg-muted)] hover:text-[var(--gl-text-primary)]"
@@ -89,7 +89,7 @@ export function NavMain({ items }: { items: NavMainItem[] }) {
                     <SidebarMenuButton
                       tooltip={item.title}
                       className={cn(
-                        "font-bold transition-all duration-200",
+                        "font-bold transition-all duration-200 text-sm",
                         isSubActive
                           ? "text-blue-400 hover:text-blue-400"
                           : "text-[var(--gl-text-secondary)] hover:bg-[var(--gl-bg-muted)] hover:text-[var(--gl-text-primary)]"
@@ -110,7 +110,7 @@ export function NavMain({ items }: { items: NavMainItem[] }) {
                           <SidebarMenuSubButton
                             render={<Link href={getHref(subItem.id)} />}
                             className={cn(
-                              "text-xs transition-colors duration-150 cursor-pointer py-1.5",
+                              "text-sm transition-colors duration-150 cursor-pointer py-1.5",
                               isSubItemActive
                                 ? "text-blue-400 font-bold bg-[rgba(59,130,246,0.08)]"
                                 : "text-[var(--gl-text-secondary)] hover:text-[var(--gl-text-primary)] hover:bg-[var(--gl-bg-muted)]"
