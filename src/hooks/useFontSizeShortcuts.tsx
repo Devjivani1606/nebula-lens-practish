@@ -80,10 +80,9 @@ export function useFontSizeShortcuts() {
           key={toast.id}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
+          exit={{ opacity: 0, transition: { duration: 0.2 } }} // fadeOut 200ms
           transition={{
             duration: 0.15, // fadeIn 150ms
-            exit: { duration: 0.2 }, // fadeOut 200ms
           }}
           className="fixed z-50 pointer-events-none"
           style={{ top: '16px', right: '16px' }}
