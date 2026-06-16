@@ -59,7 +59,7 @@ function AnimatedCounter({ value }: { value: number }) {
 function ComplianceProgressBar({ label, percentage }: { label: string, percentage: number }) {
   return (
     <motion.div variants={staggerItem} className="mb-3">
-      <div className="flex justify-between text-[11px] font-medium text-[var(--gl-text-muted)] mb-1 uppercase tracking-[0.7px]">
+      <div className="flex justify-between text-xs font-medium text-[var(--gl-text-muted)] mb-1 uppercase tracking-[0.7px]">
         <span>{label}</span>
         <span>{percentage}%</span>
       </div>
@@ -77,10 +77,10 @@ function ComplianceProgressBar({ label, percentage }: { label: string, percentag
 
 const getSeverityStyles = (severity: string) => {
   switch(severity?.toLowerCase()) {
-    case 'critical': return "text-red-500 text-[14px] font-medium";
-    case 'high': return "text-orange-500 text-[13px] font-medium";
-    case 'medium': return "text-amber-500 text-[13px] font-normal";
-    default: return "text-slate-500 dark:text-slate-400 text-[12px] font-normal";
+    case 'critical': return "text-red-500 text-base font-medium";
+    case 'high': return "text-orange-500 text-sm font-medium";
+    case 'medium': return "text-amber-500 text-sm font-normal";
+    default: return "text-slate-500 dark:text-slate-400 text-xs font-normal";
   }
 };
 
@@ -143,6 +143,14 @@ export default function ContextualInspector() {
     else if (activeLens === 'blast-radius') setActiveTab('Blast Radius');
     else setActiveTab('General');
   }, [activeLens, selectedNodeId]);
+
+  useEffect(() => {
+    const el = document.getElementById('gl-inspector');
+    if (el) {
+      const saved = localStorage.getItem('gl-font-scale') as string || 'medium';
+      el.dataset.fontScale = saved;
+    }
+  }, []);
 
   const handleMouseEnter = () => {
     if (hoverTimer.current) clearTimeout(hoverTimer.current);
@@ -232,6 +240,7 @@ export default function ContextualInspector() {
 
   return (
     <div 
+      id="gl-inspector"
       data-tour-id="inspector-panel" 
       className={`relative h-full ${!isExpanded ? 'cursor-pointer' : ''} bg-white dark:bg-[#111111] border-l border-slate-200 dark:border-slate-800 z-30 flex flex-col shadow-[-10px_0_30px_-15px_rgba(0,0,0,0.1)] ${isResizing ? '' : 'transition-all duration-[280ms] ease-in-out'} shrink-0`}
       style={{ width: isExpanded ? width : 48 }}
@@ -249,7 +258,7 @@ export default function ContextualInspector() {
       {!isExpanded ? (
         <div className="w-full h-full flex flex-col items-center py-6 text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 transition-colors">
           <InfoIcon className="w-5 h-5 mb-6" />
-          <div className="[writing-mode:vertical-lr] text-[11px] font-medium tracking-[0.7px] uppercase rotate-180 text-[var(--gl-text-muted)] whitespace-nowrap">
+          <div className="[writing-mode:vertical-lr] text-xs font-medium tracking-[0.7px] uppercase rotate-180 text-[var(--gl-text-muted)] whitespace-nowrap">
             GLOBAL OVERVIEW
           </div>
         </div>
@@ -267,7 +276,7 @@ export default function ContextualInspector() {
                 <Badge variant="secondary" className="mb-2 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400">
                   {selectedNode ? selectedNode.type?.replace('Node', '').toUpperCase() : 'GLOBAL OVERVIEW'}
                 </Badge>
-                <h3 className="text-[15px] font-medium tracking-[-0.3px] text-[var(--gl-text-primary)]">
+                <h3 className="text-base font-medium tracking-[-0.3px] text-[var(--gl-text-primary)]">
                   {selectedNode ? (data?.name || selectedNode.id) : 'Infrastructure Posture'}
                 </h3>
               </div>
@@ -291,7 +300,7 @@ export default function ContextualInspector() {
                 <button
                   key={tab}
                   onClick={(e) => { e.stopPropagation(); setActiveTab(tab); }}
-                  className={`relative px-3 py-3 text-[11px] font-medium tracking-[0.7px] uppercase transition-colors ${
+                  className={`relative px-3 py-3 text-xs font-medium tracking-[0.7px] uppercase transition-colors ${
                     activeTab === tab ? 'text-[var(--gl-text-primary)]' : 'text-[var(--gl-text-muted)] hover:text-slate-600 dark:hover:text-slate-300'
                   }`}
                 >
@@ -323,18 +332,18 @@ export default function ContextualInspector() {
                       {selectedNode && data ? (
                         <>
                           <motion.div variants={staggerItem}>
-                            <p className="text-[12px] font-normal text-[var(--gl-text-muted)] mt-1">{data.insights}</p>
+                            <p className="text-xs font-normal text-[var(--gl-text-muted)] mt-1">{data.insights}</p>
                           </motion.div>
                           <Separator className="bg-slate-200 dark:bg-slate-800" />
                           <motion.div variants={staggerContainer} initial="initial" animate="animate">
-                            <h4 className="text-[11px] font-medium tracking-[0.7px] uppercase text-[var(--gl-text-muted)] mb-3">Instance Properties</h4>
+                            <h4 className="text-xs font-medium tracking-[0.7px] uppercase text-[var(--gl-text-muted)] mb-3">Instance Properties</h4>
                             <div className="space-y-2">
                               {data.metrics && Object.entries(data.metrics).map(([key, value]) => (
                                 <motion.div variants={staggerItem} key={key} className="flex justify-between items-center py-2 border-b border-slate-100 dark:border-slate-800/50 last:border-0">
-                                  <span className="text-[12px] text-[var(--gl-text-muted)]">
+                                  <span className="text-xs text-[var(--gl-text-muted)]">
                                     {formatMetricLabel(key)}
                                   </span>
-                                  <span className="text-[15px] font-medium tracking-[-0.3px] text-[var(--gl-text-primary)]">
+                                  <span className="text-base font-medium tracking-[-0.3px] text-[var(--gl-text-primary)]">
                                     {!isNaN(Number(value)) && <AnimatedCounter value={Number(value)} />}
                                     {isNaN(Number(value)) && String(value)}
                                   </span>
@@ -347,7 +356,7 @@ export default function ContextualInspector() {
                             <>
                               <Separator className="bg-slate-200 dark:bg-slate-800" />
                               <motion.div variants={staggerItem}>
-                                <h4 className="text-[11px] font-medium tracking-[0.7px] uppercase text-[var(--gl-text-muted)] mb-3">Time-Series Telemetry</h4>
+                                <h4 className="text-xs font-medium tracking-[0.7px] uppercase text-[var(--gl-text-muted)] mb-3">Time-Series Telemetry</h4>
                                 <div className="w-full h-40">
                                   <ResponsiveContainer width="100%" height={160}>
                                     <AreaChart data={telemetryData} margin={{ top: 5, right: 0, left: -25, bottom: 0 }}>
@@ -376,12 +385,12 @@ export default function ContextualInspector() {
                       ) : (
                         <>
                           <motion.div variants={staggerItem} className="flex items-center justify-between mb-3">
-                            <h3 className="text-[11px] font-medium tracking-[0.7px] uppercase text-[var(--gl-text-muted)] flex items-center gap-2">
+                            <h3 className="text-xs font-medium tracking-[0.7px] uppercase text-[var(--gl-text-muted)] flex items-center gap-2">
                               <PulseIcon weight="bold" className="w-3 h-3 text-emerald-500" /> Environment Status
                             </h3>
                             <button
                               onClick={(e) => { e.stopPropagation(); toggleLiveStream(); }}
-                              className={`px-3 py-1 text-[11px] font-medium tracking-[0.7px] uppercase rounded-full transition-all duration-300 border flex items-center gap-2 ${isLiveStreamActive
+                              className={`px-3 py-1 text-xs font-medium tracking-[0.7px] uppercase rounded-full transition-all duration-300 border flex items-center gap-2 ${isLiveStreamActive
                                 ? 'bg-red-500/10 text-red-500 border-red-500/30 shadow-[0_0_15px_rgba(239,68,68,0.2)]'
                                 : 'bg-slate-100 dark:bg-slate-800 text-slate-500 border-slate-200 dark:border-slate-700'
                               }`}
@@ -395,8 +404,8 @@ export default function ContextualInspector() {
                           </motion.div>
 
                           <motion.div variants={staggerItem} className="flex items-center justify-between p-3 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-100 dark:border-emerald-500/20">
-                            <span className="text-[15px] font-medium tracking-[-0.3px] text-emerald-700 dark:text-emerald-400">System Health</span>
-                            <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 text-[12px] font-normal">
+                            <span className="text-base font-medium tracking-[-0.3px] text-emerald-700 dark:text-emerald-400">System Health</span>
+                            <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 text-xs font-normal">
                               <span className="relative flex h-2 w-2">
                                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                                 <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
@@ -408,7 +417,7 @@ export default function ContextualInspector() {
                           <Separator className="bg-slate-200 dark:bg-slate-800" />
 
                           <motion.div variants={staggerContainer} initial="initial" animate="animate">
-                            <h3 className="text-[11px] font-medium tracking-[0.7px] uppercase text-[var(--gl-text-muted)] mb-3 flex items-center gap-2">
+                            <h3 className="text-xs font-medium tracking-[0.7px] uppercase text-[var(--gl-text-muted)] mb-3 flex items-center gap-2">
                               <HardDrivesIcon weight="duotone" className="w-3 h-3" /> Topology Metrics
                             </h3>
                             <div className="grid grid-cols-2 gap-3">
@@ -438,14 +447,14 @@ export default function ContextualInspector() {
                   {activeTab === 'Metrics & Cost' && (
                     <motion.div variants={staggerContainer} initial="initial" animate="animate" className="space-y-6">
                       <motion.div variants={staggerItem}>
-                        <h4 className="text-[11px] font-medium tracking-[0.7px] uppercase text-[var(--gl-text-muted)] mb-1">Estimated Cost</h4>
-                        <p className="text-[22px] font-medium tracking-[-0.5px] text-[var(--gl-text-primary)] mt-1">
-                          $<AnimatedCounter value={selectedNode ? Number(data?.metrics?.estMonthlyCost || 0) : estimatedGlobalCost} /><span className="text-[12px] text-[var(--gl-text-muted)]">/mo</span>
+                        <h4 className="text-xs font-medium tracking-[0.7px] uppercase text-[var(--gl-text-muted)] mb-1">Estimated Cost</h4>
+                        <p className="text-xl font-medium tracking-[-0.5px] text-[var(--gl-text-primary)] mt-1">
+                          $<AnimatedCounter value={selectedNode ? Number(data?.metrics?.estMonthlyCost || 0) : estimatedGlobalCost} /><span className="text-xs text-[var(--gl-text-muted)]">/mo</span>
                         </p>
                       </motion.div>
 
                       <motion.div variants={staggerItem}>
-                        <h4 className="text-[11px] font-medium tracking-[0.7px] uppercase text-[var(--gl-text-muted)] mb-3">Cost Breakdown</h4>
+                        <h4 className="text-xs font-medium tracking-[0.7px] uppercase text-[var(--gl-text-muted)] mb-3">Cost Breakdown</h4>
                         <div className="w-full py-4 bg-slate-50 dark:bg-slate-900/30 rounded-xl border border-slate-200 dark:border-slate-800 flex flex-col items-center justify-center">
                           <div className="w-40 h-40 flex items-center justify-center">
                             <PieChart
@@ -485,15 +494,15 @@ export default function ContextualInspector() {
 
                       {selectedNode && finopsRecommendation && (
                         <motion.div variants={staggerItem} className="p-4 rounded-xl border bg-emerald-50 dark:bg-slate-900 border-emerald-200 dark:border-emerald-500/30">
-                          <h4 className="text-[11px] font-medium tracking-[0.7px] uppercase text-[var(--gl-text-muted)] mb-2 flex items-center gap-1">
+                          <h4 className="text-xs font-medium tracking-[0.7px] uppercase text-[var(--gl-text-muted)] mb-2 flex items-center gap-1">
                             <TrendDownIcon weight="bold" className="w-3 h-3 text-emerald-500" /> Right-Sizing Suggestion
                           </h4>
-                          <p className="text-[15px] font-medium tracking-[-0.3px] text-[var(--gl-text-primary)] mb-1">{finopsRecommendation.action}</p>
+                          <p className="text-base font-medium tracking-[-0.3px] text-[var(--gl-text-primary)] mb-1">{finopsRecommendation.action}</p>
                           <div className="flex items-center justify-between mt-3 pt-3 border-t border-emerald-200 dark:border-slate-800">
-                            <span className="text-[12px] text-[var(--gl-text-muted)] flex items-center gap-1">
+                            <span className="text-xs text-[var(--gl-text-muted)] flex items-center gap-1">
                               <WarningIcon weight="duotone" className="w-3 h-3 text-orange-500" /> {finopsRecommendation.issue}
                             </span>
-                            <span className="text-[22px] font-medium tracking-[-0.5px] text-[var(--gl-text-primary)] flex items-center gap-1">
+                            <span className="text-xl font-medium tracking-[-0.5px] text-[var(--gl-text-primary)] flex items-center gap-1">
                               Save {finopsRecommendation.savings}
                             </span>
                           </div>
@@ -502,7 +511,7 @@ export default function ContextualInspector() {
 
                       {selectedNode && telemetryData && chartKeys.length > 0 && (
                         <motion.div variants={staggerItem}>
-                          <h4 className="text-[11px] font-medium tracking-[0.7px] uppercase text-[var(--gl-text-muted)] mb-3">Time-Series Telemetry</h4>
+                          <h4 className="text-xs font-medium tracking-[0.7px] uppercase text-[var(--gl-text-muted)] mb-3">Time-Series Telemetry</h4>
                           <div className="w-full h-40">
                             <ResponsiveContainer width="100%" height={160}>
                               <AreaChart data={telemetryData} margin={{ top: 5, right: 0, left: -25, bottom: 0 }}>
@@ -537,7 +546,7 @@ export default function ContextualInspector() {
                             <button
                               key={fw}
                               onClick={(e) => { e.stopPropagation(); useCanvasStore.getState().setComplianceFramework(fw as any); }}
-                              className={`flex-1 text-[11px] font-medium tracking-[0.7px] uppercase py-1.5 rounded-md transition-all ${
+                              className={`flex-1 text-xs font-medium tracking-[0.7px] uppercase py-1.5 rounded-md transition-all ${
                                 complianceFramework === fw
                                   ? 'bg-white dark:bg-slate-800 text-[var(--gl-text-primary)] shadow-sm'
                                   : 'text-[var(--gl-text-muted)] hover:text-[var(--gl-text-primary)]'
@@ -552,18 +561,18 @@ export default function ContextualInspector() {
                       {!selectedNode && (
                         <motion.div variants={staggerItem} className="p-4 rounded-xl border bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900/50">
                           <div className="flex items-center justify-between mb-4">
-                            <h4 className="text-[11px] font-medium tracking-[0.7px] uppercase text-[var(--gl-text-muted)] flex items-center gap-2">
+                            <h4 className="text-xs font-medium tracking-[0.7px] uppercase text-[var(--gl-text-muted)] flex items-center gap-2">
                               <ShieldIcon weight="duotone" className="w-3 h-3 text-amber-500" /> Risk Score
                             </h4>
-                            <span className="text-[22px] font-medium tracking-[-0.5px] text-[var(--gl-text-primary)]">
-                              <AnimatedCounter value={score} /><span className="text-[12px] text-[var(--gl-text-muted)]">/100</span>
+                            <span className="text-xl font-medium tracking-[-0.5px] text-[var(--gl-text-primary)]">
+                              <AnimatedCounter value={score} /><span className="text-xs text-[var(--gl-text-muted)]">/100</span>
                             </span>
                           </div>
                         </motion.div>
                       )}
 
                       <motion.div variants={staggerContainer} initial="initial" animate="animate">
-                        <h4 className="text-[11px] font-medium tracking-[0.7px] uppercase text-[var(--gl-text-muted)] mb-3 flex items-center gap-2">
+                        <h4 className="text-xs font-medium tracking-[0.7px] uppercase text-[var(--gl-text-muted)] mb-3 flex items-center gap-2">
                           <ShieldIcon weight="duotone" className="w-3 h-3" /> Compliance Progress
                         </h4>
                         <ComplianceProgressBar label="SOC 2 Readiness" percentage={85} />
@@ -574,7 +583,7 @@ export default function ContextualInspector() {
                       <Separator className="bg-slate-200 dark:bg-slate-800" />
 
                       <motion.div variants={staggerItem}>
-                        <h4 className={`text-[11px] font-medium tracking-[0.7px] uppercase text-[var(--gl-text-muted)] mb-3 flex items-center gap-2`}>
+                        <h4 className={`text-xs font-medium tracking-[0.7px] uppercase text-[var(--gl-text-muted)] mb-3 flex items-center gap-2`}>
                           <ShieldWarningIcon weight="duotone" className="w-3 h-3 text-amber-500" /> Active Misconfigurations
                         </h4>
                         {selectedNode ? (
@@ -583,24 +592,24 @@ export default function ContextualInspector() {
                               {nodeVulnerabilities.map((vuln, idx) => (
                                 <motion.div variants={staggerItem} key={idx} className="p-3 rounded-lg bg-white/50 dark:bg-slate-900/50 border border-amber-100 dark:border-amber-900/30">
                                   <p className={`${getSeverityStyles(vuln.severity)} mb-1`}>{vuln.issue}</p>
-                                  <p className="text-[12px] font-normal text-[var(--gl-text-muted)] border-l-2 border-amber-300 dark:border-amber-700 pl-2">
+                                  <p className="text-xs font-normal text-[var(--gl-text-muted)] border-l-2 border-amber-300 dark:border-amber-700 pl-2">
                                     {vuln.remediation}
                                   </p>
                                 </motion.div>
                               ))}
                             </motion.div>
                           ) : (
-                            <p className="text-[12px] font-normal text-[var(--gl-text-muted)] italic">No compliance violations detected on this resource.</p>
+                            <p className="text-xs font-normal text-[var(--gl-text-muted)] italic">No compliance violations detected on this resource.</p>
                           )
                         ) : (
                           <motion.div variants={staggerContainer} initial="initial" animate="animate" className="space-y-3">
                             {vulnerabilities.map((vuln, idx) => (
                               <motion.div variants={staggerItem} key={idx} className="p-3 rounded-lg bg-white/50 dark:bg-slate-900/50 border border-amber-100 dark:border-amber-900/30">
                                 <div className="flex items-center justify-between mb-1">
-                                  <span className="text-[12px] font-medium text-[var(--gl-text-muted)]">{vuln.name}</span>
+                                  <span className="text-xs font-medium text-[var(--gl-text-muted)]">{vuln.name}</span>
                                   <span className={getSeverityStyles(vuln.severity)}>{vuln.severity.toUpperCase()}</span>
                                 </div>
-                                <p className="text-[12px] font-normal text-[var(--gl-text-primary)] mb-2">{vuln.issue}</p>
+                                <p className="text-xs font-normal text-[var(--gl-text-primary)] mb-2">{vuln.issue}</p>
                               </motion.div>
                             ))}
                           </motion.div>
@@ -613,28 +622,28 @@ export default function ContextualInspector() {
                     <motion.div variants={staggerContainer} initial="initial" animate="animate" className="space-y-6">
                       {selectedNode ? (
                         <motion.div variants={staggerItem} className="p-4 rounded-xl border bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-900/50">
-                          <h4 className="text-[11px] font-medium tracking-[0.7px] uppercase text-[var(--gl-text-muted)] mb-3 flex items-center gap-2">
+                          <h4 className="text-xs font-medium tracking-[0.7px] uppercase text-[var(--gl-text-muted)] mb-3 flex items-center gap-2">
                             <PulseIcon weight="bold" className="w-3 h-3 text-red-500" /> Cascading Failure
                           </h4>
                           <div className="flex items-center justify-between mb-4">
-                            <span className="text-[12px] text-[var(--gl-text-muted)]">Downstream Services Affected</span>
-                            <span className="text-[22px] font-medium tracking-[-0.5px] text-[var(--gl-text-primary)]"><AnimatedCounter value={affectedNodes.length} /></span>
+                            <span className="text-xs text-[var(--gl-text-muted)]">Downstream Services Affected</span>
+                            <span className="text-xl font-medium tracking-[-0.5px] text-[var(--gl-text-primary)]"><AnimatedCounter value={affectedNodes.length} /></span>
                           </div>
                           <Separator className="bg-red-200 dark:bg-red-900/50 mb-4" />
                           <div className="space-y-2">
                             {affectedNodes.length > 0 ? affectedNodes.map(node => (
                               <div key={node.id} className="flex items-center gap-2 p-2 rounded-lg bg-white/50 dark:bg-slate-900/50 border border-red-100 dark:border-red-900/30">
-                                <span className="text-[12px] font-normal text-[var(--gl-text-muted)] truncate">{(node.data as any)?.name || node.id}</span>
+                                <span className="text-xs font-normal text-[var(--gl-text-muted)] truncate">{(node.data as any)?.name || node.id}</span>
                               </div>
                             )) : (
-                              <p className="text-[12px] font-normal text-[var(--gl-text-muted)] italic">No downstream dependencies. Safe to isolate.</p>
+                              <p className="text-xs font-normal text-[var(--gl-text-muted)] italic">No downstream dependencies. Safe to isolate.</p>
                             )}
                           </div>
                         </motion.div>
                       ) : (
                         <motion.div variants={staggerItem} className="flex flex-col items-center justify-center p-6 text-center border border-dashed rounded-xl border-slate-200 dark:border-slate-800">
                           <PulseIcon weight="duotone" className="w-8 h-8 text-slate-400 mb-3" />
-                          <p className="text-[12px] font-normal text-[var(--gl-text-muted)]">Select any node on the canvas to simulate a failure and map the downstream impact.</p>
+                          <p className="text-xs font-normal text-[var(--gl-text-muted)]">Select any node on the canvas to simulate a failure and map the downstream impact.</p>
                         </motion.div>
                       )}
                     </motion.div>
