@@ -1,17 +1,19 @@
 import { useState, useEffect } from 'react';
 
-export type FontScale = 'small' | 'medium' | 'large';
+export type FontScale = 'compact' | 'small' | 'medium' | 'large' | 'larger';
 
 const SCALE_VALUES: Record<FontScale, number> = {
-  small: 0.875,
-  medium: 1,
-  large: 1.125
+  compact: 0.75,
+  small: 0.8125,
+  medium: 0.875,
+  large: 1,
+  larger: 1.125
 };
 
-const SCALE_ORDER: FontScale[] = ['small', 'medium', 'large'];
+const SCALE_ORDER: FontScale[] = ['compact', 'small', 'medium', 'large', 'larger'];
 
 export function useFontScale() {
-  const [scale, setScaleState] = useState<FontScale>('medium');
+  const [scale, setScaleState] = useState<FontScale>('small');
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -35,17 +37,19 @@ export function useFontScale() {
       if (dashboard) dashboard.dataset.fontScale = s;
 
       // Inspector panel (new)
+      const inspectorScaleIndex = Math.max(0, SCALE_ORDER.indexOf(s) - 1);
+      const inspectorScale = SCALE_ORDER[inspectorScaleIndex];
       const inspector = document.getElementById('gl-inspector');
-      if (inspector) inspector.dataset.fontScale = s;
+      if (inspector) inspector.dataset.fontScale = inspectorScale;
+
+      try {
+        localStorage.setItem('gl-font-scale', s);
+      } catch (e) {
+        console.error('Failed to set localStorage', e);
+      }
     };
     
     applyScale(scale);
-    
-    try {
-      localStorage.setItem('gl-font-scale', scale);
-    } catch (e) {
-      console.error('Failed to set localStorage', e);
-    }
   }, [scale, mounted]);
 
   const setScale = (newScale: FontScale) => {
