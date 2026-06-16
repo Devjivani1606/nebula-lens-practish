@@ -1,0 +1,61 @@
+/* ---- SMALL (87.5% = 14px base → everything 1 step smaller) ---- */
+#gl-dashboard[data-font-scale="small"] .text-xs,
+#gl-dashboard[data-font-scale="small"] [class*="text-xs"]  { font-size: 0.6875rem !important; } /* 11px */
+#gl-dashboard[data-font-scale="small"] .text-sm,
+#gl-dashboard[data-font-scale="small"] [class*="text-sm"]  { font-size: 0.75rem !important;   } /* 12px */
+#gl-dashboard[data-font-scale="small"] .text-base          { font-size: 0.8125rem !important; } /* 13px */
+#gl-dashboard[data-font-scale="small"] .text-lg            { font-size: 0.875rem !important;  } /* 14px */
+#gl-dashboard[data-font-scale="small"] .text-xl            { font-size: 1rem !important;      } /* 16px */
+#gl-dashboard[data-font-scale="small"] .text-2xl           { font-size: 1.25rem !important;   } /* 20px */
+#gl-dashboard[data-font-scale="small"] .text-3xl           { font-size: 1.5rem !important;    } /* 24px */
+#gl-dashboard[data-font-scale="small"] .text-4xl           { font-size: 2rem !important;      } /* 32px */
+
+/* ---- LARGE (112.5% = 18px base → everything 1 step larger) ---- */
+#gl-dashboard[data-font-scale="large"] .text-xs,
+#gl-dashboard[data-font-scale="large"] [class*="text-xs"]  { font-size: 0.8125rem !important; } /* 13px */
+#gl-dashboard[data-font-scale="large"] .text-sm,
+#gl-dashboard[data-font-scale="large"] [class*="text-sm"]  { font-size: 0.9375rem !important; } /* 15px */
+#gl-dashboard[data-font-scale="large"] .text-base          { font-size: 1rem !important;      } /* 16px */
+#gl-dashboard[data-font-scale="large"] .text-lg            { font-size: 1.125rem !important;  } /* 18px */
+#gl-dashboard[data-font-scale="large"] .text-xl            { font-size: 1.375rem !important;  } /* 22px */
+#gl-dashboard[data-font-scale="large"] .text-2xl           { font-size: 1.625rem !important;  } /* 26px */
+#gl-dashboard[data-font-scale="large"] .text-3xl           { font-size: 1.875rem !important;  } /* 30px */
+#gl-dashboard[data-font-scale="large"] .text-4xl           { font-size: 2.5rem !important;    } /* 40px */
+
+/* Smooth font-size transitions on dashboard content */
+#gl-dashboard * { 
+  transition-property: font-size;
+  transition-duration: 200ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ---- SMALL INSPECTOR ---- */
+#gl-inspector[data-font-scale="small"] .text-xs,
+#gl-inspector[data-font-scale="small"] [class*="text-xs"]  { font-size: 0.6875rem !important; } /* 11px */
+#gl-inspector[data-font-scale="small"] .text-sm,
+#gl-inspector[data-font-scale="small"] [class*="text-sm"]  { font-size: 0.75rem !important;   } /* 12px */
+#gl-inspector[data-font-scale="small"] .text-base          { font-size: 0.8125rem !important; } /* 13px */
+#gl-inspector[data-font-scale="small"] .text-lg            { font-size: 0.875rem !important;  } /* 14px */
+#gl-inspector[data-font-scale="small"] .text-xl            { font-size: 1rem !important;      } /* 16px */
+#gl-inspector[data-font-scale="small"] .text-2xl           { font-size: 1.25rem !important;   } /* 20px */
+#gl-inspector[data-font-scale="small"] .text-3xl           { font-size: 1.5rem !important;    } /* 24px */
+#gl-inspector[data-font-scale="small"] .text-4xl           { font-size: 2rem !important;      } /* 32px */
+
+/* ---- LARGE INSPECTOR ---- */
+#gl-inspector[data-font-scale="large"] .text-xs,
+#gl-inspector[data-font-scale="large"] [class*="text-xs"]  { font-size: 0.8125rem !important; } /* 13px */
+#gl-inspector[data-font-scale="large"] .text-sm,
+#gl-inspector[data-font-scale="large"] [class*="text-sm"]  { font-size: 0.9375rem !important; } /* 15px */
+#gl-inspector[data-font-scale="large"] .text-base          { font-size: 1rem !important;      } /* 16px */
+#gl-inspector[data-font-scale="large"] .text-lg            { font-size: 1.125rem !important;  } /* 18px */
+#gl-inspector[data-font-scale="large"] .text-xl            { font-size: 1.375rem !important;  } /* 22px */
+#gl-inspector[data-font-scale="large"] .text-2xl           { font-size: 1.625rem !important;  } /* 26px */
+#gl-inspector[data-font-scale="large"] .text-3xl           { font-size: 1.875rem !important;  } /* 30px */
+#gl-inspector[data-font-scale="large"] .text-4xl           { font-size: 2.5rem !important;    } /* 40px */
+
+/* Smooth font-size transitions on inspector content */
+#gl-inspector * { 
+  transition-property: font-size;
+  transition-duration: 200ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
