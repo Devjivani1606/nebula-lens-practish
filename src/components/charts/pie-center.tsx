@@ -4,7 +4,7 @@ import React, { useContext } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { PieChartContext } from './pie-chart';
 
-interface PieCenterProps {
+export interface PieCenterProps {
   prefix?: string;
 }
 
