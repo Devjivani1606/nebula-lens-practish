@@ -1,16 +1,17 @@
 import { NextResponse } from 'next/server';
+import { CloudNode, CloudEdge } from '@/types/cloud';
 
 export async function GET() {
   // Simulate minor network latency inherent to cloud API aggregation
   await new Promise((resolve) => setTimeout(resolve, 800));
 
-  const mockAwsArchitecture = {
+  const mockAwsArchitecture: { nodes: CloudNode[]; edges: CloudEdge[] } = {
     "nodes": [
 
       {
         "id": "vpc-main",
         "type": "VPC",
-        "parentId": null,
+        "parentId": undefined,
         "position": { "x": 0, "y": 0 },
         "style": { "width": 900, "height": 520 }, // Slightly taller to fit the AZ
         "data": {
@@ -18,6 +19,11 @@ export async function GET() {
           "insights": "Flow logs enabled.",
           "metrics": { "cidrBlock": "10.0.0.0/16", "region": "ap-south-1", "estMonthlyCost": 420 },
           "telemetryData": [{ "time": "08:00", "natTrafficGB": 12 }, { "time": "08:15", "natTrafficGB": 15 }]
+        },
+        "networkMeta": {
+          "vpcId": "vpc-0abc123456789",
+          "cidr": "10.0.0.0/16",
+          "isPublic": true
         }
       },
       //  NEW: The Availability Zone Layer
@@ -32,6 +38,10 @@ export async function GET() {
           "name": "ap-south-1a",
           "insights": "Physical Data Center boundaries.",
           "metrics": { "status": "Operational", "powerGrid": "Stable" }
+        },
+        "networkMeta": {
+          "vpcId": "vpc-0abc123456789",
+          "az": "ap-south-1a"
         }
       },
       //  UPDATED: Subnet is now a child of the AZ!
@@ -46,12 +56,19 @@ export async function GET() {
           "name": "Private Compute Subnet",
           "metrics": { "cidrBlock": "10.0.1.0/24", "estMonthlyCost": 180 },
           "telemetryData": [{ "time": "08:00", "dataTransferIn": 45 }, { "time": "08:15", "dataTransferIn": 50 }]
+        },
+        "networkMeta": {
+          "vpcId": "vpc-0abc123456789",
+          "subnetId": "subnet-0123456789abcdef",
+          "cidr": "10.0.1.0/24",
+          "az": "ap-south-1a",
+          "isPublic": false
         }
       },
       {
         "id": "api-gateway-ingress",
         "type": "apiGatewayNode",
-        "parentId": null,
+        "parentId": undefined,
         "position": { "x": -315, "y": 250 },
         "data": {
           "name": "Client API Gateway",
@@ -77,6 +94,10 @@ export async function GET() {
             { "time": "09:00", "requests": 1800, "latency": 65 },
             { "time": "09:15", "requests": 1200, "latency": 45 }
           ]
+        },
+        "networkMeta": {
+          "vpcId": "vpc-0abc123456789",
+          "isPublic": true
         }
       },
       {
@@ -109,6 +130,9 @@ export async function GET() {
             { "time": "09:00", "messages": 45 },
             { "time": "09:15", "messages": 14 }
           ]
+        },
+        "networkMeta": {
+          "vpcId": "vpc-0abc123456789"
         }
       },
       {
@@ -142,6 +166,9 @@ export async function GET() {
             { "time": "09:00", "cpu": 85, "memory": 980 },
             { "time": "09:15", "cpu": 60, "memory": 890 }
           ]
+        },
+        "networkMeta": {
+          "vpcId": "vpc-0abc123456789"
         }
       },
       {
@@ -174,12 +201,16 @@ export async function GET() {
             { "time": "09:00", "connections": 210, "iops": 1200 },
             { "time": "09:15", "connections": 142, "iops": 650 }
           ]
+        },
+        "networkMeta": {
+          "vpcId": "vpc-0abc123456789",
+          "isPublic": false
         }
       },
       {
         "id": "s3-asset-bucket",
         "type": "s3Node",
-        "parentId": null,
+        "parentId": undefined,
         "position": { "x": 950, "y": 250 },
         "data": {
           "name": "Asset Storage",
@@ -204,6 +235,10 @@ export async function GET() {
             { "time": "09:00", "readOps": 2500, "writeOps": 300 },
             { "time": "09:15", "readOps": 1400, "writeOps": 60 }
           ]
+        },
+        "networkMeta": {
+          "vpcId": "vpc-0abc123456789",
+          "isPublic": false
         }
       }
     ],
@@ -214,7 +249,13 @@ export async function GET() {
         "target": "sqs-job-queue",
         "type": "animatedEdge",
         "label": "POST /jobs",
-        "data": { "transferCost": 4 }
+        "data": { "transferCost": 4 },
+        "networkMeta": {
+          "protocol": "TCP",
+          "port": 443,
+          "direction": "outbound",
+          "isEncrypted": true
+        }
       },
       {
         "id": "edge-sqs-to-lambda",
@@ -222,7 +263,13 @@ export async function GET() {
         "target": "lambda-processor",
         "type": "animatedEdge",
         "label": "Triggers Event",
-        "data": { "transferCost": 12 }
+        "data": { "transferCost": 12 },
+        "networkMeta": {
+          "protocol": "TCP",
+          "port": 443,
+          "direction": "outbound",
+          "isEncrypted": true
+        }
       },
       {
         "id": "edge-lambda-to-db",
@@ -230,7 +277,13 @@ export async function GET() {
         "target": "db-mongo-cluster",
         "type": "animatedEdge",
         "label": "Reads/Writes State",
-        "data": { "transferCost": 145 } // 🚨 Expensive Cross-AZ Database Traffic!
+        "data": { "transferCost": 145 }, // 🚨 Expensive Cross-AZ Database Traffic!
+        "networkMeta": {
+          "protocol": "TCP",
+          "port": 27017,
+          "direction": "outbound",
+          "isEncrypted": true
+        }
       },
       {
         "id": "edge-lambda-to-s3",
@@ -238,7 +291,13 @@ export async function GET() {
         "target": "s3-asset-bucket",
         "type": "animatedEdge",
         "label": "Stores Assets",
-        "data": { "transferCost": 45 }
+        "data": { "transferCost": 45 },
+        "networkMeta": {
+          "protocol": "TCP",
+          "port": 443,
+          "direction": "outbound",
+          "isEncrypted": true
+        }
       }
     ]
   };

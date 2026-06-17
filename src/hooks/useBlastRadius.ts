@@ -32,6 +32,7 @@ export function useBlastRadius(startNodeId: string | null) {
         }
       });
 
+
       // 2. INFRASTRUCTURE FAILURE: Find anything structurally trapped inside this container
       nodes.forEach(node => {
         if (node.parentId === currentId && !affected.has(node.id)) {

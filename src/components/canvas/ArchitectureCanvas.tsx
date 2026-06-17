@@ -6,6 +6,8 @@ import { ReactFlow, Background, Controls, Panel, MiniMap, useReactFlow } from '@
 import { useStore } from 'zustand';
 import { useCanvasStore } from '../../store/useCanvasStore';
 import { useAutoLayout } from '../../lib/layout/useAutoLayout';
+import { useLayerEngine } from '../../hooks/useLayerEngine';
+import LayerPanel from '../LayerPanel';
 
 import LambdaNode from '../nodes/LambdaNode';
 import S3Node from '../nodes/S3Node';
@@ -71,6 +73,8 @@ export default function ArchitectureCanvas() {
   } = useCanvasStore();
 
   const { fitView, setCenter, getNode } = useReactFlow();
+
+  const { visibleNodes, visibleEdges } = useLayerEngine();
 
   // Smoothly re-center canvas when the inspector panel resizes
   useEffect(() => {
@@ -317,8 +321,8 @@ export default function ArchitectureCanvas() {
           className="relative flex-1 h-full transition-all duration-[280ms] ease-in-out"
         >
           <ReactFlow
-            nodes={nodes}
-            edges={edges}
+            nodes={visibleNodes}
+            edges={visibleEdges}
             nodeTypes={nodeTypes}
             edgeTypes={edgeTypes}
             onNodesChange={onNodesChange}
@@ -358,8 +362,12 @@ export default function ArchitectureCanvas() {
               >
                 Redo ↪
               </Button>
-
             </Panel>
+
+            <Panel position="top-left" className="mt-16 z-50">
+              <LayerPanel />
+            </Panel>
+
             <LensToolbar
               isLayouting={isLayouting}
               onAutoLayout={() => executeAutoLayout({ force: true })}

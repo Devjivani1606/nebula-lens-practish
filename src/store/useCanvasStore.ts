@@ -11,17 +11,19 @@ import {
   applyNodeChanges,
   applyEdgeChanges,
 } from '@xyflow/react';
+import { useLayerStore } from './layerStore';
 
 // Import our mock data
-import initialData from '../data/latestdata.json';
+import initialData from '../data/latestdata.json' assert { type: 'json' };
+import { CloudNode, CloudEdge } from '../types/cloud';
 
 // 🚀 FIX: Added 'security' to the allowed lens types
 type LensType = 'structural' | 'blast-radius' | 'cost' | 'security';
 
 // Define the TypeScript interface for our store
 type CanvasState = {
-  nodes: Node[];
-  edges: Edge[];
+  nodes: CloudNode[];
+  edges: CloudEdge[];
   selectedNodeId: string | null;
   isLoading: boolean;
 
@@ -58,25 +60,43 @@ type CanvasState = {
 export const useCanvasStore = create<CanvasState>()(
   temporal(
     (set, get) => ({
-      nodes: initialData.nodes as Node[],
-      edges: initialData.edges as Edge[],
+      // TODO: Replace with a runtime validator (e.g. Zod) to ensure the imported JSON stays in sync with the CloudNode/CloudEdge types
+      nodes: initialData.nodes as CloudNode[],
+      edges: initialData.edges as CloudEdge[],
       isLoading: false,
 
       selectedNodeId: null,
       setSelectedNodeId: (id) => set({ selectedNodeId: id }),
 
       onNodesChange: (changes: NodeChange[]) => {
-        set({ nodes: applyNodeChanges(changes, get().nodes) });
+        set({ nodes: applyNodeChanges(changes, get().nodes) as CloudNode[] });
       },
       onEdgesChange: (changes: EdgeChange[]) => {
-        set({ edges: applyEdgeChanges(changes, get().edges) });
+        set({ edges: applyEdgeChanges(changes, get().edges) as CloudEdge[] });
       },
       onConnect: (connection: Connection) => {
-        set({ edges: addEdge(connection, get().edges) });
+        set({ edges: addEdge(connection, get().edges) as CloudEdge[] });
       },
 
       activeLens: 'structural',
-      setActiveLens: (lens) => set({ activeLens: lens }),
+      setActiveLens: (lens) => {
+        const prevLens = get().activeLens;
+        set({ activeLens: lens });
+
+        // Sync with layerStore
+        const layerState = useLayerStore.getState();
+        if (prevLens === 'security' && layerState.activeLayers.includes('security-layer')) {
+          layerState.toggleLayer('security-layer');
+        } else if (prevLens === 'cost' && layerState.activeLayers.includes('cost-layer')) {
+          layerState.toggleLayer('cost-layer');
+        }
+
+        if (lens === 'security' && !layerState.activeLayers.includes('security-layer')) {
+          layerState.toggleLayer('security-layer');
+        } else if (lens === 'cost' && !layerState.activeLayers.includes('cost-layer')) {
+          layerState.toggleLayer('cost-layer');
+        }
+      },
 
       focusedNodeId: null,
       setFocusedNodeId: (id) => set({ focusedNodeId: id }),
