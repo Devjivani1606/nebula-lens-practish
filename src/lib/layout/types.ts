@@ -51,7 +51,7 @@ export interface ElkNode {
 /**
  * Node type strings exactly as used in latestdata.json.
  *
- * ⚠️  ASSUMPTION: Container types are PascalCase ("VPC", "AvailabilityZone", "Subnet").
+ *   ASSUMPTION: Container types are PascalCase ("VPC", "AvailabilityZone", "Subnet").
  *     Resource types are camelCase + "Node" suffix (e.g. "lambdaNode", "sqsNode").
  *     Verify these values if node types change.
  */
