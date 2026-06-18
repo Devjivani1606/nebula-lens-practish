@@ -7,7 +7,7 @@ interface LayerStore {
   activeLayers: string[];
   toggleLayer: (id: string) => void;
   getVisibleNodes: (allNodes: CloudNode[]) => CloudNode[];
-  getVisibleEdges: (allEdges: CloudEdge[]) => CloudEdge[];
+  getVisibleEdges: (allNodes: CloudNode[], allEdges: CloudEdge[]) => CloudEdge[];
 }
 
 export const useLayerStore = create<LayerStore>((set, get) => ({
@@ -39,7 +39,7 @@ export const useLayerStore = create<LayerStore>((set, get) => ({
     );
   },
 
-  getVisibleEdges: (allEdges: CloudEdge[]) => {
+  getVisibleEdges: (allNodes: CloudNode[], allEdges: CloudEdge[]) => {
     const { activeLayers, layers } = get();
 
     if (activeLayers.length === 0) {
@@ -49,7 +49,7 @@ export const useLayerStore = create<LayerStore>((set, get) => ({
     const activeLayerObjects = layers.filter(l => activeLayers.includes(l.id));
 
     return allEdges.filter(edge =>
-      activeLayerObjects.some(layer => layer.edgeFilter(edge))
+      activeLayerObjects.some(layer => layer.edgeFilter(edge, allNodes))
     );
   }
 }));

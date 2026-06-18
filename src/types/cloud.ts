@@ -29,7 +29,7 @@ export type Layer = {
   icon: string;
   active: boolean;
   filter: (node: CloudNode) => boolean;
-  edgeFilter: (edge: CloudEdge) => boolean;
+  edgeFilter: (edge: CloudEdge, nodes: CloudNode[]) => boolean;
   renderOverride?: Partial<CSSProperties>;
   priority: number;
 };
