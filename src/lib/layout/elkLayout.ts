@@ -13,7 +13,7 @@
  * ELK outputs positions relative to each node's parent container.
  * React Flow with `parentId` ALSO uses parent-relative coordinates.
  * Therefore, ELK's x/y values can be passed directly to RF `position`
- * without any parent-offset arithmetic. ✅ Verified by inspecting both
+ * without any parent-offset arithmetic. Verified by inspecting both
  * ELK's layout output contract and RF's compound-node documentation.
  */
 
@@ -45,7 +45,7 @@ function isContainer(nodeType: string): boolean {
  * Default fallback dimensions for leaf/resource nodes whose React Flow
  * `measured` dimensions have not yet been set by the renderer.
  *
- * ⚠️  ASSUMPTION: 220×100 is a reasonable approximation for the custom node
+ * ASSUMPTION: 220×100 is a reasonable approximation for the custom node
  *     cards defined in this project. Adjust if card sizes change.
  */
 const DEFAULT_NODE_WIDTH = 220;
@@ -61,7 +61,7 @@ const DEFAULT_NODE_HEIGHT = 100;
  *   2. node.width / height            — RF v11 legacy fields
  *   3. DEFAULT_NODE_WIDTH / HEIGHT    — static fallback
  *
- * ⚠️  ASSUMPTION: `node.measured` is the React Flow v12 field name.
+ * ASSUMPTION: `node.measured` is the React Flow v12 field name.
  */
 function getNodeDimensions(node: Node): { width: number; height: number } {
   const w = (node as any).measured?.width ?? node.width ?? DEFAULT_NODE_WIDTH;
@@ -136,7 +136,7 @@ export function convertToElkGraph(
   function buildElkNode(rfNode: Node, depth: number = 0): ELKNode {
     const childRfNodes = childrenOf.get(rfNode.id) ?? [];
     const isContainerNode = childRfNodes.length > 0;
-    
+
     // Empty container case: structurally grouping but no children
     const typeStr = (rfNode.type || '').toLowerCase();
     const isGroupingType = typeStr.includes('vpc') || typeStr.includes('subnet') || typeStr.includes('availabilityzone') || typeStr.includes('igw');
@@ -206,7 +206,7 @@ export function convertToElkGraph(
     }
     elkEdges.push(elkEdge);
   }
-  
+
   elkRoot.edges = elkEdges;
 
   return elkRoot;
@@ -390,7 +390,7 @@ export async function runLayout(
     }
 
     const section = elkEdge.sections[0];
-    
+
     // Convert to a flat array of waypoints: start -> bends -> end
     const waypoints = [
       { x: section.startPoint.x, y: section.startPoint.y },

@@ -12,12 +12,23 @@ export function useLayerEngine() {
   const getVisibleEdges = useLayerStore((state) => state.getVisibleEdges);
 
   const visibleNodes = useMemo(() => {
-    return getVisibleNodes(nodes);
+    const filteredNodes = getVisibleNodes(nodes);
+    const visibleIds = new Set(filteredNodes.map(n => n.id));
+
+    // React Flow throws an error if a node has a parentId that doesn't exist in the nodes array.
+    // If a parent is filtered out by a layer, we must detach the child so it can still render independently.
+    return filteredNodes.map(node => {
+      if (node.parentId && !visibleIds.has(node.parentId)) {
+        const { parentId, extent, ...rest } = node;
+        return rest as CloudNode;
+      }
+      return node;
+    });
   }, [nodes, activeLayers, getVisibleNodes]);
 
   const visibleEdges = useMemo(() => {
-    return getVisibleEdges(edges);
-  }, [edges, activeLayers, getVisibleEdges]);
+    return getVisibleEdges(nodes, edges);
+  }, [nodes, edges, activeLayers, getVisibleEdges]);
 
   return { visibleNodes, visibleEdges };
 }

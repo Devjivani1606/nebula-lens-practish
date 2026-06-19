@@ -1,15 +1,5 @@
 import { Layer, CloudNode, CloudEdge } from '../types/cloud';
 
-const NETWORK_NODE_TYPES = [
-  "vpc", "subnet", "ec2", "rds", "lambda", "igw", 
-  "nat-gateway", "route-table", "security-group", 
-  "load-balancer", "elasticache"
-];
-
-const NETWORK_EDGE_TYPES = [
-  "network-traffic", "routes-to", "sg-rule"
-];
-
 export const NetworkLayer: Layer = {
   id: 'network-layer',
   name: 'Network',
@@ -17,12 +7,13 @@ export const NetworkLayer: Layer = {
   active: true,
   priority: 10,
   filter: (node: CloudNode) => {
-    return node.type ? NETWORK_NODE_TYPES.includes(node.type) : false;
+    return ["VPC", "AvailabilityZone", "Subnet", "lambdaNode"].includes(node.type || "");
   },
-  edgeFilter: (edge: CloudEdge) => {
-    // Assuming relationshipType might be on the edge itself or in its data payload
-    const relType = (edge as any).relationshipType || edge.data?.relationshipType;
-    return NETWORK_EDGE_TYPES.includes(relType);
+  edgeFilter: (edge: CloudEdge, nodes: CloudNode[]) => {
+    const networkTypes = ["VPC", "AvailabilityZone", "Subnet", "lambdaNode"];
+    const sourceIsNetwork = nodes.find(n => n.id === edge.source && networkTypes.includes(n.type || ""));
+    const targetIsNetwork = nodes.find(n => n.id === edge.target && networkTypes.includes(n.type || ""));
+    return !!(sourceIsNetwork && targetIsNetwork);
   },
   renderOverride: {
     tint: "#3B82F6",
@@ -38,8 +29,15 @@ export const SecurityLayer: Layer = {
   icon: 'shield',
   active: false,
   priority: 20,
-  filter: (node: CloudNode) => true,
-  edgeFilter: (edge: CloudEdge) => true,
+  filter: (node: CloudNode) => {
+    return ["apiGatewayNode", "databaseNode", "s3Node", "sqsNode"].includes(node.type || "");
+  },
+  edgeFilter: (edge: CloudEdge, nodes: CloudNode[]) => {
+    const securityTypes = ["apiGatewayNode", "databaseNode", "s3Node", "sqsNode"];
+    const sourceIs = nodes.find(n => n.id === edge.source && securityTypes.includes(n.type || ""));
+    const targetIs = nodes.find(n => n.id === edge.target && securityTypes.includes(n.type || ""));
+    return !!(sourceIs || targetIs); // show edge if either end is a security node
+  },
 };
 
 export const CostLayer: Layer = {
@@ -49,5 +47,5 @@ export const CostLayer: Layer = {
   active: false,
   priority: 30,
   filter: (node: CloudNode) => true,
-  edgeFilter: (edge: CloudEdge) => true,
+  edgeFilter: (edge: CloudEdge, nodes: CloudNode[]) => true,
 };
