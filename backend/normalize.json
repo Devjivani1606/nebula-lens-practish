@@ -1,0 +1,420 @@
+{"nodes": [
+    {
+      "id": "arn:aws:ec2:ap-south-1:129678139333:vpc/vpc-0e2eb4fd43dec85d0",
+      "type": "vpcNode",
+      "position": {
+        "x": 700,
+        "y": 50
+      },
+      "data": {
+        "name": " document-platform-vpc",
+        "service": "vpc",
+        "region": "ap-south-1",
+        "account_id": "129678139333",
+        "resource_arn": "arn:aws:ec2:ap-south-1:129678139333:vpc/vpc-0e2eb4fd43dec85d0",
+        "insights": "Custom VPC",
+        "metrics": {
+          "state": "available",
+          "region": "ap-south-1",
+          "cidrBlock": "10.0.0.0/16",
+          "endpoints": [],
+          "isDefault": false,
+          "securityScan": "Pass",
+          "securityGroups": [
+            {
+              "groupId": "sg-0f6e7d255d71e09f5",
+              "groupName": "launch-wizard-2",
+              "ipPermissions": [
+                {
+                  "toPort": 22,
+                  "fromPort": 22,
+                  "ipProtocol": "tcp",
+                  "userIdGroupPairs": []
+                }
+              ]
+            },
+            {
+              "groupId": "sg-08c35da245413e3fa",
+              "groupName": "default",
+              "ipPermissions": [
+                {
+                  "toPort": null,
+                  "fromPort": null,
+                  "ipProtocol": "-1",
+                  "userIdGroupPairs": [
+                    {
+                      "groupId": "sg-08c35da245413e3fa"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "tags": {}
+      }
+    },
+    {
+      "id": "arn:aws:ec2:ap-south-1:129678139333:subnet/subnet-0e1fbfc4d4ed2206c",
+      "type": "subnetNode",
+      "position": {
+        "x": 400,
+        "y": 100
+      },
+      "data": {
+        "name": "public-sub",
+        "service": "subnet",
+        "region": "ap-south-1",
+        "account_id": "129678139333",
+        "resource_arn": "arn:aws:ec2:ap-south-1:129678139333:subnet/subnet-0e1fbfc4d4ed2206c",
+        "insights": "Private Subnet",
+        "metrics": {
+          "type": "Private Subnet",
+          "region": "ap-south-1",
+          "cidrBlock": "10.0.1.0/24",
+          "availableIPs": 250,
+          "securityScan": "Pass",
+          "availabilityZone": "ap-south-1a"
+        },
+        "tags": {}
+      },
+      "parentID": "arn:aws:ec2:ap-south-1:129678139333:vpc/vpc-0e2eb4fd43dec85d0"
+    },
+    {
+      "id": "arn:aws:ec2:ap-south-1:129678139333:subnet/subnet-0a7a80ad19e683292",
+      "type": "subnetNode",
+      "position": {
+        "x": 1000,
+        "y": 180
+      },
+      "data": {
+        "name": "private-sub",
+        "service": "subnet",
+        "region": "ap-south-1",
+        "account_id": "129678139333",
+        "resource_arn": "arn:aws:ec2:ap-south-1:129678139333:subnet/subnet-0a7a80ad19e683292",
+        "insights": "Private Subnet",
+        "metrics": {
+          "type": "Private Subnet",
+          "region": "ap-south-1",
+          "cidrBlock": "10.0.2.0/24",
+          "availableIPs": 250,
+          "securityScan": "Pass",
+          "availabilityZone": "ap-south-1b"
+        },
+        "tags": {}
+      },
+      "parentID": "arn:aws:ec2:ap-south-1:129678139333:vpc/vpc-0e2eb4fd43dec85d0"
+      },
+    {
+      "id": "arn:aws:ec2:ap-south-1:129678139333:instance/i-0d55ca7ec32e108e8",
+      "type": "ec2Node",
+      "position": {
+        "x": 400,
+        "y": 350
+      },
+      "data": {
+        "name": "dashboard-server",
+        "service": "ec2",
+        "region": "ap-south-1",
+        "account_id": "129678139333",
+        "resource_arn": "arn:aws:ec2:ap-south-1:129678139333:instance/i-0d55ca7ec32e108e8",
+        "insights": "Running - t3.micro",
+        "metrics": {
+          "state": "running",
+          "vpcId": "vpc-0e2eb4fd43dec85d0",
+          "region": "ap-south-1",
+          "publicIp": "13.201.26.169",
+          "subnetId": "subnet-0e1fbfc4d4ed2206c",
+          "privateIp": "10.0.1.30",
+          "instanceType": "t3.micro",
+          "securityScan": "Warning: Instance has public IP",
+          "securityGroups": [
+            "launch-wizard-2"
+          ],
+          "availabilityZone": "ap-south-1a",
+          "securityGroupIds": [
+            "sg-0f6e7d255d71e09f5"
+          ],
+          "iamInstanceProfileArn": "arn:aws:iam::129678139333:instance-profile/ec2permissionRole"
+        },
+        "tags": {}
+      },
+      "parentID": "arn:aws:ec2:ap-south-1:129678139333:subnet/subnet-0e1fbfc4d4ed2206c"
+    },
+    {
+      "id": "arn:aws:lambda:ap-south-1:129678139333:function:processor",
+      "type": "lambdaNode",
+      "position": {
+        "x": 900,
+        "y": 350
+      },
+      "data": {
+        "name": "processor",
+        "service": "lambda",
+        "region": "ap-south-1",
+        "account_id": "129678139333",
+        "resource_arn": "arn:aws:lambda:ap-south-1:129678139333:function:processor",
+        "insights": "Inside VPC",
+        "metrics": {
+          "inVpc": true,
+          "vpcId": "vpc-0e2eb4fd43dec85d0",
+          "memory": "128 MB",
+          "region": "ap-south-1",
+          "iamRole": "document-platform-role",
+          "roleArn": "arn:aws:iam::129678139333:role/document-platform-role",
+          "runtime": "python3.11",
+          "timeout": "3s",
+          "subnetIds": [
+            "subnet-0a7a80ad19e683292"
+          ],
+          "environment": {
+            "Variables": {
+              "OUTPUT_BUCKET": "processed-documents-bucket26",
+              "NOTIFICATION_QUEUE": "notification-queue"
+            }
+          },
+          "functionArn": "arn:aws:lambda:ap-south-1:129678139333:function:processor",
+          "securityScan": "Pass",
+          "securityGroupIds": [
+            "sg-08c35da245413e3fa"
+          ],
+          "eventSourceMappings": [
+            {
+              "state": "Enabled",
+              "eventSourceArn": "arn:aws:sqs:ap-south-1:129678139333:processing-queue"
+            }
+          ]
+        },
+        "tags": {}
+      },
+      "parentID": "arn:aws:ec2:ap-south-1:129678139333:subnet/subnet-0a7a80ad19e683292"
+    },
+    {
+      "id": "arn:aws:lambda:ap-south-1:129678139333:function:notifier",
+      "type": "lambdaNode",
+      "position": {
+        "x": 1250,
+        "y": 350
+      },
+      "data": {
+        "name": "notifier",
+        "service": "lambda",
+        "region": "ap-south-1",
+        "account_id": "129678139333",
+        "resource_arn": "arn:aws:lambda:ap-south-1:129678139333:function:notifier",
+        "insights": "Public Lambda",
+        "metrics": {
+          "inVpc": false,
+          "vpcId": "",
+          "memory": "128 MB",
+          "region": "ap-south-1",
+          "iamRole": "document-platform-role",
+          "roleArn": "arn:aws:iam::129678139333:role/document-platform-role",
+          "runtime": "python3.11",
+          "timeout": "3s",
+          "subnetIds": [],
+          "environment": {},
+          "functionArn": "arn:aws:lambda:ap-south-1:129678139333:function:notifier",
+          "securityScan": "Warning: Lambda not in VPC",
+          "securityGroupIds": [],
+          "eventSourceMappings": [
+            {
+              "state": "Enabled",
+              "eventSourceArn": "arn:aws:sqs:ap-south-1:129678139333:notification-queue"
+            }
+          ]
+        },
+        "tags": {}
+      }
+    },
+    {
+      "id": "arn:aws:s3:::documents-bucket26",
+      "type": "s3Node",
+      "position": {
+        "x": 650,
+        "y": 600
+      },
+      "data": {
+        "name": "documents-bucket26",
+        "service": "s3",
+        "region": "ap-south-1",
+        "account_id": "129678139333",
+        "resource_arn": "arn:aws:s3:::documents-bucket26",
+        "insights": "Warning: Check Access",
+        "metrics": {
+          "region": "ap-south-1",
+          "bucketArn": "arn:aws:s3:::documents-bucket26",
+          "versioning": "Disabled",
+          "creationDate": "2026-06-11 10:57:52+00:00",
+          "publicAccess": "Open",
+          "securityScan": "Warning: Public access may be open",
+          "notificationConfiguration": {}
+        },
+        "tags": {}
+      }
+    },
+    {
+      "id": "arn:aws:s3:::processed-documents-bucket26",
+      "type": "s3Node",
+      "position": {
+        "x": 1000,
+        "y": 600
+      },
+      "data": {
+        "name": "processed-documents-bucket26",
+        "service": "s3",
+        "region": "ap-south-1",
+        "account_id": "129678139333",
+        "resource_arn": "arn:aws:s3:::processed-documents-bucket26",
+        "insights": "Warning: Check Access",
+        "metrics": {
+          "region": "ap-south-1",
+          "bucketArn": "arn:aws:s3:::processed-documents-bucket26",
+          "versioning": "Disabled",
+          "creationDate": "2026-06-11 10:58:13+00:00",
+          "publicAccess": "Open",
+          "securityScan": "Warning: Public access may be open",
+          "notificationConfiguration": {}
+        },
+        "tags": {}
+      }
+    },
+    {
+      "id": "arn:aws:sqs:ap-south-1:129678139333:processing-queue",
+      "type": "sqsNode",
+      "position": {
+        "x": 400,
+        "y": 100
+      },
+      "data": {
+        "name": "processing-queue",
+        "service": "sqs",
+        "region": "ap-south-1",
+        "account_id": "129678139333",
+        "resource_arn": "arn:aws:sqs:ap-south-1:129678139333:processing-queue",
+        "insights": "Inferred — not yet scanned",
+        "metrics": {
+          "region": "ap-south-1",
+          "inferred": true,
+          "type": "Standard"
+        },
+        "tags": {}
+      },
+      "inferred": true
+    },
+    {
+      "id": "arn:aws:sqs:ap-south-1:129678139333:notification-queue",
+      "type": "sqsNode",
+      "position": {
+        "x": 400,
+        "y": 100
+      },
+      "data": {
+        "name": "notification-queue",
+        "service": "sqs",
+        "region": "ap-south-1",
+        "account_id": "129678139333",
+        "resource_arn": "arn:aws:sqs:ap-south-1:129678139333:notification-queue",
+        "insights": "Inferred — not yet scanned",
+        "metrics": {
+          "region": "ap-south-1",
+          "inferred": true,
+          "type": "Standard"
+        },
+        "tags": {}
+      },
+      "inferred": true
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge-sing-queue-:processor",
+      "source": "arn:aws:sqs:ap-south-1:129678139333:processing-queue",
+      "target": "arn:aws:lambda:ap-south-1:129678139333:function:processor",
+      "type": "animatedEdge",
+      "label": "triggers",
+      "confidence": 100,
+      "evidence": [
+        "event_source_mapping"
+      ]
+    },
+    {
+      "id": "edge-tion-queue-n:notifier",
+      "source": "arn:aws:sqs:ap-south-1:129678139333:notification-queue",
+      "target": "arn:aws:lambda:ap-south-1:129678139333:function:notifier",
+      "type": "animatedEdge",
+      "label": "triggers",
+      "confidence": 100,
+      "evidence": [
+        "event_source_mapping"
+      ]
+    },
+    {
+      "id": "edge-:processor-s-bucket26",
+      "source": "arn:aws:lambda:ap-south-1:129678139333:function:processor",
+      "target": "arn:aws:s3:::documents-bucket26",
+      "type": "animatedEdge",
+      "label": "writes_to",
+      "confidence": 80,
+      "evidence": [
+        "iam_policy_permission"
+      ]
+    },
+    {
+      "id": "edge-:processor-s-bucket26",
+      "source": "arn:aws:lambda:ap-south-1:129678139333:function:processor",
+      "target": "arn:aws:s3:::processed-documents-bucket26",
+      "type": "animatedEdge",
+      "label": "writes_to",
+      "confidence": 80,
+      "evidence": [
+        "iam_policy_permission"
+      ]
+    },
+    {
+      "id": "edge-n:notifier-s-bucket26",
+      "source": "arn:aws:lambda:ap-south-1:129678139333:function:notifier",
+      "target": "arn:aws:s3:::documents-bucket26",
+      "type": "animatedEdge",
+      "label": "writes_to",
+      "confidence": 80,
+      "evidence": [
+        "iam_policy_permission"
+      ]
+    },
+    {
+      "id": "edge-n:notifier-s-bucket26",
+      "source": "arn:aws:lambda:ap-south-1:129678139333:function:notifier",
+      "target": "arn:aws:s3:::processed-documents-bucket26",
+      "type": "animatedEdge",
+      "label": "writes_to",
+      "confidence": 80,
+      "evidence": [
+        "iam_policy_permission"
+      ]
+    },
+    {
+      "id": "edge-ec32e108e8-s-bucket26",
+      "source": "arn:aws:ec2:ap-south-1:129678139333:instance/i-0d55ca7ec32e108e8",
+      "target": "arn:aws:s3:::documents-bucket26",
+      "type": "animatedEdge",
+      "label": "writes_to",
+      "confidence": 80,
+      "evidence": [
+        "iam_policy_permission"
+      ]
+    },
+    {
+      "id": "edge-ec32e108e8-s-bucket265",
+      "source": "arn:aws:ec2:ap-south-1:129678139333:instance/i-0d55ca7ec32e108e8",
+      "target": "arn:aws:s3:::processed-documents-bucket26",
+      "type": "animatedEdge",
+      "label": "writes_to",
+      "confidence": 80,
+      "evidence": [
+        "iam_policy_permission"
+      ]
+    }
+  ]
+}
