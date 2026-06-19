@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15
+    container_name: nebula-lens-db
+    environment:
+      POSTGRES_USER: gravitylens
+      POSTGRES_PASSWORD: gravitylens123
+      POSTGRES_DB: gravitylens_db
+    ports:
+      - "5434:5432"  # Using 5434 to avoid conflict with existing gravity-lens-db on 5433
+    volumes:
+      - nebula_lens_db_data:/var/lib/postgresql/data
+    restart: always
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: nebula-lens-backend
+    ports:
+      - "8001:7860"  # Updated to map to 7860 to match the Hugging Face port in Dockerfile
+    environment:
+      - DATABASE_URL=postgresql://gravitylens:gravitylens123@db:5432/gravitylens_db
+    depends_on:
+      - db
+    restart: always
+
+volumes:
+  nebula_lens_db_data:
