@@ -667,9 +667,11 @@ GravityLens is being built in phases:
 - ✅ Automatic discovery
 - ✅ Interactive graph visualization
 - ✅ Relationship discovery (structural + application wiring)
+<!--
 - ✅ Snapshot and versioning
 - ✅ Diff calculation
 - ✅ Replay animation
+-->
 
 ### Phase 2: Enhanced Discovery
 - Runtime relationship discovery (X-Ray)
