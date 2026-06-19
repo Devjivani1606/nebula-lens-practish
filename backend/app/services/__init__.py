@@ -1,0 +1,1 @@
+from app.services.aws_service import aws_service
