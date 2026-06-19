@@ -251,47 +251,6 @@ Every document begins with:
 - "See ARCHITECTURE.md for more details"
 - Breadcrumb navigation
 
----
-
-## How to Contribute Documentation
-
-When writing new documentation:
-
-1. **Follow the structure** — use the same format as existing docs
-2. **Use headers consistently** — H1 for title, H2 for sections, H3 for subsections
-3. **Include a table of contents** — so readers can jump to sections
-4. **Add diagrams** — at least one diagram per major concept
-5. **Provide examples** — pseudo-code, API examples, etc.
-6. **Link to related docs** — help readers understand the full picture
-7. **Update this index** — when you add a new document
-
----
-
-## Current Project Status
-
-**Backend:** ✅ Complete (100%)
-- All 8 service scanners working
-- All engines implemented (normalizer, snapshot, diff, replay)
-- All API endpoints functional
-- Database schema complete
-
-**Frontend:** ✅ Complete (100%)
-- All 6 pages built
-- All components implemented
-- Design system established
-- Interactive features working
-
-**Documentation:** 🟡 In Progress (20%)
-- README.md ✅
-- PROBLEM_DEFINITION.md ✅
-- ARCHITECTURE.md 📋
-- API_ENDPOINTS.md 📋
-- Everything else ⏳
-
-**Next:** Connect frontend to real backend and create ARCHITECTURE.md
-
----
-
 ## Questions?
 
 If you have questions about:
