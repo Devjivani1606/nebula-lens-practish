@@ -37,6 +37,7 @@ const navigationItems: NavMainItem[] = [
     ],
   },
   { title: "Timeline Scrubber", id: "timeline", icon: Clock },
+  { title: "Database Explorer", id: "db-explorer", icon: Scroll },
   { title: "Settings", id: "settings", icon: Gear },
 ];
 
