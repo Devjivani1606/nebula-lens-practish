@@ -13,6 +13,7 @@ export type DashboardSection =
   | "timeline"
   | "alerts"
   | "cost"
+  | "db-explorer"
   | "settings";
 
 interface DashboardState {
