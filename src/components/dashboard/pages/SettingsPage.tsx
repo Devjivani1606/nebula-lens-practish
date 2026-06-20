@@ -1,3 +1,4 @@
+
 "use client";
 import React, { useState, useEffect } from "react";
 import { FontSizeSelector } from "../FontSizeSelector";
@@ -19,6 +20,9 @@ export default function SettingsPage() {
   
   const [accounts, setAccounts] = useState<AwsAccount[]>([]);
   const [fetchingAccounts, setFetchingAccounts] = useState(true);
+
+  const [resetLoading, setResetLoading] = useState(false);
+  const [resetStatus, setResetStatus] = useState<{ text: string; isError: boolean } | null>(null);
 
   // Fetch connected accounts on mount
   const fetchAccounts = async () => {
@@ -75,6 +79,43 @@ export default function SettingsPage() {
       setStatusMessage({ text: "Failed to connect to the backend service. Check if backend is running.", isError: true });
     } finally {
       setSubmitLoading(false);
+    }
+  };
+
+  const handleResetDatabase = async () => {
+    if (!window.confirm("Are you absolutely sure you want to delete all database data? This will clear all connected accounts and snapshots.")) {
+      return;
+    }
+
+    setResetLoading(true);
+    setResetStatus(null);
+
+    try {
+      const res = await fetch("/api/aws/reset", {
+        method: "POST",
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        setResetStatus({ text: data.message, isError: false });
+        fetchAccounts();
+        try {
+          const { fetchConnectedAccounts, setSelectedAccountId, fetchInfrastructure } = (await import("../../../store/useCanvasStore")).useCanvasStore.getState();
+          setSelectedAccountId(null);
+          fetchConnectedAccounts();
+          fetchInfrastructure();
+        } catch (storeErr) {
+          console.error("Failed to update canvas store:", storeErr);
+        }
+      } else {
+        setResetStatus({ text: data.error || "Failed to reset database.", isError: true });
+      }
+    } catch (error) {
+      console.error("Reset error:", error);
+      setResetStatus({ text: "Failed to connect to the backend service.", isError: true });
+    } finally {
+      setResetLoading(false);
     }
   };
 
@@ -215,6 +256,45 @@ export default function SettingsPage() {
                 ))}
               </div>
             )}
+          </div>
+        </section>
+
+        {/* Danger Zone Section */}
+        <section className="flex flex-col gap-4">
+          <h2 className="text-[11px] uppercase text-red-400 tracking-[0.7px] font-medium">
+            DANGER ZONE
+          </h2>
+          
+          <div className="bg-[var(--gl-bg-panel)] border border-red-500/20 rounded-xl p-6 flex flex-col gap-6 shadow-sm">
+            <div className="flex flex-col gap-1">
+              <h3 className="font-semibold text-base text-[var(--gl-text-primary)]">Reset Database</h3>
+              <p className="text-xs text-[var(--gl-text-muted)]">
+                Permanently erase all AWS accounts, snapshots, normalized nodes, and relationships from the database. This action is irreversible.
+              </p>
+            </div>
+
+            <div>
+              {resetStatus && (
+                <div
+                  className={`p-3.5 mb-4 rounded-lg border text-xs font-medium ${
+                    resetStatus.isError
+                      ? "bg-red-500/10 border-red-500/20 text-red-400"
+                      : "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
+                  }`}
+                >
+                  {resetStatus.text}
+                </div>
+              )}
+
+              <button
+                type="button"
+                onClick={handleResetDatabase}
+                disabled={resetLoading}
+                className="px-5 py-2.5 rounded-lg bg-red-600 hover:bg-red-500 text-white font-medium text-xs shadow-sm transition-colors duration-200 disabled:opacity-50"
+              >
+                {resetLoading ? "Erasing Database..." : "Reset Database & Clear All Data"}
+              </button>
+            </div>
           </div>
         </section>
         
