@@ -49,3 +49,7 @@ __pycache__/
 venv/
 gravity-lens-backend/
 
+# docs
+docs/elk-layout-progress.md
+
+
