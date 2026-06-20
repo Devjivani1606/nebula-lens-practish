@@ -25,7 +25,7 @@ router = APIRouter(prefix="/api/normalize", tags=["Normalization"])
 
 class NormalizeAccountRequest(BaseModel):
     """Request to normalize an account's latest snapshot"""
-    account_id: str              # AWS 12-digit account ID or database UUID
+    account_id: Optional[str] = None
     only_new: Optional[bool] = False
     include_metrics: Optional[bool] = True   # Run MetricsEngine (CloudWatch telemetry)
     include_cost: Optional[bool] = True      # Run CostEngine (estimated monthly cost)
@@ -82,43 +82,53 @@ def normalize_account(
     - Edges only represent real communication flows: invokes, triggers, writes_to, etc.
     """
     try:
-        # Step 1: Find the AWS account
-        parsed_uuid = None
-        try:
-            parsed_uuid = UUIDClass(request.account_id)
-        except ValueError:
+        # Step 1: Find the AWS account and latest snapshot
+        if request.account_id:
             parsed_uuid = None
+            try:
+                parsed_uuid = UUIDClass(request.account_id)
+            except ValueError:
+                parsed_uuid = None
 
-        query = db.query(AwsAccount)
-        if parsed_uuid:
-            account = query.filter(
-                or_(
-                    AwsAccount.id == parsed_uuid,
-                    AwsAccount.account_id == request.account_id,
+            query = db.query(AwsAccount)
+            if parsed_uuid:
+                account = query.filter(
+                    or_(
+                        AwsAccount.id == parsed_uuid,
+                        AwsAccount.account_id == request.account_id,
+                    )
+                ).first()
+            else:
+                account = query.filter(AwsAccount.account_id == request.account_id).first()
+
+            if not account:
+                raise HTTPException(
+                    status_code=404,
+                    detail=f"AWS Account {request.account_id} not found"
                 )
+
+            logger.info(f"Found account: {account.account_name} ({account.account_id})")
+
+            # Step 2: Get latest snapshot for this account
+            latest_snapshot = db.query(Snapshot).filter(
+                Snapshot.account_id == account.id,
+                Snapshot.is_latest == True
             ).first()
         else:
-            account = query.filter(AwsAccount.account_id == request.account_id).first()
+            # Get the latest snapshot overall
+            latest_snapshot = db.query(Snapshot).filter(
+                Snapshot.is_latest == True
+            ).order_by(Snapshot.created_at.desc()).first()
 
-        if not account:
-            raise HTTPException(
-                status_code=404,
-                detail=f"AWS Account {request.account_id} not found"
-            )
+            if latest_snapshot:
+                account = db.query(AwsAccount).filter(AwsAccount.id == latest_snapshot.account_id).first()
+            else:
+                account = None
 
-        logger.info(f"Found account: {account.account_name} ({account.account_id})")
-
-        # Step 2: Get latest snapshot for this account
-        latest_snapshot = db.query(Snapshot).filter(
-            Snapshot.account_id == account.id,
-            Snapshot.is_latest == True
-        ).first()
-
-        if not latest_snapshot:
+        if not latest_snapshot or not account:
             return NormalizeAccountResponse(
                 success=False,
-                message=f"No snapshots found for account {account.account_name}",
-                account_name=account.account_name,
+                message="No snapshots found in the database",
                 total_resources=0,
                 nodes=[],
                 edges=[]
