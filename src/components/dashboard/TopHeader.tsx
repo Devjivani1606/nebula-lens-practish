@@ -25,6 +25,7 @@ const SECTION_LABELS: Record<DashboardSection, string> = {
   timeline: "Timeline",
   alerts: "Alerts",
   cost: "Cost Analysis",
+  "db-explorer": "Database Explorer",
   settings: "Settings",
   logs: ""
 };
