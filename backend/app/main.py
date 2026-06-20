@@ -118,3 +118,6 @@ def trigger_manual_scan(account_id: str):
 
     finally:
         db.close()
+
+
+        
