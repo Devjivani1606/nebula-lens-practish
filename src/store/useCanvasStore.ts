@@ -106,6 +106,7 @@ export const useCanvasStore = create<CanvasState>()(
 
       isLiveStreamActive: false,
 
+      
       toggleLiveStream: () => set((state) => ({ isLiveStreamActive: !state.isLiveStreamActive })),
 
       isTourActive: false,
