@@ -42,6 +42,14 @@ export function TopHeader() {
   const isLoading = useCanvasStore((state) => state.isLoading);
   const fetchInfrastructure = useCanvasStore((state) => state.fetchInfrastructure);
   const setTourActive = useCanvasStore((state) => state.setTourActive);
+  const connectedAccounts = useCanvasStore((state) => state.connectedAccounts);
+  const selectedAccountId = useCanvasStore((state) => state.selectedAccountId);
+  const setSelectedAccountId = useCanvasStore((state) => state.setSelectedAccountId);
+  const fetchConnectedAccounts = useCanvasStore((state) => state.fetchConnectedAccounts);
+
+  React.useEffect(() => {
+    fetchConnectedAccounts();
+  }, [fetchConnectedAccounts]);
 
   const replayTour = () => {
     localStorage.removeItem('gravity-lens-tour-complete');
@@ -81,6 +89,32 @@ export function TopHeader() {
 
       {/* Spacer */}
       <div className="flex-1" />
+
+      {/* AWS Account Selector Dropdown */}
+      {connectedAccounts.length > 0 && (
+        <div className="flex items-center gap-1.5">
+          <span className="text-[10px] uppercase tracking-wider font-semibold text-[var(--gl-text-muted)] hidden lg:inline">Account:</span>
+          <select
+            value={selectedAccountId || ""}
+            onChange={async (e) => {
+              const val = e.target.value;
+              setSelectedAccountId(val || null);
+              // Wait for state to apply then fetch
+              setTimeout(() => {
+                fetchInfrastructure();
+              }, 50);
+            }}
+            className="h-8 px-2 rounded-lg border border-[var(--gl-border)] bg-[var(--gl-bg-panel)] text-xs text-[var(--gl-text-secondary)] focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer max-w-[200px] truncate"
+          >
+            <option value="">Latest (All Accounts)</option>
+            {connectedAccounts.map((account) => (
+              <option key={account.id} value={account.id}>
+                {account.account_name} ({account.account_id})
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
 
       {/* Sync Infrastructure */}
       <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
