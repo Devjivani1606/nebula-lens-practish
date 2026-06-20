@@ -23,6 +23,9 @@ services:
       - "8001:7860"  # Updated to map to 7860 to match the Hugging Face port in Dockerfile
     environment:
       - DATABASE_URL=postgresql://gravitylens:gravitylens123@db:5432/gravitylens_db
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
     depends_on:
       - db
     restart: always
