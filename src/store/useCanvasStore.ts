@@ -33,6 +33,12 @@ type CanvasState = {
   onConnect: (connection: Connection) => void;
   fetchInfrastructure: () => Promise<void>;
 
+  // AWS Account state
+  selectedAccountId: string | null;
+  setSelectedAccountId: (id: string | null) => void;
+  connectedAccounts: any[];
+  fetchConnectedAccounts: () => Promise<void>;
+
   // Lens State
   activeLens: LensType;
   setActiveLens: (lens: LensType) => void;
@@ -76,6 +82,22 @@ export const useCanvasStore = create<CanvasState>()(
       },
       onConnect: (connection: Connection) => {
         set({ edges: addEdge(connection, get().edges) as CloudEdge[] });
+      },
+
+      // AWS Account state
+      selectedAccountId: null,
+      setSelectedAccountId: (id) => set({ selectedAccountId: id }),
+      connectedAccounts: [],
+      fetchConnectedAccounts: async () => {
+        try {
+          const response = await fetch('/api/aws/accounts');
+          if (response.ok) {
+            const data = await response.json();
+            set({ connectedAccounts: data.accounts || [] });
+          }
+        } catch (error) {
+          console.error("Error fetching connected accounts:", error);
+        }
       },
 
       activeLens: 'structural',
@@ -166,7 +188,9 @@ export const useCanvasStore = create<CanvasState>()(
       fetchInfrastructure: async () => {
         set({ isLoading: true });
         try {
-          const response = await fetch('/api/infrastructure');
+          const accountId = get().selectedAccountId;
+          const url = accountId ? `/api/infrastructure?account_id=${accountId}` : '/api/infrastructure';
+          const response = await fetch(url);
           if (!response.ok) throw new Error('Failed to capture cloud layout topology');
           const data = await response.json();
 
