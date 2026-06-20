@@ -4,7 +4,11 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import or_
 from sqlalchemy.orm import Session
 from app.database import get_db
-from app.models.models import AwsAccount, User, ScanJob, ScanStatus
+from app.models.models import (
+    AwsAccount, User, ScanJob, ScanStatus, Snapshot,
+    Resource, Relationship, NormalizedNode, NormalizedEdge,
+    ServiceScan, SnapshotDiff
+)
 from app.schemas.aws_account import (
     ConnectAwsRequest,
     ConnectAwsResponse,
@@ -145,3 +149,25 @@ def get_account_status(account_id: str, db: Session = Depends(get_db)):
         "latest_scan_status": latest_scan.status if latest_scan else None,
         "latest_scan_at": latest_scan.created_at if latest_scan else None
     }
+
+
+@router.post("/reset")
+def reset_database(db: Session = Depends(get_db)):
+    """Erase all scans, snapshots, resources, edges, and connected AWS accounts from the database."""
+    try:
+        # Delete dependencies first
+        db.query(NormalizedEdge).delete()
+        db.query(NormalizedNode).delete()
+        db.query(SnapshotDiff).delete()
+        db.query(Relationship).delete()
+        db.query(Resource).delete()
+        db.query(ServiceScan).delete()
+        db.query(ScanJob).delete()
+        db.query(Snapshot).delete()
+        db.query(AwsAccount).delete()
+        db.commit()
+        return {"success": True, "message": "Database reset successfully. All connected accounts and snapshots deleted."}
+    except Exception as e:
+        db.rollback()
+        logger.error(f"Failed to reset database: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Database reset failed: {str(e)}")
