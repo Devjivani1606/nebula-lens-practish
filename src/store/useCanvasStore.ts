@@ -93,7 +93,7 @@ export const useCanvasStore = create<CanvasState>()(
           const response = await fetch('/api/aws/accounts');
           if (response.ok) {
             const data = await response.json();
-            set({ connectedAccounts: data.accounts || [] });
+            set({ connectedAccounts: Array.isArray(data) ? data : (data.accounts || []) });
           }
         } catch (error) {
           console.error("Error fetching connected accounts:", error);
