@@ -429,8 +429,51 @@ def normalize_account(
                 logger.error(f"Failed to merge DB edge: {str(e)}")
                 continue
 
+        # ── Filter: remove empty VPCs and Subnets (bottom-up) ──────────────
+        # Step 1: keep only non-vpc/subnet nodes that appear in at least one edge
+        connected_arns = {e["source"] for e in edges} | {e["target"] for e in edges}
+
+        kept_ids: set = set()
+        for n in nodes:
+            svc = n.get("data", {}).get("service", "")
+            if svc not in ("vpc", "subnet") and n["id"] in connected_arns:
+                kept_ids.add(n["id"])
+
+        # Step 2: keep a Subnet only if at least one of its children is kept
+        for n in nodes:
+            if n.get("data", {}).get("service") == "subnet":
+                subnet_id = n["id"]
+                has_child = any(
+                    child.get("parentId") == subnet_id or child.get("parentID") == subnet_id
+                    for child in nodes
+                    if child["id"] in kept_ids
+                )
+                if has_child:
+                    kept_ids.add(subnet_id)
+
+        # Step 3: keep a VPC only if at least one of its children (subnet or direct) is kept
+        for n in nodes:
+            if n.get("data", {}).get("service") == "vpc":
+                vpc_id = n["id"]
+                has_child = any(
+                    child.get("parentId") == vpc_id or child.get("parentID") == vpc_id
+                    for child in nodes
+                    if child["id"] in kept_ids
+                )
+                if has_child:
+                    kept_ids.add(vpc_id)
+
+        nodes = [n for n in nodes if n["id"] in kept_ids]
+
+        # Step 4: clean up dangling parentId references
+        for node in nodes:
+            pid = node.get("parentId") or node.get("parentID")
+            if pid and pid not in kept_ids:
+                node.pop("parentId", None)
+                node.pop("parentID", None)
+
         nodes = normalize_topology_nodes(nodes)
-        logger.info(f"Returning {len(nodes)} nodes and {len(edges)} edges (dynamic + db)")
+        logger.info(f"Returning {len(nodes)} nodes and {len(edges)} edges (no empty vpc/subnet)")
 
         # ── Step 6: Persist raw normalized output to DB ───────────────────────
         _save_normalized_output(db, latest_snapshot.id, nodes, edges)
