@@ -2,6 +2,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { FontSizeSelector } from "../FontSizeSelector";
+import { useCanvasStore } from "../../../store/useCanvasStore";
 
 interface AwsAccount {
   id: string;
@@ -23,6 +24,15 @@ export default function SettingsPage() {
 
   const [resetLoading, setResetLoading] = useState(false);
   const [resetStatus, setResetStatus] = useState<{ text: string; isError: boolean } | null>(null);
+
+  const selectedAccountId = useCanvasStore((state) => state.selectedAccountId);
+  const setSelectedAccountId = useCanvasStore((state) => state.setSelectedAccountId);
+  const fetchInfrastructure = useCanvasStore((state) => state.fetchInfrastructure);
+
+  const handleSelectAccount = async (accId: string) => {
+    setSelectedAccountId(accId);
+    await fetchInfrastructure();
+  };
 
   // Fetch connected accounts on mount
   const fetchAccounts = async () => {
@@ -251,6 +261,18 @@ export default function SettingsPage() {
                       <span className="text-[10px] text-[var(--gl-text-muted)]">
                         Connected: {new Date(acc.created_at).toLocaleDateString()}
                       </span>
+                      <button
+                        type="button"
+                        onClick={() => handleSelectAccount(acc.id)}
+                        className={`px-3 py-1 rounded-lg text-xs font-semibold tracking-wide transition-all duration-200 ${
+                          selectedAccountId === acc.id
+                            ? "bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 cursor-default"
+                            : "bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm"
+                        }`}
+                        disabled={selectedAccountId === acc.id}
+                      >
+                        {selectedAccountId === acc.id ? "✓ Active" : "Select"}
+                      </button>
                     </div>
                   </div>
                 ))}
