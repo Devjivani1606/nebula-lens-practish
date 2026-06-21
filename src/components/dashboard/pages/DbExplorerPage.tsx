@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { 
   Database, ArrowsClockwise, TreeStructure, 
-  HardDrive, GitFork, IdentificationCard, Copy, Check 
+  HardDrive, GitFork, IdentificationCard, Copy, Check, Trash
 } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 
@@ -17,7 +17,7 @@ interface DbStats {
   scan_jobs: number;
 }
 
-type TableTab = "accounts" | "snapshots" | "nodes" | "edges";
+type TableTab = "accounts" | "snapshots" | "nodes" | "edges" | "resources" | "relationships" | "jobs";
 
 export default function DbExplorerPage() {
   const [stats, setStats] = useState<DbStats | null>(null);
@@ -27,6 +27,33 @@ export default function DbExplorerPage() {
   const [loadingTable, setLoadingTable] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  const safeLastSegment = (str: string | null | undefined) => {
+    if (!str) return "N/A";
+    const idx = str.lastIndexOf(":");
+    return idx !== -1 ? str.substring(idx + 1) : str;
+  };
+
+  const handleDeleteRow = async (id: string) => {
+    if (!window.confirm(`Are you sure you want to delete this row from "${activeTab}"?`)) {
+      return;
+    }
+    try {
+      const res = await fetch(`/api/db/data?table=${activeTab}&id=${id}`, {
+        method: "DELETE"
+      });
+      if (res.ok) {
+        fetchStats();
+        fetchTableData(activeTab);
+      } else {
+        const err = await res.json();
+        alert(err.error || "Failed to delete row");
+      }
+    } catch (e) {
+      console.error("Delete error:", e);
+      alert("Failed to delete row due to connection error.");
+    }
+  };
 
   const fetchStats = async () => {
     setLoadingStats(true);
@@ -160,12 +187,12 @@ export default function DbExplorerPage() {
 
         {/* Tab Controls & Search */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-[var(--gl-border)] pb-2 mt-2">
-          <div className="flex gap-2 p-1 bg-[var(--gl-bg-muted)] border border-[var(--gl-border)] rounded-lg">
-            {(["accounts", "snapshots", "nodes", "edges"] as TableTab[]).map((tab) => (
+          <div className="flex flex-wrap gap-2 p-1 bg-[var(--gl-bg-muted)] border border-[var(--gl-border)] rounded-lg">
+            {(["accounts", "snapshots", "nodes", "edges", "resources", "relationships", "jobs"] as TableTab[]).map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`px-4 py-1.5 rounded-md text-xs font-semibold uppercase tracking-wider transition-all duration-200 ${activeTab === tab
+                className={`px-3 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-wider transition-all duration-200 ${activeTab === tab
                   ? "bg-[var(--gl-bg-panel)] text-blue-400 shadow-sm border border-[var(--gl-border)]"
                   : "text-[var(--gl-text-muted)] hover:text-[var(--gl-text-secondary)]"
                   }`}
@@ -239,6 +266,35 @@ export default function DbExplorerPage() {
                         <th className="p-4">Confidence</th>
                       </>
                     )}
+                    {activeTab === "resources" && (
+                      <>
+                        <th className="p-4">ID</th>
+                        <th className="p-4">Node ID</th>
+                        <th className="p-4">Name</th>
+                        <th className="p-4">Service</th>
+                        <th className="p-4">Region</th>
+                        <th className="p-4">Type</th>
+                      </>
+                    )}
+                    {activeTab === "relationships" && (
+                      <>
+                        <th className="p-4">ID</th>
+                        <th className="p-4">Edge ID</th>
+                        <th className="p-4">Source</th>
+                        <th className="p-4">Target</th>
+                        <th className="p-4">Label</th>
+                      </>
+                    )}
+                    {activeTab === "jobs" && (
+                      <>
+                        <th className="p-4">ID</th>
+                        <th className="p-4">Account ID</th>
+                        <th className="p-4">Status</th>
+                        <th className="p-4">Triggered By</th>
+                        <th className="p-4">Created At</th>
+                      </>
+                    )}
+                    <th className="p-4 text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[var(--gl-border)] font-mono text-[11px] text-[var(--gl-text-secondary)]">
@@ -258,8 +314,8 @@ export default function DbExplorerPage() {
                           <td className="p-4 font-sans font-medium">{row.account_name || "N/A"}</td>
                           <td className="p-4">
                             <span className="flex items-center gap-1.5 max-w-[200px] truncate" title={row.role_arn}>
-                              {row.role_arn.substring(0, 20)}...
-                              <button onClick={() => handleCopy(row.role_arn)} className="text-[var(--gl-text-muted)] hover:text-white shrink-0">
+                              {row.role_arn ? row.role_arn.substring(0, 20) : "N/A"}...
+                              <button onClick={() => handleCopy(row.role_arn || "")} className="text-[var(--gl-text-muted)] hover:text-white shrink-0">
                                 {copiedId === row.role_arn ? <Check size={12} className="text-emerald-400" /> : <Copy size={12} />}
                               </button>
                             </span>
@@ -269,14 +325,14 @@ export default function DbExplorerPage() {
                               {row.status}
                             </span>
                           </td>
-                          <td className="p-4 font-sans">{new Date(row.created_at).toLocaleString()}</td>
+                          <td className="p-4 font-sans">{row.created_at ? new Date(row.created_at).toLocaleString() : "N/A"}</td>
                         </>
                       )}
 
                       {activeTab === "snapshots" && (
                         <>
-                          <td className="p-4">{row.id.substring(0, 8)}...</td>
-                          <td className="p-4">{row.account_id.substring(0, 8)}...</td>
+                          <td className="p-4">{row.id ? row.id.substring(0, 8) : "N/A"}...</td>
+                          <td className="p-4">{row.account_id ? row.account_id.substring(0, 8) : "N/A"}...</td>
                           <td className="p-4 font-bold">v{row.version_number}</td>
                           <td className="p-4 font-sans font-medium">{row.label || "Snapshot Scan"}</td>
                           <td className="p-4">
@@ -288,45 +344,45 @@ export default function DbExplorerPage() {
                               <span className="text-[var(--gl-text-muted)] font-sans">No</span>
                             )}
                           </td>
-                          <td className="p-4 font-sans">{new Date(row.created_at).toLocaleString()}</td>
+                          <td className="p-4 font-sans">{row.created_at ? new Date(row.created_at).toLocaleString() : "N/A"}</td>
                         </>
                       )}
 
                       {activeTab === "nodes" && (
                         <>
                           <td className="p-4">
-                            <span className="flex items-center gap-1.5 max-w-[250px] truncate" title={row.node_id}>
-                              {row.node_id.substring(row.node_id.lastIndexOf(":") + 1)}
-                              <button onClick={() => handleCopy(row.node_id)} className="text-[var(--gl-text-muted)] hover:text-white shrink-0">
+                            <span className="flex items-center gap-1.5 max-w-[250px] truncate" title={row.node_id || ""}>
+                              {safeLastSegment(row.node_id)}
+                              <button onClick={() => handleCopy(row.node_id || "")} className="text-[var(--gl-text-muted)] hover:text-white shrink-0">
                                 {copiedId === row.node_id ? <Check size={12} className="text-emerald-400" /> : <Copy size={12} />}
                               </button>
                             </span>
                           </td>
-                          <td className="p-4 font-sans font-medium text-[var(--gl-text-primary)]">{row.resource_name}</td>
+                          <td className="p-4 font-sans font-medium text-[var(--gl-text-primary)]">{row.resource_name || "N/A"}</td>
                           <td className="p-4">
                             <span className="px-2 py-0.5 rounded-md text-[9px] font-bold bg-indigo-500/10 text-indigo-400 uppercase">
-                              {row.service}
+                              {row.service || "N/A"}
                             </span>
                           </td>
-                          <td className="p-4">{row.region}</td>
-                          <td className="p-4 font-sans text-[var(--gl-text-muted)]">{row.node_type}</td>
+                          <td className="p-4">{row.region || "N/A"}</td>
+                          <td className="p-4 font-sans text-[var(--gl-text-muted)]">{row.node_type || "N/A"}</td>
                           <td className="p-4 max-w-[150px] truncate" title={row.parent_node_id || ""}>
-                            {row.parent_node_id ? row.parent_node_id.substring(row.parent_node_id.lastIndexOf(":") + 1) : "None"}
+                            {safeLastSegment(row.parent_node_id)}
                           </td>
                         </>
                       )}
 
                       {activeTab === "edges" && (
                         <>
-                          <td className="p-4 truncate max-w-[150px]">{row.edge_id}</td>
+                          <td className="p-4 truncate max-w-[150px]">{row.edge_id || "N/A"}</td>
                           <td className="p-4">
-                            <span className="flex items-center gap-1.5 max-w-[180px] truncate" title={row.source_arn}>
-                              {row.source_arn.substring(row.source_arn.lastIndexOf(":") + 1)}
+                            <span className="flex items-center gap-1.5 max-w-[180px] truncate" title={row.source_arn || ""}>
+                              {safeLastSegment(row.source_arn)}
                             </span>
                           </td>
                           <td className="p-4">
-                            <span className="flex items-center gap-1.5 max-w-[180px] truncate" title={row.target_arn}>
-                              {row.target_arn.substring(row.target_arn.lastIndexOf(":") + 1)}
+                            <span className="flex items-center gap-1.5 max-w-[180px] truncate" title={row.target_arn || ""}>
+                              {safeLastSegment(row.target_arn)}
                             </span>
                           </td>
                           <td className="p-4 font-sans font-semibold text-blue-400">{row.label || "communicates"}</td>
@@ -340,6 +396,73 @@ export default function DbExplorerPage() {
                           </td>
                         </>
                       )}
+
+                      {activeTab === "resources" && (
+                        <>
+                          <td className="p-4">{row.id ? row.id.substring(0, 8) : "N/A"}...</td>
+                          <td className="p-4">
+                            <span className="flex items-center gap-1.5 max-w-[200px] truncate" title={row.node_id || ""}>
+                              {safeLastSegment(row.node_id)}
+                            </span>
+                          </td>
+                          <td className="p-4 font-sans font-medium text-[var(--gl-text-primary)]">{row.resource_name || "N/A"}</td>
+                          <td className="p-4">
+                            <span className="px-2 py-0.5 rounded-md text-[9px] font-bold bg-indigo-500/10 text-indigo-400 uppercase">
+                              {row.service || "N/A"}
+                            </span>
+                          </td>
+                          <td className="p-4">{row.region || "N/A"}</td>
+                          <td className="p-4 font-sans text-[var(--gl-text-muted)]">{row.node_type || "N/A"}</td>
+                        </>
+                      )}
+
+                      {activeTab === "relationships" && (
+                        <>
+                          <td className="p-4">{row.id ? row.id.substring(0, 8) : "N/A"}...</td>
+                          <td className="p-4 truncate max-w-[150px]">{row.edge_id || "N/A"}</td>
+                          <td className="p-4">
+                            <span className="flex items-center gap-1.5 max-w-[180px] truncate" title={row.source_arn || ""}>
+                              {safeLastSegment(row.source_arn)}
+                            </span>
+                          </td>
+                          <td className="p-4">
+                            <span className="flex items-center gap-1.5 max-w-[180px] truncate" title={row.target_arn || ""}>
+                              {safeLastSegment(row.target_arn)}
+                            </span>
+                          </td>
+                          <td className="p-4 font-sans font-semibold text-blue-400">{row.label || "communicates"}</td>
+                        </>
+                      )}
+
+                      {activeTab === "jobs" && (
+                        <>
+                          <td className="p-4">{row.id ? row.id.substring(0, 8) : "N/A"}...</td>
+                          <td className="p-4 font-bold text-[var(--gl-text-primary)]">{row.account_id ? row.account_id.substring(0, 8) : "N/A"}...</td>
+                          <td className="p-4">
+                            <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold border ${row.status === "success"
+                              ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                              : row.status === "failed"
+                              ? "bg-red-500/10 text-red-400 border-red-500/20"
+                              : "bg-amber-500/10 text-amber-400 border-amber-500/20"
+                              }`}>
+                              {row.status}
+                            </span>
+                          </td>
+                          <td className="p-4 font-sans">{row.triggered_by || "scheduler"}</td>
+                          <td className="p-4 font-sans">{row.created_at ? new Date(row.created_at).toLocaleString() : "N/A"}</td>
+                        </>
+                      )}
+
+                      <td className="p-4 text-right">
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteRow(row.id)}
+                          className="p-1.5 rounded-lg bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-white transition-all duration-200"
+                          title="Delete Row"
+                        >
+                          <Trash size={14} />
+                        </button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
