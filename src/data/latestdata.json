@@ -392,6 +392,203 @@
       "networkMeta": {
         "vpcId": "vpc-main"
       }
+    },
+    {
+      "id": "iam-role-main",
+      "type": "iamRoleNode",
+      "position": {
+        "x": 400,
+        "y": -200
+      },
+      "data": {
+        "name": "ECS Execution Role",
+        "insights": "Least privilege applied",
+        "metrics": {
+          "estMonthlyCost": 0
+        }
+      }
+    },
+    {
+      "id": "sg-web",
+      "type": "securityGroupNode",
+      "parentId": "vpc-main",
+      "extent": "parent",
+      "position": {
+        "x": 50,
+        "y": 150
+      },
+      "data": {
+        "name": "Web Security Group",
+        "insights": "Port 80/443 open",
+        "metrics": {
+          "estMonthlyCost": 0
+        }
+      }
+    },
+    {
+      "id": "eni-web",
+      "type": "eniNode",
+      "parentId": "subnet-private",
+      "extent": "parent",
+      "position": {
+        "x": 100,
+        "y": 150
+      },
+      "data": {
+        "name": "Web Interface",
+        "metrics": {
+          "estMonthlyCost": 0
+        }
+      }
+    },
+    {
+      "id": "alb-main",
+      "type": "albNode",
+      "parentId": "vpc-main",
+      "extent": "parent",
+      "position": {
+        "x": -100,
+        "y": 50
+      },
+      "data": {
+        "name": "External ALB",
+        "insights": "WAF attached",
+        "metrics": {
+          "estMonthlyCost": 45
+        }
+      }
+    },
+    {
+      "id": "sns-topic",
+      "type": "snsNode",
+      "position": {
+        "x": -200,
+        "y": 350
+      },
+      "data": {
+        "name": "Alerts Topic",
+        "metrics": {
+          "estMonthlyCost": 2
+        }
+      }
+    },
+    {
+      "id": "event-bridge-rule",
+      "type": "eventBridgeNode",
+      "position": {
+        "x": 100,
+        "y": -150
+      },
+      "data": {
+        "name": "Daily Schedule",
+        "metrics": {
+          "estMonthlyCost": 1
+        }
+      }
+    },
+    {
+      "id": "dynamodb-table",
+      "type": "dynamoDbNode",
+      "position": {
+        "x": 800,
+        "y": 100
+      },
+      "data": {
+        "name": "Session Store",
+        "metrics": {
+          "estMonthlyCost": 25
+        }
+      }
+    },
+    {
+      "id": "rds-instance",
+      "type": "rdsNode",
+      "parentId": "subnet-private",
+      "extent": "parent",
+      "position": {
+        "x": 400,
+        "y": 300
+      },
+      "data": {
+        "name": "Primary Database",
+        "metrics": {
+          "estMonthlyCost": 120
+        }
+      }
+    },
+    {
+      "id": "ecs-service",
+      "type": "ecsNode",
+      "parentId": "subnet-private",
+      "extent": "parent",
+      "position": {
+        "x": 200,
+        "y": 100
+      },
+      "data": {
+        "name": "Web API",
+        "metrics": {
+          "estMonthlyCost": 65
+        }
+      }
+    },
+    {
+      "id": "eks-cluster",
+      "type": "eksNode",
+      "parentId": "vpc-main",
+      "extent": "parent",
+      "position": {
+        "x": 600,
+        "y": 50
+      },
+      "data": {
+        "name": "Compute Cluster",
+        "metrics": {
+          "estMonthlyCost": 350
+        }
+      }
+    },
+    {
+      "id": "cloudfront-dist",
+      "type": "cloudFrontNode",
+      "position": {
+        "x": -500,
+        "y": 50
+      },
+      "data": {
+        "name": "Global CDN",
+        "metrics": {
+          "estMonthlyCost": 85
+        }
+      }
+    },
+    {
+      "id": "step-functions-sm",
+      "type": "stepFunctionsNode",
+      "position": {
+        "x": -50,
+        "y": -200
+      },
+      "data": {
+        "name": "Order Workflow",
+        "metrics": {
+          "estMonthlyCost": 15
+        }
+      }
+    },
+    {
+      "id": "secrets-manager-secret",
+      "type": "secretsManagerNode",
+      "position": {
+        "x": 600,
+        "y": -150
+      },
+      "data": {
+        "name": "DB Credentials",
+        "metrics": {
+          "estMonthlyCost": 5
+        }
+      }
     }
   ],
   "edges": [
@@ -450,6 +647,146 @@
         "direction": "outbound",
         "protocol": "TCP"
       }
+    },
+    {
+      "id": "edge-iam-ecs",
+      "source": "iam-role-main",
+      "target": "ecs-service",
+      "type": "animatedEdge",
+      "label": "Assumes Role"
+    },
+    {
+      "id": "edge-iam-eks",
+      "source": "iam-role-main",
+      "target": "eks-cluster",
+      "type": "animatedEdge",
+      "label": "Assumes Role"
+    },
+    {
+      "id": "edge-iam-lambda",
+      "source": "iam-role-main",
+      "target": "lambda-processor",
+      "type": "animatedEdge",
+      "label": "Assumes Role"
+    },
+    {
+      "id": "edge-iam-sf",
+      "source": "iam-role-main",
+      "target": "step-functions-sm",
+      "type": "animatedEdge",
+      "label": "Assumes Role"
+    },
+    {
+      "id": "edge-sg-ecs",
+      "source": "sg-web",
+      "target": "ecs-service",
+      "type": "animatedEdge",
+      "label": "Secures"
+    },
+    {
+      "id": "edge-sg-alb",
+      "source": "sg-web",
+      "target": "alb-main",
+      "type": "animatedEdge",
+      "label": "Secures"
+    },
+    {
+      "id": "edge-eni-ecs",
+      "source": "eni-web",
+      "target": "ecs-service",
+      "type": "animatedEdge",
+      "label": "Attached To"
+    },
+    {
+      "id": "edge-cf-alb",
+      "source": "cloudfront-dist",
+      "target": "alb-main",
+      "type": "animatedEdge",
+      "label": "Forwards To"
+    },
+    {
+      "id": "edge-cf-api",
+      "source": "cloudfront-dist",
+      "target": "api-gateway-ingress",
+      "type": "animatedEdge",
+      "label": "Forwards To"
+    },
+    {
+      "id": "edge-alb-ecs",
+      "source": "alb-main",
+      "target": "ecs-service",
+      "type": "animatedEdge",
+      "label": "Routes Traffic"
+    },
+    {
+      "id": "edge-sns-sqs",
+      "source": "sns-topic",
+      "target": "sqs-job-queue",
+      "type": "animatedEdge",
+      "label": "Publishes"
+    },
+    {
+      "id": "edge-eb-lambda",
+      "source": "event-bridge-rule",
+      "target": "lambda-processor",
+      "type": "animatedEdge",
+      "label": "Triggers"
+    },
+    {
+      "id": "edge-eb-sf",
+      "source": "event-bridge-rule",
+      "target": "step-functions-sm",
+      "type": "animatedEdge",
+      "label": "Triggers"
+    },
+    {
+      "id": "edge-ecs-dynamo",
+      "source": "ecs-service",
+      "target": "dynamodb-table",
+      "type": "animatedEdge",
+      "label": "Reads/Writes"
+    },
+    {
+      "id": "edge-ecs-rds",
+      "source": "ecs-service",
+      "target": "rds-instance",
+      "type": "animatedEdge",
+      "label": "Reads/Writes"
+    },
+    {
+      "id": "edge-eks-rds",
+      "source": "eks-cluster",
+      "target": "rds-instance",
+      "type": "animatedEdge",
+      "label": "Reads/Writes"
+    },
+    {
+      "id": "edge-sf-lambda",
+      "source": "step-functions-sm",
+      "target": "lambda-processor",
+      "type": "animatedEdge",
+      "label": "Invokes"
+    },
+    {
+      "id": "edge-sf-sns",
+      "source": "step-functions-sm",
+      "target": "sns-topic",
+      "type": "animatedEdge",
+      "label": "Publishes"
+    },
+    {
+      "id": "edge-sm-ecs",
+      "source": "secrets-manager-secret",
+      "target": "ecs-service",
+      "type": "animatedEdge",
+      "label": "Reads Secret"
+    },
+    {
+      "id": "edge-sm-rds",
+      "source": "secrets-manager-secret",
+      "target": "rds-instance",
+      "type": "animatedEdge",
+      "label": "Manages Creds"
     }
   ]
 }

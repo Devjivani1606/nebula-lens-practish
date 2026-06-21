@@ -25,6 +25,19 @@ import AvailabilityZoneNode from '../nodes/AvailabilityZoneNode';
 import Ec2Node from '../nodes/Ec2Node';
 import CanvasSkeleton from '../ui/CanvasSkeleton';
 import CommandPalette from '../ui/CommandPalette';
+import SecurityGroupNode from '../nodes/SecurityGroupNode';
+import EniNode from '../nodes/EniNode';
+import IamRoleNode from '../nodes/IamRoleNode';
+import AlbNode from '../nodes/AlbNode';
+import SnsNode from '../nodes/SnsNode';
+import EventBridgeNode from '../nodes/EventBridgeNode';
+import DynamoDbNode from '../nodes/DynamoDbNode';
+import RdsNode from '../nodes/RdsNode';
+import EcsNode from '../nodes/EcsNode';
+import EksNode from '../nodes/EksNode';
+import CloudFrontNode from '../nodes/CloudFrontNode';
+import StepFunctionsNode from '../nodes/StepFunctionsNode';
+import SecretsManagerNode from '../nodes/SecretsManagerNode';
 
 const nodeTypes = {
   lambdaNode: LambdaNode,
@@ -39,6 +52,19 @@ const nodeTypes = {
   sqsNode: SqsNode,
   ec2Node: Ec2Node,
   AvailabilityZone: AvailabilityZoneNode,
+  securityGroupNode: SecurityGroupNode,
+  eniNode: EniNode,
+  iamRoleNode: IamRoleNode,
+  albNode: AlbNode,
+  snsNode: SnsNode,
+  eventBridgeNode: EventBridgeNode,
+  dynamoDbNode: DynamoDbNode,
+  rdsNode: RdsNode,
+  ecsNode: EcsNode,
+  eksNode: EksNode,
+  cloudFrontNode: CloudFrontNode,
+  stepFunctionsNode: StepFunctionsNode,
+  secretsManagerNode: SecretsManagerNode,
 };
 const edgeTypes = { animatedEdge: AnimatedEdge };
 
@@ -430,12 +456,12 @@ export default function ArchitectureCanvas() {
               nodeColor={(node) => {
                 const type = node.type?.toLowerCase() || '';
                 if (type.includes('vpc') || type.includes('subnet') || type.includes('availabilityzone')) return 'transparent';
-                if (type.includes('api')) return '#a855f7';
-                if (type.includes('sqs')) return '#d946ef';
-                if (type.includes('lambda')) return '#f97316';
-                if (type.includes('database')) return '#3b82f6';
-                if (type.includes('s3')) return '#22c55e';
-                if (type.includes('ec2')) return '#06b6d4';
+                if (type.includes('api') || type.includes('cloudfront')) return '#a855f7';
+                if (type.includes('sqs') || type.includes('sns') || type.includes('eventbridge')) return '#d946ef';
+                if (type.includes('lambda') || type.includes('stepfunctions') || type.includes('ecs') || type.includes('eks')) return '#f97316';
+                if (type.includes('database') || type.includes('dynamodb') || type.includes('rds')) return '#3b82f6';
+                if (type.includes('s3') || type.includes('secretsmanager')) return '#22c55e';
+                if (type.includes('ec2') || type.includes('alb') || type.includes('iam') || type.includes('eni') || type.includes('securitygroup')) return '#06b6d4';
                 return '#cbd5e1';
               }}
               nodeStrokeColor={(node) => {
