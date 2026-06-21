@@ -17,7 +17,7 @@ export default function SettingsPage() {
   const [accountName, setAccountName] = useState("");
   const [submitLoading, setSubmitLoading] = useState(false);
   const [statusMessage, setStatusMessage] = useState<{ text: string; isError: boolean } | null>(null);
-  
+
   const [accounts, setAccounts] = useState<AwsAccount[]>([]);
   const [fetchingAccounts, setFetchingAccounts] = useState(true);
 
@@ -127,13 +127,13 @@ export default function SettingsPage() {
       </div>
 
       <div className="px-8 py-6 max-w-3xl flex flex-col gap-10">
-        
+
         {/* Appearance Section */}
         <section className="flex flex-col gap-4">
           <h2 className="text-[11px] uppercase text-[var(--gl-text-muted)] tracking-[0.7px] font-medium">
             TEXT SIZE
           </h2>
-          
+
           <div className="bg-[var(--gl-bg-panel)] border border-[var(--gl-border)] rounded-xl p-5 flex flex-col gap-6 shadow-sm">
             <div className="flex justify-between items-start gap-4">
               <div className="flex flex-col gap-1.5">
@@ -161,7 +161,7 @@ export default function SettingsPage() {
           <h2 className="text-[11px] uppercase text-[var(--gl-text-muted)] tracking-[0.7px] font-medium">
             AWS CONNECTION & INTEGRATIONS
           </h2>
-          
+
           <div className="bg-[var(--gl-bg-panel)] border border-[var(--gl-border)] rounded-xl p-6 flex flex-col gap-6 shadow-sm">
             <div className="flex flex-col gap-1">
               <h3 className="font-semibold text-base text-[var(--gl-text-primary)]">Connect new AWS Account</h3>
@@ -222,7 +222,7 @@ export default function SettingsPage() {
           <h2 className="text-[11px] uppercase text-[var(--gl-text-muted)] tracking-[0.7px] font-medium">
             CONNECTED AWS ACCOUNTS
           </h2>
-          
+
           <div className="bg-[var(--gl-bg-panel)] border border-[var(--gl-border)] rounded-xl overflow-hidden shadow-sm">
             {fetchingAccounts ? (
               <div className="p-6 text-center text-xs text-[var(--gl-text-muted)]">Loading accounts...</div>
@@ -264,7 +264,7 @@ export default function SettingsPage() {
           <h2 className="text-[11px] uppercase text-red-400 tracking-[0.7px] font-medium">
             DANGER ZONE
           </h2>
-          
+
           <div className="bg-[var(--gl-bg-panel)] border border-red-500/20 rounded-xl p-6 flex flex-col gap-6 shadow-sm">
             <div className="flex flex-col gap-1">
               <h3 className="font-semibold text-base text-[var(--gl-text-primary)]">Reset Database</h3>
@@ -297,7 +297,7 @@ export default function SettingsPage() {
             </div>
           </div>
         </section>
-        
+
       </div>
     </div>
   );

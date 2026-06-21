@@ -29,7 +29,7 @@ def connect_aws_account(
 ):
     """
     Connect a new AWS account using IAM Role ARN.
-    
+
     Flow:
     1. Verify Role ARN using STS
     2. Check if account already connected

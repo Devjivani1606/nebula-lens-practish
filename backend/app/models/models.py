@@ -2,7 +2,7 @@
 # Each schema is a class that inherits from Base.
 
 from sqlalchemy import (
-    Column, String, Integer, Boolean, 
+    Column, String, Integer, Boolean,
     DateTime, Text, ForeignKey, Enum
 )
 from sqlalchemy.dialects.postgresql import UUID, JSONB
@@ -38,12 +38,12 @@ class User(Base):
     id         = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     email      = Column(String(255), unique=True, nullable=False)
     name       = Column(String(255))
-    auth0_id   = Column(String(255), unique=True)  # Auth0 user ID this Auth0 later we use them 
+    auth0_id   = Column(String(255), unique=True)  # Auth0 user ID this Auth0 later we use them
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
     # Relationships
-    aws_accounts = relationship("AwsAccount", back_populates="user") # this python allowing you to access a user's aws accounts like user.aws_accounts and aws_account.user this twoway mapping 
+    aws_accounts = relationship("AwsAccount", back_populates="user") # this python allowing you to access a user's aws accounts like user.aws_accounts and aws_account.user this twoway mapping
 
 # ─────────────────────────────────────────
 # TABLE 2 — AWS ACCOUNTS
@@ -84,7 +84,7 @@ class ScanJob(Base):
 
     # Relationships
     aws_account    = relationship("AwsAccount", back_populates="scan_jobs")
-    service_scans  = relationship("ServiceScan", back_populates="scan_job") 
+    service_scans  = relationship("ServiceScan", back_populates="scan_job")
 
 # ─────────────────────────────────────────
 # TABLE 4 — SERVICE SCANS
