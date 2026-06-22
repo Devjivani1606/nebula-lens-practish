@@ -55,7 +55,7 @@ def get_latest_graph(account_id: Optional[str] = None, only_new: bool = False):
             return {"nodes": [], "edges": []}
 
         # Only the supported services — filters out old/mock data
-        SUPPORTED_SERVICES = {"vpc", "subnet", "ec2", "lambda", "rds", "sqs", "s3", "apigateway", "eventbridge"}
+        SUPPORTED_SERVICES = {"vpc", "subnet", "ec2", "lambda", "rds", "sqs", "s3", "apigateway", "eventbridge", "dynamodb", "ecs", "sns", "cloudfront"}
 
         resources = db.query(Resource).filter(
             Resource.snapshot_id == snapshot.id,

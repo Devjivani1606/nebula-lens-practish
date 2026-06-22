@@ -30,6 +30,13 @@ class RelationshipEngine:
     # Services that are hierarchy containers — NEVER appear as edge endpoints
     HIERARCHY_SERVICES = frozenset({"vpc", "subnet"})
 
+    # Edge matrix updated:
+    # SNS  → Lambda/SQS  (topic subscription)          100
+    # DynamoDB → Lambda  (stream ESM on lambda)         100
+    # CloudFront → S3    (origin domain match)          90
+    # Lambda → DynamoDB  (IAM policy permission)        80
+    # EC2    → DynamoDB  (IAM instance profile)         80
+
     def discover_relationships(
         self,
         credentials: dict,
@@ -105,6 +112,36 @@ class RelationshipEngine:
                     edges.append(self._edge(
                         eb_arn, tgt_arn, "triggers", 100, ["eventbridge_rule_target"]
                     ))
+
+        # [100] SNS → Lambda / SQS (topic subscriptions stored on sns node)
+        for sns_arn, n in by_service.get("sns", []):
+            for endpoint_arn in self._m(n).get("subscriptionEndpoints", []):
+                endpoint_arn = self._strip_q(endpoint_arn)
+                if endpoint_arn and endpoint_arn in node_by_arn:
+                    edges.append(self._edge(
+                        sns_arn, endpoint_arn, "triggers", 100, ["sns_subscription"]
+                    ))
+
+        # [100] DynamoDB → Lambda (stream as event source mapping on lambda)
+        for lam_arn, n in by_service.get("lambda", []):
+            for esm in self._m(n).get("eventSourceMappings", []):
+                src = esm.get("eventSourceArn") or esm.get("EventSourceArn", "")
+                if src and ":dynamodb:" in src:
+                    # ESM ARN is stream ARN — match to table ARN
+                    table_arn = src.split("/stream/")[0] if "/stream/" in src else src
+                    if table_arn in node_by_arn:
+                        edges.append(self._edge(
+                            table_arn, lam_arn, "triggers", 100, ["dynamodb_stream_esm"]
+                        ))
+
+        # [90] CloudFront → S3 (origin domain name matches bucket)
+        for cf_arn, n in by_service.get("cloudfront", []):
+            for bucket_name in self._m(n).get("s3BucketNames", []):
+                for s3_arn, _ in by_service.get("s3", []):
+                    if bucket_name and s3_arn.endswith(f":::{bucket_name}"):
+                        edges.append(self._edge(
+                            cf_arn, s3_arn, "serves_from", 90, ["cloudfront_s3_origin"]
+                        ))
 
         # ── Step 3: Confidence 80 — IAM role policies ────────────────────────
 
@@ -226,13 +263,14 @@ class RelationshipEngine:
     ) -> List[dict]:
         """
         Emit IAM-permission-based edges from source to all matching
-        S3 / SQS / RDS nodes. Fully dynamic — checks every existing node.
+        S3 / SQS / RDS / DynamoDB nodes.
         """
         edges = []
         targets = [
-            ("s3", "writes_to"),
-            ("sqs", "sends_to"),
-            ("rds", "writes_to"),
+            ("s3",        "writes_to"),
+            ("sqs",       "sends_to"),
+            ("rds",       "writes_to"),
+            ("dynamodb",  "writes_to"),
         ]
         for svc, label in targets:
             permitted = allowed.get(svc, set())
@@ -284,7 +322,7 @@ class RelationshipEngine:
         if role_arn in cache:
             return cache[role_arn]
 
-        allowed: Dict[str, Set[str]] = {"s3": set(), "sqs": set(), "rds": set()}
+        allowed: Dict[str, Set[str]] = {"s3": set(), "sqs": set(), "rds": set(), "dynamodb": set()}
         try:
             role_name = role_arn.split("/")[-1]
             iam = boto3.client(
@@ -366,16 +404,19 @@ class RelationshipEngine:
                             allowed["sqs"].add("*")
                         if "rds" in al:
                             allowed["rds"].add("*")
+                        if "dynamodb" in al:
+                            allowed["dynamodb"].add("*")
                         continue
 
                     if "s3" in al:
-                        # Normalize: strip object paths → bucket-level ARN
                         bucket = res.split("/*")[0].split("/")[0]
                         allowed["s3"].add(bucket)
                     elif "sqs" in al:
                         allowed["sqs"].add(res)
                     elif "rds" in al:
                         allowed["rds"].add(res)
+                    elif "dynamodb" in al:
+                        allowed["dynamodb"].add(res)
 
 
 relationship_engine = RelationshipEngine()
