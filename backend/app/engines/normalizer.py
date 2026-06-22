@@ -377,7 +377,8 @@ class NormalizationEngine:
             "status": status,
             "multiAZ": db_instance.get('MultiAZ', False),
             "region": region,
-            "securityScan": self._scan_rds(db_instance)
+            "securityScan": self._scan_rds(db_instance),
+            "dbSubnetGroupVpcId": db_instance.get('DBSubnetGroup', {}).get('VpcId', '')
         }
 
         insights = f"{status.capitalize()} - {engine}"
@@ -1017,6 +1018,87 @@ class NormalizationEngine:
             "resource_name": rule_name,
             "raw_id": rule_name
         }
+
+    # ─────────────────────────────────────────
+    # PASS 2 EXTENDED NORMALIZERS
+    # ─────────────────────────────────────────
+
+    def normalize_sns(self, topic_arn, endpoints, region, account_id):
+        topic_name = topic_arn.split(":")[-1]
+        metrics = {"endpoints": endpoints, "region": region}
+        node = self.build_node(topic_arn, "snsNode", topic_name, "sns", region, account_id, metrics)
+        return {"node": node, "resource_arn": topic_arn, "resource_name": topic_name, "raw_id": topic_arn}
+
+    def normalize_alb(self, alb, target_groups, region, account_id):
+        arn = alb['LoadBalancerArn']
+        name = alb['LoadBalancerName']
+        metrics = {
+            "targetGroups": target_groups, 
+            "region": region,
+            "DNSName": alb.get('DNSName', '')
+        }
+        node = self.build_node(arn, "albNode", name, "alb", region, account_id, metrics)
+        return {"node": node, "resource_arn": arn, "resource_name": name, "raw_id": arn}
+
+    def normalize_ecs(self, task_def, region, account_id):
+        arn = task_def['taskDefinitionArn']
+        name = task_def.get('family', arn.split('/')[-1])
+        secrets = []
+        images = []
+        logGroup = ""
+        for c in task_def.get('containerDefinitions', []):
+            secrets.extend(c.get('secrets', []))
+            if 'image' in c: images.append(c['image'])
+            lg = c.get('logConfiguration', {}).get('options', {}).get('awslogs-group')
+            if lg: logGroup = lg
+        metrics = {
+            "taskRoleArn": task_def.get('taskRoleArn', ''),
+            "executionRoleArn": task_def.get('executionRoleArn', ''),
+            "secrets": secrets,
+            "images": images,
+            "logGroup": logGroup,
+            "region": region
+        }
+        node = self.build_node(arn, "ecsNode", name, "ecs", region, account_id, metrics)
+        return {"node": node, "resource_arn": arn, "resource_name": name, "raw_id": arn}
+
+    def normalize_cloudfront(self, dist, region, account_id):
+        arn = dist['ARN']
+        name = dist['DomainName']
+        origins = dist.get('Origins', {}).get('Items', [])
+        metrics = {"origins": origins, "region": "global"}
+        node = self.build_node(arn, "cloudfrontNode", name, "cloudfront", "global", account_id, metrics)
+        return {"node": node, "resource_arn": arn, "resource_name": name, "raw_id": arn}
+
+    def normalize_stepfunctions(self, detail, region, account_id):
+        arn = detail['stateMachineArn']
+        name = detail['name']
+        try:
+            states = json.loads(detail.get('definition', '{}')).get('States', {})
+        except:
+            states = {}
+        metrics = {"states": states, "region": region}
+        node = self.build_node(arn, "stepfunctionsNode", name, "stepfunctions", region, account_id, metrics)
+        return {"node": node, "resource_arn": arn, "resource_name": name, "raw_id": arn}
+
+    def normalize_secretsmanager(self, secret, region, account_id):
+        arn = secret['ARN']
+        name = secret['Name']
+        metrics = {"rotationLambdaARN": secret.get('RotationLambdaARN', ''), "region": region}
+        node = self.build_node(arn, "secretsmanagerNode", name, "secretsmanager", region, account_id, metrics)
+        return {"node": node, "resource_arn": arn, "resource_name": name, "raw_id": arn}
+
+    def normalize_eks(self, cluster, nodegroup_arns, region, account_id):
+        arn = cluster.get('arn', f"arn:aws:eks:{region}:{account_id}:cluster/{cluster.get('name')}")
+        name = cluster.get('name', 'eks')
+        metrics = {
+            "roleArn": cluster.get('roleArn', ''),
+            "securityGroupIds": cluster.get('resourcesVpcConfig', {}).get('securityGroupIds', []),
+            "nodegroupArns": nodegroup_arns,
+            "region": region
+        }
+        node = self.build_node(arn, "eksNode", name, "eks", region, account_id, metrics)
+        return {"node": node, "resource_arn": arn, "resource_name": name, "raw_id": arn}
 
 
 # Single instance
