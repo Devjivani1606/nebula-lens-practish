@@ -1063,13 +1063,6 @@ class NormalizationEngine:
         node = self.build_node(arn, "ecsNode", name, "ecs", region, account_id, metrics)
         return {"node": node, "resource_arn": arn, "resource_name": name, "raw_id": arn}
 
-    def normalize_cloudfront(self, dist, region, account_id):
-        arn = dist['ARN']
-        name = dist['DomainName']
-        origins = dist.get('Origins', {}).get('Items', [])
-        metrics = {"origins": origins, "region": "global"}
-        node = self.build_node(arn, "cloudfrontNode", name, "cloudfront", "global", account_id, metrics)
-        return {"node": node, "resource_arn": arn, "resource_name": name, "raw_id": arn}
 
     def normalize_stepfunctions(self, detail, region, account_id):
         arn = detail['stateMachineArn']
