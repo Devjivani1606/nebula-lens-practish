@@ -1,6 +1,57 @@
 import logging
 import boto3
 from typing import List, Dict, Any, Set
+from dataclasses import dataclass
+
+@dataclass
+class RelationshipRule:
+    source_service: str
+    config_path: str
+    target_type: str
+    relationship_type: str
+    confidence: float
+    extractor: str
+
+PASS_2_RULES = [
+    RelationshipRule("lambda", "roleArn", "IAM Role", "USES", 95, "arn"),
+    RelationshipRule("lambda", "vpcId", "VPC", "DEPLOYED_IN", 90, "id"),
+    RelationshipRule("lambda", "subnetIds", "Subnet", "DEPLOYED_IN", 90, "id_list"),
+    RelationshipRule("lambda", "securityGroupIds", "Security Group", "SECURED_BY", 90, "id_list"),
+    RelationshipRule("lambda", "environment.Variables", "SQS Queue", "REFERENCES", 60, "env_heuristic"),
+    RelationshipRule("lambda", "environment.Variables", "DynamoDB Table", "REFERENCES", 60, "env_heuristic"),
+    RelationshipRule("lambda", "environment.Variables", "S3 Bucket", "REFERENCES", 60, "env_heuristic"),
+    RelationshipRule("lambda", "environment.Variables", "SNS Topic", "REFERENCES", 60, "env_heuristic"),
+    RelationshipRule("lambda", "environment.Variables", "EventBridge Bus", "REFERENCES", 60, "env_heuristic"),
+    RelationshipRule("apigateway", "integrations", "Lambda", "INVOKES", 95, "arn_list"),
+    RelationshipRule("apigateway", "vpcLinkId", "VPC Link", "USES", 90, "id"),
+    RelationshipRule("eventbridge", "targets.Arn", "Lambda", "TRIGGERS", 95, "arn_list"),
+    RelationshipRule("eventbridge", "targets.Arn", "SNS Topic", "TRIGGERS", 95, "arn_list"),
+    RelationshipRule("eventbridge", "targets.Arn", "SQS Queue", "TRIGGERS", 95, "arn_list"),
+    RelationshipRule("eventbridge", "targets.Arn", "Step Functions", "TRIGGERS", 95, "arn_list"),
+    RelationshipRule("sns", "endpoints.Lambda", "Lambda", "NOTIFIES", 95, "arn_list"),
+    RelationshipRule("sns", "endpoints.SQS", "SQS Queue", "NOTIFIES", 95, "arn_list"),
+    RelationshipRule("alb", "targetGroups", "Target Group", "ROUTES_TO", 95, "arn_list"),
+    RelationshipRule("alb", "targets", "EC2 Instance", "ROUTES_TO", 90, "id_list"),
+    RelationshipRule("alb", "targets", "ECS Service", "ROUTES_TO", 90, "id_list"),
+    RelationshipRule("ecs", "taskRoleArn", "IAM Role", "USES", 95, "arn"),
+    RelationshipRule("ecs", "executionRoleArn", "IAM Role", "USES", 95, "arn"),
+    RelationshipRule("ecs", "secrets", "Secrets Manager", "READS", 95, "arn_list"),
+    RelationshipRule("ecs", "logGroup", "CloudWatch Logs", "WRITES_TO", 70, "name"),
+    RelationshipRule("ecs", "images", "ECR Repo", "PULLS_FROM", 80, "name_list"),
+    RelationshipRule("cloudfront", "origins", "S3 Bucket", "SERVES", 85, "domain_name"),
+    RelationshipRule("cloudfront", "origins", "ALB", "SERVES", 85, "domain_name"),
+    RelationshipRule("cloudfront", "origins", "API Gateway", "SERVES", 85, "domain_name"),
+    RelationshipRule("rds", "dbSubnetGroupVpcId", "VPC", "DEPLOYED_IN", 90, "id"),
+    RelationshipRule("rds", "subnets", "Subnet", "DEPLOYED_IN", 90, "id_list"),
+    RelationshipRule("rds", "vpcSecurityGroups", "Security Group", "SECURED_BY", 90, "id_list"),
+    RelationshipRule("stepfunctions", "states_resources.Lambda", "Lambda", "INVOKES", 95, "arn_list"),
+    RelationshipRule("stepfunctions", "states_resources.SNS", "SNS Topic", "INVOKES", 95, "arn_list"),
+    RelationshipRule("stepfunctions", "states_resources.SQS", "SQS Queue", "INVOKES", 95, "arn_list"),
+    RelationshipRule("secretsmanager", "rotationLambdaARN", "Lambda", "ROTATED_BY", 95, "arn"),
+    RelationshipRule("eks", "roleArn", "IAM Role", "USES", 95, "arn"),
+    RelationshipRule("eks", "nodegroupArns", "Node Group", "CONTAINS", 95, "arn_list"),
+    RelationshipRule("eks", "securityGroupIds", "Security Group", "SECURED_BY", 90, "id_list")
+]
 
 logger = logging.getLogger(__name__)
 
@@ -106,6 +157,9 @@ class RelationshipEngine:
                         eb_arn, tgt_arn, "triggers", 100, ["eventbridge_rule_target"]
                     ))
 
+        # ── Step 2.5: Confidence engine — Pass 2 (Configuration Rules) ────────
+        edges.extend(self._run_pass2_rules(node_by_arn, by_service, vpc_nodes_raw))
+
         # ── Step 3: Confidence 80 — IAM role policies ────────────────────────
 
         # [80] Lambda → S3 / SQS / RDS
@@ -172,13 +226,23 @@ class RelationshipEngine:
                     ))
 
         # ── Step 5: Deduplicate ──────────────────────────────────────────────
-        seen: Set[tuple] = set()
-        unique: List[dict] = []
+        unique_map: Dict[tuple, dict] = {}
         for e in edges:
-            key = (e["source"], e["target"], e.get("label", ""))
-            if key not in seen:
-                seen.add(key)
-                unique.append(e)
+            key = (e["source"], e["target"])
+            if key not in unique_map:
+                e_copy = e.copy()
+                e_copy["labels"] = [e.get("label", "")]
+                unique_map[key] = e_copy
+            else:
+                existing = unique_map[key]
+                if e.get("label", "") not in existing["labels"]:
+                    existing["labels"].append(e.get("label", ""))
+                if e.get("confidence", 0) > existing.get("confidence", 0):
+                    existing["confidence"] = e.get("confidence", 0)
+                    existing["label"] = e.get("label", "")
+                    existing["evidence"] = e.get("evidence", [])
+
+        unique = list(unique_map.values())
 
         logger.info(
             f"RelationshipEngine: {len(unique)} unique edges discovered "
@@ -188,13 +252,150 @@ class RelationshipEngine:
 
     # ── Private helpers ──────────────────────────────────────────────────────
 
+    def _run_pass2_rules(self, node_by_arn: dict, by_service: dict, vpc_nodes_raw: list) -> list:
+        edges = []
+        for rule in PASS_2_RULES:
+            for source_arn, n in by_service.get(rule.source_service, []):
+                metrics = self._m(n)
+                values = self._evaluate_path(metrics, rule.config_path)
+                if not values: continue
+                targets = self._run_extractor(rule.extractor, values, rule.target_type, node_by_arn, by_service, vpc_nodes_raw)
+                for tgt, matched_val in targets:
+                    evidence = {
+                        "source": "CONFIG_ANALYSIS",
+                        "rule_id": f"{rule.source_service}_{rule.target_type.replace(' ', '')}_{rule.relationship_type}",
+                        "confidence": rule.confidence,
+                        "extractor": rule.extractor,
+                        "matched_value": matched_val
+                    }
+                    edges.append(self._edge(
+                        source_arn, tgt, rule.relationship_type.lower(), rule.confidence, evidence
+                    ))
+        return edges
+
+    def _evaluate_path(self, metrics: dict, path: str) -> list:
+        res = []
+        if path == "roleArn": return [metrics.get("roleArn")]
+        if path == "vpcId": return [metrics.get("vpcId")]
+        if path == "subnetIds": return metrics.get("subnetIds", [])
+        if path == "securityGroupIds": return metrics.get("securityGroupIds", [])
+        if path == "environment.Variables": return list(metrics.get("environment", {}).get("Variables", {}).values())
+        if path == "integrations": return metrics.get("integrations", [])
+        if path == "vpcLinkId": return [metrics.get("vpcLinkId")]
+        if path == "targets.Arn": return [t.get("Arn", t.get("arn")) for t in metrics.get("targets", [])]
+        if path == "endpoints.Lambda": return metrics.get("endpoints", {}).get("Lambda", [])
+        if path == "endpoints.SQS": return metrics.get("endpoints", {}).get("SQS", [])
+        if path == "targetGroups": return [tg.get("TargetGroupArn") for tg in metrics.get("targetGroups", [])]
+        if path == "targets": 
+            for tg in metrics.get("targetGroups", []):
+                for tgt in tg.get("Targets", []): res.append(tgt.get("Id"))
+            return res
+        if path == "taskRoleArn": return [metrics.get("taskRoleArn")]
+        if path == "executionRoleArn": return [metrics.get("executionRoleArn")]
+        if path == "secrets":
+            for sec in metrics.get("secrets", []): res.append(sec.get("ValueFrom"))
+            return res
+        if path == "logGroup": return [metrics.get("logGroup")]
+        if path == "images": return metrics.get("images", [])
+        if path == "origins": return [o.get("DomainName") for o in metrics.get("origins", [])]
+        if path == "dbSubnetGroupVpcId": return [metrics.get("dbSubnetGroupVpcId")]
+        if path == "subnets": return metrics.get("subnets", [])
+        if path == "vpcSecurityGroups": return metrics.get("vpcSecurityGroups", [])
+        if path == "states_resources.Lambda":
+            for s in metrics.get("states", {}).values():
+                if s.get("Type") == "Task" and "lambda" in str(s.get("Resource", "")).lower(): res.append(s.get("Resource"))
+            return res
+        if path == "states_resources.SNS":
+            for s in metrics.get("states", {}).values():
+                if s.get("Type") == "Task" and "sns" in str(s.get("Resource", "")).lower(): res.append(s.get("Resource"))
+            return res
+        if path == "states_resources.SQS":
+            for s in metrics.get("states", {}).values():
+                if s.get("Type") == "Task" and "sqs" in str(s.get("Resource", "")).lower(): res.append(s.get("Resource"))
+            return res
+        if path == "rotationLambdaARN": return [metrics.get("rotationLambdaARN")]
+        if path == "nodegroupArns": return metrics.get("nodegroupArns", [])
+        return [r for r in res if r]
+
+    def _run_extractor(self, extractor: str, values: list, target_type: str, node_by_arn: dict, by_service: dict, vpc_nodes_raw: list) -> list:
+        targets = []
+        if extractor in ["arn", "arn_list"]:
+            for v in values:
+                if not v: continue
+                stripped = self._strip_q(v)
+                if stripped in node_by_arn: targets.append((stripped, v))
+        elif extractor in ["id", "id_list"]:
+            for v in values:
+                if not v: continue
+                for arn, n in node_by_arn.items():
+                    if n.get("raw_id") == v or v in arn: targets.append((arn, v))
+                for vpc_n in vpc_nodes_raw:
+                    if vpc_n.get("raw_id") == v or v in vpc_n.get("resource_arn", ""): targets.append((vpc_n.get("resource_arn"), v))
+                    sgs = vpc_n.get("node", {}).get("data", {}).get("metrics", {}).get("securityGroups", [])
+                    for sg in sgs:
+                        if sg.get("groupId") == v: targets.append((vpc_n.get("resource_arn"), v))
+        elif extractor in ["name", "name_list"]:
+            for v in values:
+                if not v: continue
+                for arn, n in node_by_arn.items():
+                    if n.get("resource_name") == v or v in arn: targets.append((arn, v))
+        elif extractor == "domain_name":
+            for v in values:
+                if not v or not isinstance(v, str) or len(v) < 10: continue
+                v_lower = v.lower()
+                if target_type == "S3 Bucket" and ".s3." in v_lower:
+                    bucket_name = v_lower.split(".s3.")[0]
+                    for arn, n in by_service.get("s3", []):
+                        if n.get("resource_name", "").lower() == bucket_name:
+                            targets.append((arn, v))
+                elif target_type == "ALB" and ".elb.amazonaws.com" in v_lower:
+                    dns_prefix = v_lower.split(".elb.amazonaws.com")[0]
+                    for arn, n in by_service.get("alb", []):
+                        alb_dns = n.get("node", {}).get("data", {}).get("metrics", {}).get("DNSName", "").lower()
+                        if dns_prefix and alb_dns.startswith(dns_prefix):
+                            targets.append((arn, v))
+                elif target_type == "API Gateway" and ".execute-api." in v_lower:
+                    api_id = v_lower.split(".execute-api.")[0]
+                    for arn, n in by_service.get("apigateway", []):
+                        if n.get("raw_id", "").lower() == api_id:
+                            targets.append((arn, v))
+        elif extractor == "env_heuristic":
+            for v in values:
+                if not v or not isinstance(v, str) or len(v) < 10: continue
+                v_lower = v.lower()
+                if target_type == "SQS Queue" and v_lower.startswith("https://sqs.") and ".amazonaws.com/" in v_lower:
+                    for arn, n in by_service.get("sqs", []):
+                        q_name = n.get("resource_name", "")
+                        if q_name and v_lower.endswith("/" + q_name.lower()):
+                            targets.append((arn, v))
+                elif target_type == "SNS Topic" and v_lower.startswith("arn:aws:sns:"):
+                    for arn, n in by_service.get("sns", []):
+                        if v_lower == arn.lower(): targets.append((arn, v))
+                elif target_type == "S3 Bucket" and (v_lower.startswith("arn:aws:s3:::") or v_lower.startswith("s3://")):
+                    for arn, n in by_service.get("s3", []):
+                        b_name = n.get("resource_name", "")
+                        if b_name and (v_lower == f"arn:aws:s3:::{b_name}".lower() or v_lower == f"s3://{b_name}".lower() or v_lower.startswith(f"s3://{b_name}/".lower())):
+                            targets.append((arn, v))
+                elif target_type == "DynamoDB Table" and v_lower.startswith("arn:aws:dynamodb:"):
+                    for arn, n in by_service.get("dynamodb", []):
+                        if v_lower == arn.lower() or v_lower.startswith(f"{arn.lower()}/"):
+                            targets.append((arn, v))
+                elif target_type == "EventBridge Bus" and (v_lower.startswith("arn:aws:events:") or ("/" not in v_lower)):
+                    for arn, n in by_service.get("eventbridge", []):
+                        bus_name = n.get("resource_name", "")
+                        if bus_name and (v_lower == arn.lower() or v_lower == bus_name.lower()):
+                            targets.append((arn, v))
+        
+        unique_targets = list(set(targets))
+        return unique_targets
+
     def _edge(
         self,
         source: str,
         target: str,
         label: str,
         confidence: int,
-        evidence: List[str]
+        evidence: Any
     ) -> dict:
         """Build a standard React Flow edge dict."""
         return {

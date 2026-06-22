@@ -11,6 +11,7 @@ from app.scanners.rds_scanner import rds_scanner
 from app.scanners.sqs_scanner import sqs_scanner
 from app.scanners.apigateway_scanner import apigateway_scanner
 from app.scanners.eventbridge_scanner import eventbridge_scanner
+from app.scanners.pass2_scanners import pass2_scanners
 from app.engines.snapshot_engine import snapshot_engine
 from app.engines.relationship_engine import relationship_engine
 from app.database import SessionLocal
@@ -209,6 +210,21 @@ class ScanOrchestrator:
                         ScanStatus.failed, 0, str(e)
                     )
 
+                # 8. Extended Pass 2 Services (SNS, ALB, ECS, CloudFront, StepFunctions, SecretsManager, EKS)
+                extended_results = [
+                    pass2_scanners.scan_sns(credentials, region, aws_account_id),
+                    pass2_scanners.scan_alb(credentials, region, aws_account_id),
+                    pass2_scanners.scan_ecs(credentials, region, aws_account_id),
+                    pass2_scanners.scan_stepfunctions(credentials, region, aws_account_id),
+                    pass2_scanners.scan_secretsmanager(credentials, region, aws_account_id),
+                    pass2_scanners.scan_eks(credentials, region, aws_account_id)
+                ]
+                for ext in extended_results:
+                    all_nodes.extend(ext['nodes'])
+                    all_edges.extend(ext['edges'])
+                    
+                # CloudFront is global, handle in global section
+
             # 7. ── S3 (Global) ───────────────────────
             # S3 is global and not bound to a region. It is scanned once outside the region loop.
             try:
@@ -225,6 +241,11 @@ class ScanOrchestrator:
                     db, scan_job.id, 's3', 'global',
                     ScanStatus.failed, 0, str(e)
                 )
+
+            # Global CloudFront
+            cf_result = pass2_scanners.scan_cloudfront(credentials, 'us-east-1', aws_account_id)
+            all_nodes.extend(cf_result['nodes'])
+            all_edges.extend(cf_result['edges'])
 
             # ── Discover Relationships (Edges) ────
             if all_nodes:
