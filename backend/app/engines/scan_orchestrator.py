@@ -179,10 +179,10 @@ class ScanOrchestrator:
                     any_failure = True
                     self._save_service_scan(db, scan_job.id, 'sns', region, ScanStatus.failed, 0, str(e))
 
-            # ── S3 (Global) ───────────────────────────────────────────────────
-                # 8. Extended Pass 2 Services (SNS, ALB, ECS, CloudFront, StepFunctions, SecretsManager, EKS)
+                # 8. Extended Pass 2 Services (ALB, ECS task-defs, StepFunctions, SecretsManager, EKS)
+                # NOTE: SNS is already scanned by sns_scanner above.
+                # NOTE: CloudFront is global and handled below by cloudfront_scanner.
                 extended_results = [
-                    pass2_scanners.scan_sns(credentials, region, aws_account_id),
                     pass2_scanners.scan_alb(credentials, region, aws_account_id),
                     pass2_scanners.scan_ecs(credentials, region, aws_account_id),
                     pass2_scanners.scan_stepfunctions(credentials, region, aws_account_id),
@@ -192,8 +192,6 @@ class ScanOrchestrator:
                 for ext in extended_results:
                     all_nodes.extend(ext['nodes'])
                     all_edges.extend(ext['edges'])
-                    
-                # CloudFront is global, handle in global section
 
             # 7. ── S3 (Global) ───────────────────────
             # S3 is global and not bound to a region. It is scanned once outside the region loop.
@@ -215,12 +213,6 @@ class ScanOrchestrator:
             except Exception as e:
                 any_failure = True
                 self._save_service_scan(db, scan_job.id, 'cloudfront', 'global', ScanStatus.failed, 0, str(e))
-
-            # ── Discover Relationships (Edges) ────────────────────────────────
-            # Global CloudFront
-            cf_result = pass2_scanners.scan_cloudfront(credentials, 'us-east-1', aws_account_id)
-            all_nodes.extend(cf_result['nodes'])
-            all_edges.extend(cf_result['edges'])
 
             # ── Discover Relationships (Edges) ────
             if all_nodes:

@@ -1023,7 +1023,8 @@ class NormalizationEngine:
     # PASS 2 EXTENDED NORMALIZERS
     # ─────────────────────────────────────────
 
-    def normalize_sns(self, topic_arn, endpoints, region, account_id):
+    def normalize_sns_endpoints(self, topic_arn, endpoints, region, account_id):
+        """Pass 2 variant — used by pass2_scanners. Stores pre-grouped endpoints dict."""
         topic_name = topic_arn.split(":")[-1]
         metrics = {"endpoints": endpoints, "region": region}
         node = self.build_node(topic_arn, "snsNode", topic_name, "sns", region, account_id, metrics)

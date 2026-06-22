@@ -54,7 +54,7 @@ class Pass2Scanners:
             for t in topics:
                 arn = t['TopicArn']
                 endpoints = subs_by_topic.get(arn, {"Lambda": [], "SQS": []})
-                nodes.append(normalizer.normalize_sns(arn, endpoints, region, account_id))
+                nodes.append(normalizer.normalize_sns_endpoints(arn, endpoints, region, account_id))
         except Exception as e:
             errors.append(str(e))
         return {"nodes": nodes, "edges": edges, "errors": errors}

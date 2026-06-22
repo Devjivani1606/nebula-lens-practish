@@ -272,5 +272,186 @@ class TestPass2RelationshipEngine(unittest.TestCase):
         self.assertEqual(len(res2['nodes']), 1)
         self.assertEqual(res2['nodes'][0]['resource_arn'], 'alb1')
 
+
+class TestIntegrationNoDuplicates(unittest.TestCase):
+    """
+    Integration tests to catch the class of bug where duplicate scanning
+    or broken method signatures slip through unit tests.
+    """
+
+    def test_normalize_sns_original_signature_no_type_error(self):
+        """
+        Verifies that normalize_sns can be called with the original
+        sns_scanner.py signature (attributes + subscriptions) without TypeError.
+        This would have caught the duplicate-method bug.
+        """
+        from app.engines.normalizer import normalizer
+        topic_arn = "arn:aws:sns:us-east-1:123456789012:my-topic"
+        attributes = {"KmsMasterKeyId": "key-123", "SubscriptionsConfirmed": "2"}
+        subscriptions = [
+            {"Protocol": "lambda", "Endpoint": "arn:aws:lambda:us-east-1:123:function:fn", "SubscriptionArn": "sub1"},
+            {"Protocol": "sqs", "Endpoint": "arn:aws:sqs:us-east-1:123:my-queue", "SubscriptionArn": "sub2"},
+        ]
+        # Must not raise TypeError
+        try:
+            result = normalizer.normalize_sns(
+                topic_arn=topic_arn,
+                attributes=attributes,
+                subscriptions=subscriptions,
+                region="us-east-1",
+                account_id="123456789012"
+            )
+        except TypeError as e:
+            self.fail(f"normalize_sns raised TypeError with original signature: {e}")
+
+        self.assertEqual(result["resource_arn"], topic_arn)
+        # The subscription endpoints should be in the metrics
+        self.assertIn("subscriptionEndpoints", result["node"]["data"]["metrics"])
+
+    def test_normalize_sns_endpoints_signature_no_type_error(self):
+        """
+        Verifies the Pass 2 normalize_sns_endpoints method works correctly
+        and does not conflict with the original normalize_sns.
+        """
+        from app.engines.normalizer import normalizer
+        topic_arn = "arn:aws:sns:us-east-1:123456789012:my-topic"
+        endpoints = {"Lambda": ["arn:aws:lambda:us-east-1:123:function:fn"], "SQS": []}
+        try:
+            result = normalizer.normalize_sns_endpoints(
+                topic_arn=topic_arn,
+                endpoints=endpoints,
+                region="us-east-1",
+                account_id="123456789012"
+            )
+        except TypeError as e:
+            self.fail(f"normalize_sns_endpoints raised TypeError: {e}")
+        self.assertEqual(result["resource_arn"], topic_arn)
+
+    @patch('app.engines.scan_orchestrator.sns_scanner')
+    @patch('app.engines.scan_orchestrator.ecs_scanner')
+    @patch('app.engines.scan_orchestrator.cloudfront_scanner')
+    @patch('app.engines.scan_orchestrator.pass2_scanners')
+    @patch('app.engines.scan_orchestrator.s3_scanner')
+    @patch('app.engines.scan_orchestrator.vpc_scanner')
+    @patch('app.engines.scan_orchestrator.ec2_scanner')
+    @patch('app.engines.scan_orchestrator.lambda_scanner')
+    @patch('app.engines.scan_orchestrator.rds_scanner')
+    @patch('app.engines.scan_orchestrator.sqs_scanner')
+    @patch('app.engines.scan_orchestrator.apigateway_scanner')
+    @patch('app.engines.scan_orchestrator.eventbridge_scanner')
+    @patch('app.engines.scan_orchestrator.dynamodb_scanner')
+    @patch('app.engines.scan_orchestrator.relationship_engine')
+    @patch('app.engines.scan_orchestrator.snapshot_engine')
+    @patch('app.engines.scan_orchestrator.aws_service')
+    @patch('app.engines.scan_orchestrator.SessionLocal')
+    def test_no_duplicate_arns_in_all_nodes(
+        self, mock_session, mock_aws_svc, mock_snap, mock_rel,
+        mock_ddb, mock_eb, mock_apigw, mock_sqs, mock_rds, mock_lam,
+        mock_ec2, mock_vpc, mock_s3, mock_p2, mock_cf, mock_ecs, mock_sns
+    ):
+        """
+        Simulates a full run_scan call and asserts that no single ARN appears
+        more than once in all_nodes. The region loop is accounted for by having
+        each scanner return region-tagged ARNs via side_effect (one call per region).
+
+        The key invariant being tested: for each service (SNS, ECS, CloudFront),
+        only ONE scanner path may contribute nodes, so the same ARN never appears
+        twice even across the two-region loop.
+        """
+        from app.engines.scan_orchestrator import scan_orchestrator, SCAN_REGIONS
+        from uuid import uuid4
+
+        # --- DB / account mocks ---
+        mock_db = MagicMock()
+        mock_session.return_value = mock_db
+
+        scan_job = MagicMock()
+        scan_job.id = uuid4()
+        scan_job.account_id = uuid4()
+        mock_db.query.return_value.filter.return_value.first.side_effect = [scan_job, MagicMock(
+            id=uuid4(),
+            account_id="123456789012",
+            role_arn="arn:aws:iam::123456789012:role/nebula-role"
+        )]
+
+        mock_aws_svc._get_temp_credentials.return_value = {
+            "AccessKeyId": "AKIA", "SecretAccessKey": "secret", "SessionToken": "token"
+        }
+
+        # Produce per-call results: each region gets a unique ARN so
+        # multi-region scanning is not confused with duplicate scanning.
+        def make_sns_result(creds, region, acct):
+            return {"nodes": [{"resource_arn": f"arn:aws:sns:{region}:123:topic-A",
+                                "node": {"data": {"service": "sns", "metrics": {}}},
+                                "resource_name": "topic-A", "raw_id": "topic-A"}], "edges": []}
+        def make_ecs_result(creds, region, acct, subnet_map={}):
+            return {"nodes": [{"resource_arn": f"arn:aws:ecs:{region}:123:cluster/cluster-A",
+                                "node": {"data": {"service": "ecs", "metrics": {}}},
+                                "resource_name": "cluster-A", "raw_id": "cluster-A"}], "edges": []}
+        def make_ecs_p2_result(creds, region, acct):
+            return {"nodes": [{"resource_arn": f"arn:aws:ecs:{region}:123:task-definition/td-A",
+                                "node": {"data": {"service": "ecs", "metrics": {}}},
+                                "resource_name": "td-A", "raw_id": "td-A"}], "edges": []}
+
+        # CloudFront is global — called once outside the region loop
+        cf_node = {"resource_arn": "arn:aws:cloudfront::123:distribution/E1",
+                   "node": {"data": {"service": "cloudfront", "metrics": {}}},
+                   "resource_name": "E1.cloudfront.net", "raw_id": "E1"}
+
+        empty = {"nodes": [], "edges": [], "errors": []}
+        mock_vpc.scan.return_value = {"nodes": [], "edges": []}
+        mock_ec2.scan.return_value = {"nodes": [], "edges": []}
+        mock_lam.scan.return_value = {"nodes": [], "edges": []}
+        mock_rds.scan.return_value = {"nodes": [], "edges": []}
+        mock_sqs.scan.return_value = {"nodes": [], "edges": []}
+        mock_apigw.scan.return_value = {"nodes": [], "edges": []}
+        mock_eb.scan.return_value = {"nodes": [], "edges": []}
+        mock_ddb.scan.return_value = {"nodes": [], "edges": []}
+        mock_ecs.scan.side_effect = make_ecs_result
+        mock_sns.scan.side_effect = make_sns_result
+        mock_s3.scan.return_value = {"nodes": [], "edges": []}
+        mock_cf.scan.return_value = {"nodes": [cf_node], "edges": []}
+
+        mock_p2.scan_alb.return_value = empty
+        mock_p2.scan_ecs.side_effect = make_ecs_p2_result
+        mock_p2.scan_stepfunctions.return_value = empty
+        mock_p2.scan_secretsmanager.return_value = empty
+        mock_p2.scan_eks.return_value = empty
+
+        # Relationship engine / snapshot
+        mock_rel.discover_relationships.return_value = []
+        mock_snap.create_snapshot.return_value = None
+
+        # Capture all_nodes passed to snapshot_engine
+        captured_nodes = []
+        def capture_snapshot(**kwargs):
+            captured_nodes.extend(kwargs.get('all_nodes', []))
+        mock_snap.create_snapshot.side_effect = capture_snapshot
+
+        scan_orchestrator.run_scan(scan_job.id)
+
+        # Assert no duplicate resource_arns — a given ARN must appear exactly once
+        arns = [n.get("resource_arn") for n in captured_nodes if n.get("resource_arn")]
+        duplicates = [arn for arn in set(arns) if arns.count(arn) > 1]
+        self.assertEqual(
+            duplicates, [],
+            f"Duplicate resource ARNs found in all_nodes: {duplicates}"
+        )
+
+        # Additional: verify SNS is scanned exactly once per region (via sns_scanner only)
+        # pass2_scanners.scan_sns must NOT be called — it was removed from the orchestrator
+        self.assertFalse(
+            hasattr(mock_p2, 'scan_sns') and mock_p2.scan_sns.called,
+            "pass2_scanners.scan_sns should not be called — it was removed to prevent duplicate SNS scanning"
+        )
+
+        # CloudFront must be scanned exactly once (via cloudfront_scanner only)
+        # pass2_scanners.scan_cloudfront must NOT be called
+        self.assertFalse(
+            hasattr(mock_p2, 'scan_cloudfront') and mock_p2.scan_cloudfront.called,
+            "pass2_scanners.scan_cloudfront should not be called — it was removed to prevent duplicate CF scanning"
+        )
+
+
 if __name__ == '__main__':
     unittest.main()
