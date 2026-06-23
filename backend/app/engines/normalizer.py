@@ -95,7 +95,7 @@ class NormalizationEngine:
     # VPC NORMALIZER
     # ─────────────────────────────────────────
 
-    def normalize_vpc(self, vpc: dict, region: str, account_id: str, endpoints: list = None, security_groups: list = None) -> dict:
+    def normalize_vpc(self, vpc: dict, region: str, account_id: str, endpoints: list = None, security_groups: list = None, route_tables: list = None, enis: list = None) -> dict:
         """
         Convert raw AWS VPC response into standard node format.
         """
@@ -115,7 +115,9 @@ class NormalizationEngine:
             "region": region,
             "securityScan": self._scan_vpc(vpc),
             "endpoints": endpoints or [],
-            "securityGroups": security_groups or []
+            "securityGroups": security_groups or [],
+            "routeTables": route_tables or [],
+            "enis": enis or []
         }
 
         insights = "Default VPC" if is_default else "Custom VPC"
@@ -1036,7 +1038,10 @@ class NormalizationEngine:
         metrics = {
             "targetGroups": target_groups, 
             "region": region,
-            "DNSName": alb.get('DNSName', '')
+            "DNSName": alb.get('DNSName', ''),
+            "securityGroups": alb.get('SecurityGroups', []),
+            "vpcId": alb.get('VpcId', ''),
+            "subnets": [az.get('SubnetId') for az in alb.get('AvailabilityZones', [])]
         }
         node = self.build_node(arn, "albNode", name, "alb", region, account_id, metrics)
         return {"node": node, "resource_arn": arn, "resource_name": name, "raw_id": arn}

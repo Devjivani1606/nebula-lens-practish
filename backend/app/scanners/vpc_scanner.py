@@ -41,8 +41,11 @@ class VPCScanner:
                     if vid not in vpc_endpoints:
                         vpc_endpoints[vid] = []
                     vpc_endpoints[vid].append({
+                        "vpcEndpointId": endpoint.get('VpcEndpointId'),
+                        "vpcId": vid,
                         "serviceName": endpoint.get('ServiceName'),
-                        "vpcEndpointType": endpoint.get('VpcEndpointType')
+                        "vpcEndpointType": endpoint.get('VpcEndpointType'),
+                        "routeTableIds": endpoint.get('RouteTableIds', [])
                     })
             except Exception as e:
                 logger.warning(f"Failed to scan VPC endpoints: {e}")
@@ -50,28 +53,83 @@ class VPCScanner:
             # Scan Security Groups and rules
             vpc_security_groups = {}
             try:
-                sg_res = ec2.describe_security_groups()
-                for sg in sg_res.get('SecurityGroups', []):
-                    vid = sg.get('VpcId')
-                    if vid not in vpc_security_groups:
-                        vpc_security_groups[vid] = []
-                    vpc_security_groups[vid].append({
-                        "groupId": sg.get('GroupId'),
-                        "groupName": sg.get('GroupName'),
-                        "ipPermissions": [
-                            {
-                                "fromPort": rule.get('FromPort'),
-                                "toPort": rule.get('ToPort'),
-                                "ipProtocol": rule.get('IpProtocol'),
-                                "userIdGroupPairs": [
-                                    {"groupId": pair.get('GroupId')}
-                                    for pair in rule.get('UserIdGroupPairs', [])
-                                ]
-                            } for rule in sg.get('IpPermissions', [])
-                        ]
-                    })
+                paginator = ec2.get_paginator('describe_security_groups')
+                for page in paginator.paginate():
+                    for sg in page.get('SecurityGroups', []):
+                        vid = sg.get('VpcId')
+                        if vid not in vpc_security_groups:
+                            vpc_security_groups[vid] = []
+                        vpc_security_groups[vid].append({
+                            "groupId": sg.get('GroupId'),
+                            "groupName": sg.get('GroupName'),
+                            "ipPermissions": [
+                                {
+                                    "fromPort": rule.get('FromPort'),
+                                    "toPort": rule.get('ToPort'),
+                                    "ipProtocol": rule.get('IpProtocol'),
+                                    "userIdGroupPairs": [
+                                        {"groupId": pair.get('GroupId')}
+                                        for pair in rule.get('UserIdGroupPairs', [])
+                                    ]
+                                } for rule in sg.get('IpPermissions', [])
+                            ],
+                            "ipPermissionsEgress": [
+                                {
+                                    "fromPort": rule.get('FromPort'),
+                                    "toPort": rule.get('ToPort'),
+                                    "ipProtocol": rule.get('IpProtocol'),
+                                    "userIdGroupPairs": [
+                                        {"groupId": pair.get('GroupId')}
+                                        for pair in rule.get('UserIdGroupPairs', [])
+                                    ]
+                                } for rule in sg.get('IpPermissionsEgress', [])
+                            ]
+                        })
             except Exception as e:
                 logger.warning(f"Failed to scan security groups: {e}")
+
+            # Scan Route Tables
+            vpc_route_tables = {}
+            try:
+                paginator = ec2.get_paginator('describe_route_tables')
+                for page in paginator.paginate():
+                    for rt in page.get('RouteTables', []):
+                        vid = rt.get('VpcId')
+                        if vid not in vpc_route_tables:
+                            vpc_route_tables[vid] = []
+                        vpc_route_tables[vid].append({
+                            "routeTableId": rt.get('RouteTableId'),
+                            "routes": [
+                                {
+                                    "destinationCidrBlock": r.get('DestinationCidrBlock'),
+                                    "gatewayId": r.get('GatewayId'),
+                                    "natGatewayId": r.get('NatGatewayId')
+                                } for r in rt.get('Routes', [])
+                            ]
+                        })
+            except Exception as e:
+                logger.warning(f"Failed to scan route tables: {e}")
+
+            # Scan ENIs (Network Interfaces)
+            vpc_enis = {}
+            try:
+                paginator = ec2.get_paginator('describe_network_interfaces')
+                for page in paginator.paginate():
+                    for eni in page.get('NetworkInterfaces', []):
+                        vid = eni.get('VpcId')
+                        if vid not in vpc_enis:
+                            vpc_enis[vid] = []
+                        vpc_enis[vid].append({
+                            "networkInterfaceId": eni.get('NetworkInterfaceId'),
+                            "subnetId": eni.get('SubnetId'),
+                            "vpcId": vid,
+                            "securityGroupIds": [sg.get('GroupId') for sg in eni.get('Groups', [])],
+                            "attachment": {
+                                "instanceId": eni.get('Attachment', {}).get('InstanceId')
+                            } if eni.get('Attachment') else None
+                        })
+            except Exception as e:
+                logger.warning(f"Failed to scan ENIs: {e}")
 
             # ── Scan VPCs ──────────────────────────
             vpc_map = {}  # vpc_id → vpc_arn
@@ -82,12 +140,16 @@ class VPCScanner:
                     try:
                         endpoints = vpc_endpoints.get(vpc['VpcId'], [])
                         security_groups = vpc_security_groups.get(vpc['VpcId'], [])
+                        route_tables = vpc_route_tables.get(vpc['VpcId'], [])
+                        enis = vpc_enis.get(vpc['VpcId'], [])
                         result = normalizer.normalize_vpc(
                             vpc=vpc,
                             region=region,
                             account_id=account_id,
                             endpoints=endpoints,
-                            security_groups=security_groups
+                            security_groups=security_groups,
+                            route_tables=route_tables,
+                            enis=enis
                         )
                         nodes.append(result)
                         vpc_map[result['raw_id']] = result['resource_arn']

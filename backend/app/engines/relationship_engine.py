@@ -2,6 +2,7 @@ import logging
 import boto3
 from typing import List, Dict, Any, Set
 from dataclasses import dataclass
+from app.engines.pass4_network_resolver import pass4_network_resolver
 
 @dataclass
 class RelationshipRule:
@@ -261,6 +262,13 @@ class RelationshipEngine:
                         ec2_arn, rds_arn, "writes_to", 70, ["security_group_rule"]
                     ))
 
+        # ── Step 4.5: Pass 4 Network Topology Inference ───────────────────────
+        try:
+            pass4_edges = pass4_network_resolver.run_pass4(nodes)
+            edges.extend(pass4_edges)
+        except Exception as e:
+            logger.error(f"Pass 4 Network Topology Resolver failed: {e}")
+
         # ── Step 5: Deduplicate ──────────────────────────────────────────────
         unique_map: Dict[tuple, dict] = {}
         for e in edges:
@@ -268,15 +276,23 @@ class RelationshipEngine:
             if key not in unique_map:
                 e_copy = e.copy()
                 e_copy["labels"] = [e.get("label", "")]
+                if not isinstance(e_copy.get("evidence"), list):
+                    e_copy["evidence"] = [e_copy.get("evidence")] if e_copy.get("evidence") else []
                 unique_map[key] = e_copy
             else:
                 existing = unique_map[key]
                 if e.get("label", "") not in existing["labels"]:
                     existing["labels"].append(e.get("label", ""))
+
+                new_ev = e.get("evidence")
+                if isinstance(new_ev, list):
+                    existing["evidence"].extend(new_ev)
+                elif new_ev:
+                    existing["evidence"].append(new_ev)
+
                 if e.get("confidence", 0) > existing.get("confidence", 0):
                     existing["confidence"] = e.get("confidence", 0)
                     existing["label"] = e.get("label", "")
-                    existing["evidence"] = e.get("evidence", [])
 
         unique = list(unique_map.values())
 
@@ -322,7 +338,7 @@ class RelationshipEngine:
         if path == "endpoints.Lambda": return metrics.get("endpoints", {}).get("Lambda", [])
         if path == "endpoints.SQS": return metrics.get("endpoints", {}).get("SQS", [])
         if path == "targetGroups": return [tg.get("TargetGroupArn") for tg in metrics.get("targetGroups", [])]
-        if path == "targets": 
+        if path == "targets":
             for tg in metrics.get("targetGroups", []):
                 for tgt in tg.get("Targets", []): res.append(tgt.get("Id"))
             return res
@@ -421,7 +437,7 @@ class RelationshipEngine:
                         bus_name = n.get("resource_name", "")
                         if bus_name and (v_lower == arn.lower() or v_lower == bus_name.lower()):
                             targets.append((arn, v))
-        
+
         unique_targets = list(set(targets))
         return unique_targets
 
