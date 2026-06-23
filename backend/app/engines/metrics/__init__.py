@@ -13,6 +13,7 @@ from app.engines.metrics.s3_metrics        import S3MetricsCollector,         S3
 from app.engines.metrics.vpc_metrics       import VPCMetricsCollector,        VPCMetricsMapper
 from app.engines.metrics.apigateway_metrics import APIGatewayMetricsCollector, APIGatewayMetricsMapper
 from app.engines.metrics.subnet_metrics    import SubnetMetricsCollector,     SubnetMetricsMapper
+from app.engines.metrics.eventbridge_metrics import EventBridgeMetricsCollector, EventBridgeMetricsMapper
 
 __all__ = [
     # Base
@@ -27,4 +28,5 @@ __all__ = [
     "VPCMetricsCollector",       "VPCMetricsMapper",
     "APIGatewayMetricsCollector","APIGatewayMetricsMapper",
     "SubnetMetricsCollector",    "SubnetMetricsMapper",
+    "EventBridgeMetricsCollector", "EventBridgeMetricsMapper",
 ]
