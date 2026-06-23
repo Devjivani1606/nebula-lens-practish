@@ -12,18 +12,12 @@ function SubnetNode({ id, data, selected, positionAbsoluteX }: { id: string; dat
   return (
     <motion.div
       whileHover={{ 
-        scale: 1.01, 
-        borderColor: (selected || isHighlighted) ? "#7C6FF7" : "rgba(255, 255, 255, 0.18)",
+        scale: 1.01,
         transition: { duration: 0.15, ease: "easeOut" }
       }}
       initial={{ opacity: 0 }}
       animate={{
         opacity: opacity,
-        borderColor: (selected || isHighlighted) ? "#7C6FF7" : "rgba(255, 255, 255, 0.08)",
-        borderWidth: (selected || isHighlighted) ? "1px" : "0.5px",
-        backgroundColor: (selected || isHighlighted)
-          ? "rgba(14, 165, 233, 0.05)"
-          : "rgba(14, 165, 233, 0.01)",
         boxShadow: (selected || isHighlighted)
           ? "0 0 0 3px rgba(124, 111, 247, 0.15)"
           : "0px 4px 12px rgba(0, 0, 0, 0.1)"
@@ -32,7 +26,11 @@ function SubnetNode({ id, data, selected, positionAbsoluteX }: { id: string; dat
         duration: 0.5,
         delay: Math.max(0, ((positionAbsoluteX || 0) + 400) * 0.0004)
       }}
-      className={`relative w-full h-full border-solid rounded-[10px] backdrop-blur-[8px] pointer-events-auto ${
+      className={`relative w-full h-full border-solid rounded-[10px] backdrop-blur-[8px] pointer-events-auto transition-colors duration-200 ${
+        selected || isHighlighted
+          ? 'bg-[rgba(14,165,233,0.05)] dark:bg-white/[0.06] border-[#7C6FF7] dark:border-indigo-400 border-[1px]'
+          : 'bg-[rgba(14,165,233,0.01)] dark:bg-white/[0.03] border-[rgba(255,255,255,0.08)] hover:border-[rgba(255,255,255,0.18)] dark:border-white/10 dark:hover:border-white/20 border-[0.5px]'
+      } ${
         isDimmed ? 'pointer-events-none' : ''
       }`}
     >

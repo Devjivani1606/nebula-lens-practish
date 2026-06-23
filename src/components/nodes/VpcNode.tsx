@@ -13,19 +13,12 @@ function VpcNode({ id, data, selected, positionAbsoluteX }: { id: string; data: 
   return (
     <motion.div
       whileHover={{ 
-        scale: 1.01, 
-        borderColor: (selected || isHighlighted) ? "#7C6FF7" : "rgba(124, 111, 247, 0.6)",
+        scale: 1.01,
         transition: { duration: 0.15, ease: "easeOut" }
       }}
       initial={{ opacity: 0 }}
       animate={{
         opacity: opacity,
-        borderColor: (selected || isHighlighted) ? "#7C6FF7" : "rgba(124, 111, 247, 0.4)",
-        borderWidth: "1px",
-        borderStyle: "dashed",
-        backgroundColor: (selected || isHighlighted)
-          ? "rgba(14, 165, 233, 0.05)"
-          : "rgba(14, 165, 233, 0.01)",
         boxShadow: (selected || isHighlighted)
           ? "0 0 0 3px rgba(124, 111, 247, 0.15)"
           : "none"
@@ -34,7 +27,11 @@ function VpcNode({ id, data, selected, positionAbsoluteX }: { id: string; data: 
         duration: 0.5,
         delay: Math.max(0, ((positionAbsoluteX || 0) + 400) * 0.0004)
       }}
-      className={`relative w-full h-full border-solid rounded-[10px] backdrop-blur-[8px] pointer-events-auto ${
+      className={`relative w-full h-full border-dashed border-[1px] rounded-[10px] backdrop-blur-[8px] pointer-events-auto transition-colors duration-200 ${
+        selected || isHighlighted
+          ? 'bg-[rgba(14,165,233,0.05)] dark:bg-slate-800/60 border-[#7C6FF7] dark:border-indigo-400'
+          : 'bg-[rgba(14,165,233,0.01)] dark:bg-slate-900/60 border-[rgba(124,111,247,0.4)] hover:border-[rgba(124,111,247,0.6)] dark:border-slate-700/50 dark:hover:border-slate-600'
+      } ${
         isDimmed ? 'pointer-events-none' : ''
       }`}
     >
