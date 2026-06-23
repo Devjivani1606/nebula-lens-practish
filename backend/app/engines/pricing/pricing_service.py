@@ -32,7 +32,7 @@ import json
 import logging
 from typing import Optional
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timezone
 
 import boto3
 from botocore.exceptions import ClientError, BotoCoreError
@@ -173,6 +173,108 @@ def _data_transfer_filters(location: str) -> tuple[str, list[dict]]:
     ]
 
 
+def _rds_instance_filters(instance_type: str, location: str, database_engine: str = "PostgreSQL", deployment_option: str = "Single-AZ") -> tuple[str, list[dict]]:
+    return "AmazonRDS", [
+        {"Type": "TERM_MATCH", "Field": "productFamily",   "Value": "Database Instance"},
+        {"Type": "TERM_MATCH", "Field": "instanceType",    "Value": instance_type},
+        {"Type": "TERM_MATCH", "Field": "location",        "Value": location},
+        {"Type": "TERM_MATCH", "Field": "databaseEngine",  "Value": database_engine},
+        {"Type": "TERM_MATCH", "Field": "deploymentOption", "Value": deployment_option},
+        {"Type": "TERM_MATCH", "Field": "licenseModel",     "Value": "General Public License"},
+    ]
+
+
+def _rds_storage_filters(volume_type: str, location: str) -> tuple[str, list[dict]]:
+    vt_map = {
+        "gp2": "General Purpose",
+        "gp3": "General Purpose-GP3",
+        "standard": "General Purpose"
+    }
+    vt = vt_map.get(volume_type.lower(), "General Purpose")
+    return "AmazonRDS", [
+        {"Type": "TERM_MATCH", "Field": "productFamily", "Value": "Storage"},
+        {"Type": "TERM_MATCH", "Field": "volumeType",    "Value": vt},
+        {"Type": "TERM_MATCH", "Field": "location",      "Value": location},
+    ]
+
+
+def _sns_requests_filters(location: str, topic_type: str = "Standard") -> tuple[str, list[dict]]:
+    group = "SNS-Requests-Standard" if topic_type.capitalize() == "Standard" else "SNS-Requests-FIFO"
+    return "AmazonSNS", [
+        {"Type": "TERM_MATCH", "Field": "location",      "Value": location},
+        {"Type": "TERM_MATCH", "Field": "productFamily", "Value": "API Request"},
+        {"Type": "TERM_MATCH", "Field": "group",         "Value": group},
+    ]
+
+
+def _dynamodb_storage_filters(location: str) -> tuple[str, list[dict]]:
+    return "AmazonDynamoDB", [
+        {"Type": "TERM_MATCH", "Field": "location",      "Value": location},
+        {"Type": "TERM_MATCH", "Field": "productFamily", "Value": "Database Storage"},
+        {"Type": "TERM_MATCH", "Field": "group",         "Value": "Amazon DynamoDB - Indexed Storage"},
+    ]
+
+
+def _dynamodb_rru_filters(location: str) -> tuple[str, list[dict]]:
+    return "AmazonDynamoDB", [
+        {"Type": "TERM_MATCH", "Field": "location",      "Value": location},
+        {"Type": "TERM_MATCH", "Field": "group",         "Value": "DynamoDB-ReadRequestUnits"},
+    ]
+
+
+def _dynamodb_wru_filters(location: str) -> tuple[str, list[dict]]:
+    return "AmazonDynamoDB", [
+        {"Type": "TERM_MATCH", "Field": "location",      "Value": location},
+        {"Type": "TERM_MATCH", "Field": "group",         "Value": "DynamoDB-WriteRequestUnits"},
+    ]
+
+
+def _dynamodb_rcu_filters(location: str) -> tuple[str, list[dict]]:
+    return "AmazonDynamoDB", [
+        {"Type": "TERM_MATCH", "Field": "location",      "Value": location},
+        {"Type": "TERM_MATCH", "Field": "group",         "Value": "DDB-ReadCapacityUnit"},
+    ]
+
+
+def _dynamodb_wcu_filters(location: str) -> tuple[str, list[dict]]:
+    return "AmazonDynamoDB", [
+        {"Type": "TERM_MATCH", "Field": "location",      "Value": location},
+        {"Type": "TERM_MATCH", "Field": "group",         "Value": "DDB-WriteCapacityUnit"},
+    ]
+
+
+def _cloudfront_requests_filters(location: str) -> tuple[str, list[dict]]:
+    return "AmazonCloudFront", [
+        {"Type": "TERM_MATCH", "Field": "location",      "Value": location},
+        {"Type": "TERM_MATCH", "Field": "productFamily", "Value": "Fee"},
+    ]
+
+
+def _cloudfront_data_transfer_filters(location: str) -> tuple[str, list[dict]]:
+    return "AmazonCloudFront", [
+        {"Type": "TERM_MATCH", "Field": "location",       "Value": location},
+        {"Type": "TERM_MATCH", "Field": "productFamily",  "Value": "Data Transfer"},
+        {"Type": "TERM_MATCH", "Field": "transferType",   "Value": "CloudFront Outbound"},
+    ]
+
+
+def _ecs_fargate_vcpu_filters(location: str) -> tuple[str, list[dict]]:
+    return "AmazonECS", [
+        {"Type": "TERM_MATCH", "Field": "location",      "Value": location},
+        {"Type": "TERM_MATCH", "Field": "productFamily", "Value": "Compute"},
+        {"Type": "TERM_MATCH", "Field": "group",         "Value": "Fargate-vCPU"},
+    ]
+
+
+def _ecs_fargate_memory_filters(location: str) -> tuple[str, list[dict]]:
+    return "AmazonECS", [
+        {"Type": "TERM_MATCH", "Field": "location",      "Value": location},
+        {"Type": "TERM_MATCH", "Field": "productFamily", "Value": "Compute"},
+        {"Type": "TERM_MATCH", "Field": "group",         "Value": "Fargate-Memory"},
+    ]
+
+
+
 # ─────────────────────────────────────────────────────────────────────────────
 # PRICE EXTRACTION FROM AWS PRICING API RESPONSE
 # ─────────────────────────────────────────────────────────────────────────────
@@ -274,7 +376,7 @@ class PricingService:
                 return PricingResult(
                     price=api_price,
                     source="pricing_api",
-                    fetched_at=datetime.now()
+                    fetched_at=datetime.now(timezone.utc)
                 )
             else:
                 logger.warning(f"[PricingService] PRICING_API_FAILURE: {key_str}")
@@ -282,7 +384,7 @@ class PricingService:
         # ── Level 3: Stale Cache (Last Known Good) ───────────────────────────
         stale = pricing_cache.get_last_known(service, region, resource_type)
         if stale:
-            age_days = (datetime.now() - stale.fetched_at).days
+            age_days = (datetime.now(timezone.utc) - stale.fetched_at).days
             logger.warning(
                 f"[PricingService] STALE_CACHE_USED: {key_str} = ${stale.price} "
                 f"(age: {age_days} days)"
@@ -397,6 +499,24 @@ class PricingService:
         if service == "ebs":
             return _ebs_filters(resource_type, location)
 
+        # RDS dynamic resource type parsing
+        if service == "rds":
+            if resource_type.startswith("instance:"):
+                # Format: instance:instance_class:database_engine:deployment_option
+                parts = resource_type.split(":")
+                instance_class = parts[1]
+                engine = parts[2]
+                deployment = parts[3]
+                return _rds_instance_filters(instance_class, location, engine, deployment)
+            elif resource_type.startswith("storage:"):
+                volume_type = resource_type.split(":")[1]
+                return _rds_storage_filters(volume_type, location)
+
+        # SNS requests parsing
+        if service == "sns":
+            topic_type = resource_type.split(":")[1] if ":" in resource_type else "Standard"
+            return _sns_requests_filters(location, topic_type)
+
         # All other services use fixed resource_type keys
         dispatch = {
             ("lambda",       "requests"):   lambda: _lambda_requests_filters(location),
@@ -411,6 +531,17 @@ class PricingService:
             ("nat_gateway",  "data"):       lambda: _nat_data_filters(location),
             ("eventbridge",  "events"):     lambda: _eventbridge_filters(location),
             ("data_transfer","out"):        lambda: _data_transfer_filters(location),
+            
+            # New services
+            ("dynamodb",     "storage"):    lambda: _dynamodb_storage_filters(location),
+            ("dynamodb",     "rru"):        lambda: _dynamodb_rru_filters(location),
+            ("dynamodb",     "wru"):        lambda: _dynamodb_wru_filters(location),
+            ("dynamodb",     "rcu_hourly"): lambda: _dynamodb_rcu_filters(location),
+            ("dynamodb",     "wcu_hourly"): lambda: _dynamodb_wcu_filters(location),
+            ("cloudfront",   "requests"):   lambda: _cloudfront_requests_filters(location),
+            ("cloudfront",   "transfer"):   lambda: _cloudfront_data_transfer_filters(location),
+            ("ecs",          "fargate_vcpu"):   lambda: _ecs_fargate_vcpu_filters(location),
+            ("ecs",          "fargate_memory"): lambda: _ecs_fargate_memory_filters(location),
         }
 
         handler = dispatch.get((service, resource_type))
