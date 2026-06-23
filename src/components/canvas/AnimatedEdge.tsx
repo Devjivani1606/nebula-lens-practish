@@ -25,7 +25,7 @@ export default function AnimatedEdge({
   selected, // Destructure selected state
 }: EdgeProps) {
   const [isHovered, setIsHovered] = useState(false);
-  
+
   // 1. Hook into React Flow's internal state to watch node coordinates in real-time
   const sourceNode = useInternalNode(source);
   const targetNode = useInternalNode(target);
@@ -161,7 +161,8 @@ export default function AnimatedEdge({
   let animationClass = '';
 
   // Data flow edges
-  if (lowerLabel.includes('post') || lowerLabel.includes('http') || lowerLabel.includes('api') || lowerLabel.includes('trigger') || lowerLabel.includes('event') || lowerLabel.includes('read') || lowerLabel.includes('write') || lowerLabel.includes('state') || lowerLabel.includes('store') || lowerLabel.includes('asset') || lowerLabel.includes('s3')) {
+  if (lowerLabel.includes('post') || lowerLabel.includes('http') || lowerLabel.includes('api') || lowerLabel.includes('trigger') || lowerLabel.includes('event') || lowerLabel.includes('read') || lowerLabel.includes('write') || lowerLabel.includes('state') || lowerLabel.includes('store') || lowerLabel.includes('asset') || lowerLabel.includes('s3') ||lowerLabel.includes('invoke') || // Add this
+    lowerLabel.includes('send')) {
     strokeColor = '#7C6FF7'; // Brand Accent
     particleColor = '#7C6FF7';
     edgeWidth = 1;
@@ -273,8 +274,8 @@ export default function AnimatedEdge({
         </marker>
       </defs>
 
-      <g 
-        onMouseEnter={() => setIsHovered(true)} 
+      <g
+        onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
         <BaseEdge
@@ -332,7 +333,7 @@ export default function AnimatedEdge({
               }}
             className={`nodrag nopan px-3 py-1 rounded-full border-2 font-medium shadow-sm uppercase tracking-widest transition-all ${
               isCostLens
-                ? 'bg-white dark:bg-slate-950' 
+                ? 'bg-white dark:bg-slate-950'
                 : 'bg-white dark:bg-slate-900'
             }`}
           >
