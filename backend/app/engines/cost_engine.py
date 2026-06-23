@@ -26,6 +26,11 @@ from app.engines.costs.vpc_cost         import VPCCostCalculator
 from app.engines.costs.apigateway_cost  import APIGatewayCostCalculator
 from app.engines.costs.subnet_cost      import SubnetCostAllocator
 from app.engines.costs.eventbridge_cost import EventBridgeCostCalculator
+from app.engines.costs.rds_cost          import RDSCostCalculator
+from app.engines.costs.sns_cost          import SNSCostCalculator
+from app.engines.costs.dynamodb_cost     import DynamoDBCostCalculator
+from app.engines.costs.cloudfront_cost   import CloudFrontCostCalculator
+from app.engines.costs.ecs_cost          import ECSCostCalculator
 
 logger = logging.getLogger(__name__)
 
@@ -58,6 +63,11 @@ class CostEngine:
             APIGatewayCostCalculator(),
             SubnetCostAllocator(),
             EventBridgeCostCalculator(),
+            RDSCostCalculator(),
+            SNSCostCalculator(),
+            DynamoDBCostCalculator(),
+            CloudFrontCostCalculator(),
+            ECSCostCalculator(),
         ]
         for calc in builtins:
             self.register(calc)
