@@ -1,21 +1,16 @@
 """
-SQSCostCalculator
+SQSCostCalculator — dynamic pricing via PricingService.
 
-Billing Model  : Pay-per-API-request (64KB chunks)
-Pricing        : ap-south-1
+Billing dimensions:
+  - Standard queue: per 1M API requests
+  - FIFO queue:     per 1M API requests (higher rate)
 
-Formula:
-  Standard Queue: $0.40 per 1M API requests (each 64KB = 1 request)
-  FIFO Queue:     $0.50 per 1M API requests
-  Free tier: 1M requests/month
-
-Reference: https://aws.amazon.com/sqs/pricing/
+Free tier: 1M requests/month
 """
 
 from app.engines.costs.base import BaseCostCalculator
+from app.engines.pricing import pricing_service
 
-PRICE_PER_1M_STD   = 0.40   # Standard queue
-PRICE_PER_1M_FIFO  = 0.50   # FIFO queue
 FREE_TIER_REQUESTS = 1_000_000
 
 
@@ -24,14 +19,18 @@ class SQSCostCalculator(BaseCostCalculator):
     SERVICE = "sqs"
 
     def calculate(self, node: dict, metrics_summary: dict, region: str = "ap-south-1") -> dict:
-        queue_type = node.get("data", {}).get("metrics", {}).get("type", "Standard")
-        is_fifo    = queue_type == "FIFO"
+        credentials = node.get("_credentials")
+
+        queue_type         = node.get("data", {}).get("metrics", {}).get("type", "Standard")
+        is_fifo            = queue_type == "FIFO"
+        resource_type_key  = "fifo" if is_fifo else "standard"
 
         total_api_requests = metrics_summary.get("totalApiRequests", 0)
         monthly_requests   = total_api_requests * 30
-
         billable_requests  = max(0, monthly_requests - FREE_TIER_REQUESTS)
-        unit_price         = PRICE_PER_1M_FIFO if is_fifo else PRICE_PER_1M_STD
+
+        # ── Dynamic price ─────────────────────────────────────────────────────
+        unit_price = pricing_service.get("sqs", region, resource_type_key, credentials) or 0.0
 
         line_items = [
             self._line(

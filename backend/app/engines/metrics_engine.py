@@ -20,8 +20,9 @@ from app.engines.metrics.sqs_metrics        import SQSMetricsCollector
 from app.engines.metrics.ec2_metrics        import EC2MetricsCollector
 from app.engines.metrics.s3_metrics         import S3MetricsCollector
 from app.engines.metrics.vpc_metrics        import VPCMetricsCollector
-from app.engines.metrics.apigateway_metrics import APIGatewayMetricsCollector
-from app.engines.metrics.subnet_metrics     import SubnetMetricsCollector
+from app.engines.metrics.apigateway_metrics   import APIGatewayMetricsCollector
+from app.engines.metrics.subnet_metrics       import SubnetMetricsCollector
+from app.engines.metrics.eventbridge_metrics  import EventBridgeMetricsCollector
 
 logger = logging.getLogger(__name__)
 
@@ -56,6 +57,7 @@ class MetricsEngine:
             VPCMetricsCollector(),
             APIGatewayMetricsCollector(),
             SubnetMetricsCollector(),
+            EventBridgeMetricsCollector(),
         ]
         for collector in builtins:
             self.register(collector)

@@ -1,31 +1,19 @@
 """
-APIGatewayCostCalculator
+APIGatewayCostCalculator — dynamic pricing via PricingService.
 
-Billing Model  : Pay-per-API-call + data transfer out + caching (optional)
-Pricing        : ap-south-1 (REST API)
+Billing dimensions:
+  1. API calls    → REST ($3.70/1M) or HTTP ($1.00/1M) per region
+  2. Data out     → per GB transfer out
 
-REST API Formula:
-  Cost = (api_calls / 1_000_000 × $3.70)     ← first 333M/month
-       + (data_out_gb × $0.09)
-
-HTTP API Formula (cheaper):
-  Cost = (api_calls / 1_000_000 × $1.00)     ← first 300M/month
-       + (data_out_gb × $0.09)
-
-WebSocket (not tracked yet):
-  Cost = (connection_minutes × $0.00) + (messages × $1.00/M)
-
-Reference: https://aws.amazon.com/api-gateway/pricing/
+NOTE: HTTP API pricing is significantly cheaper than REST.
+      apiType is detected from node metrics (set by apigateway_scanner).
 """
 
 from app.engines.costs.base import BaseCostCalculator
+from app.engines.pricing import pricing_service
 
-# REST API pricing
-PRICE_REST_PER_1M_CALLS     = 3.70   # ap-south-1, first 333M
-# HTTP API pricing
-PRICE_HTTP_PER_1M_CALLS     = 1.00   # significantly cheaper
-# Data transfer
-PRICE_DATA_TRANSFER_PER_GB  = 0.09
+# Avg response size assumption for data transfer estimation
+AVG_RESPONSE_BYTES = 100_000   # 100KB per response
 
 
 class APIGatewayCostCalculator(BaseCostCalculator):
@@ -33,33 +21,25 @@ class APIGatewayCostCalculator(BaseCostCalculator):
     SERVICE = "apigateway"
 
     def calculate(self, node: dict, metrics_summary: dict, region: str = "ap-south-1") -> dict:
-        api_type       = metrics_summary.get("apiType", "REST")
-        total_requests = metrics_summary.get("totalRequests", 0)
+        credentials    = node.get("_credentials")
+        api_type       = metrics_summary.get("apiType") or node.get("data", {}).get("metrics", {}).get("type", "REST")
+        total_requests = metrics_summary.get("totalRequests", 0) or metrics_summary.get("requests", 0)
 
         monthly_requests = total_requests * 30
-        # Assume ~100KB avg response → data out estimate
-        monthly_out_gb   = (monthly_requests * 100_000) / 1_073_741_824
+        # Data transfer estimate: avg response × monthly requests → GB
+        monthly_out_gb   = (monthly_requests * AVG_RESPONSE_BYTES) / 1_073_741_824
 
-        if api_type == "HTTP":
-            price_per_1m = PRICE_HTTP_PER_1M_CALLS
-            label = "HTTP API Calls"
-        else:
-            price_per_1m = PRICE_REST_PER_1M_CALLS
-            label = "REST API Calls"
+        # ── Dynamic prices ────────────────────────────────────────────────────
+        # REST and HTTP have different Pricing API entries; map to our resource_type key
+        api_key       = "http" if api_type == "HTTP" else "rest"
+        price_per_1m  = pricing_service.get("apigateway", region, api_key,    credentials) or 0.0
+        transfer_rate = pricing_service.get("apigateway", region, "transfer", credentials) or 0.0
+
+        label = f"{api_type} API Calls"
 
         line_items = [
-            self._line(
-                label,
-                monthly_requests / 1_000_000,
-                "per 1M calls",
-                price_per_1m
-            ),
-            self._line(
-                "Data Transfer Out",
-                monthly_out_gb,
-                "GB",
-                PRICE_DATA_TRANSFER_PER_GB
-            ),
+            self._line(label,             monthly_requests / 1_000_000, "per 1M calls", price_per_1m),
+            self._line("Data Transfer Out", monthly_out_gb,             "GB",           transfer_rate),
         ]
 
         return self._build_result(
@@ -71,5 +51,5 @@ class APIGatewayCostCalculator(BaseCostCalculator):
             },
             line_items=line_items,
             region=region,
-            notes=f"{api_type} API in {region} — 100KB avg response assumed for data transfer"
+            notes=f"{api_type} API in {region} — {AVG_RESPONSE_BYTES // 1000}KB avg response assumed"
         )
