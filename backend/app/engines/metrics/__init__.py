@@ -14,6 +14,11 @@ from app.engines.metrics.vpc_metrics       import VPCMetricsCollector,        VP
 from app.engines.metrics.apigateway_metrics import APIGatewayMetricsCollector, APIGatewayMetricsMapper
 from app.engines.metrics.subnet_metrics    import SubnetMetricsCollector,     SubnetMetricsMapper
 from app.engines.metrics.eventbridge_metrics import EventBridgeMetricsCollector, EventBridgeMetricsMapper
+from app.engines.metrics.rds_metrics       import RDSMetricsCollector,        RDSMetricsMapper
+from app.engines.metrics.sns_metrics       import SNSMetricsCollector,        SNSMetricsMapper
+from app.engines.metrics.dynamodb_metrics  import DynamoDBMetricsCollector,   DynamoDBMetricsMapper
+from app.engines.metrics.cloudfront_metrics import CloudFrontMetricsCollector, CloudFrontMetricsMapper
+from app.engines.metrics.ecs_metrics       import ECSMetricsCollector,        ECSMetricsMapper
 
 __all__ = [
     # Base
@@ -29,4 +34,9 @@ __all__ = [
     "APIGatewayMetricsCollector","APIGatewayMetricsMapper",
     "SubnetMetricsCollector",    "SubnetMetricsMapper",
     "EventBridgeMetricsCollector", "EventBridgeMetricsMapper",
+    "RDSMetricsCollector",       "RDSMetricsMapper",
+    "SNSMetricsCollector",       "SNSMetricsMapper",
+    "DynamoDBMetricsCollector",  "DynamoDBMetricsMapper",
+    "CloudFrontMetricsCollector","CloudFrontMetricsMapper",
+    "ECSMetricsCollector",       "ECSMetricsMapper",
 ]
