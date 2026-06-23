@@ -1,100 +1,511 @@
-'use client';
+"use client";
 
-import React, { useContext } from 'react';
-import { motion } from 'framer-motion';
-import { PieChartContext } from './pie-chart';
+import { arc as arcGenerator } from "@visx/shape";
+import { motion, useSpring, useTransform } from "motion/react";
+import { memo, useEffect } from "react";
+import { usePieHover, usePieStable } from "./pie-context";
+import { useEnterComplete } from "./use-enter-complete";
+import { useMountProgress } from "./use-mount-progress";
 
-interface PieSliceProps {
-  index: number;
-  hoverEffect?: 'translate' | 'none';
-  hoverOffset?: number;
-}
-
-function getArcPath(
-  centerX: number,
-  centerY: number,
+// Helper to generate arc path using d3 arc generator
+function generateArcPath(
   innerRadius: number,
   outerRadius: number,
   startAngle: number,
-  endAngle: number
-) {
-  const toRadians = (angle: number) => (angle - 90) * Math.PI / 180;
-
-  // If there's only one slice (full circle)
-  if (endAngle - startAngle >= 359.9) {
-    return [
-      `M ${centerX} ${centerY - outerRadius}`,
-      `A ${outerRadius} ${outerRadius} 0 1 1 ${centerX - 0.01} ${centerY - outerRadius}`,
-      `Z`,
-      `M ${centerX} ${centerY - innerRadius}`,
-      `A ${innerRadius} ${innerRadius} 0 1 0 ${centerX - 0.01} ${centerY - innerRadius}`,
-      `Z`
-    ].join(' ');
-  }
-
-  const sRad = toRadians(startAngle);
-  const eRad = toRadians(endAngle);
-
-  const x1_out = centerX + outerRadius * Math.cos(sRad);
-  const y1_out = centerY + outerRadius * Math.sin(sRad);
-  const x2_out = centerX + outerRadius * Math.cos(eRad);
-  const y2_out = centerY + outerRadius * Math.sin(eRad);
-
-  const x1_in = centerX + innerRadius * Math.cos(sRad);
-  const y1_in = centerY + innerRadius * Math.sin(sRad);
-  const x2_in = centerX + innerRadius * Math.cos(eRad);
-  const y2_in = centerY + innerRadius * Math.sin(eRad);
-
-  const largeArcFlag = endAngle - startAngle <= 180 ? '0' : '1';
-
-  return [
-    `M ${x1_out} ${y1_out}`,
-    `A ${outerRadius} ${outerRadius} 0 ${largeArcFlag} 1 ${x2_out} ${y2_out}`,
-    `L ${x2_in} ${y2_in}`,
-    `A ${innerRadius} ${innerRadius} 0 ${largeArcFlag} 0 ${x1_in} ${y1_in}`,
-    'Z'
-  ].join(' ');
+  endAngle: number,
+  cornerRadius: number,
+  padAngle: number
+): string {
+  const generator = arcGenerator<unknown>({
+    innerRadius,
+    outerRadius,
+    cornerRadius,
+    padAngle,
+  });
+  return generator({ startAngle, endAngle } as unknown as null) || "";
 }
 
-export function PieSlice({ index, hoverEffect = 'translate', hoverOffset = 6 }: PieSliceProps) {
-  const context = useContext(PieChartContext);
+// Calculate the translation offset for a slice to "pop out" along its radial axis
+function getSliceOffset(
+  startAngle: number,
+  endAngle: number,
+  distance: number
+): { x: number; y: number } {
+  // Calculate the midpoint angle of the slice
+  const midAngle = (startAngle + endAngle) / 2;
+  // In d3-shape, 0 radians is at 12 o'clock, angles increase clockwise
+  // So the outward direction is: x = sin(angle), y = -cos(angle)
+  return {
+    x: Math.sin(midAngle) * distance,
+    y: -Math.cos(midAngle) * distance,
+  };
+}
 
-  if (!context) {
-    throw new Error('PieSlice must be used within a PieChart component');
+/** Hover effect types */
+export type PieSliceHoverEffect = "translate" | "grow" | "none";
+
+export interface PieSliceProps {
+  /** Index of the slice in the data array */
+  index: number;
+  /** Optional color override - falls back to data color or palette */
+  color?: string;
+  /** Optional fill override for patterns/gradients (e.g., "url(#patternId)") */
+  fill?: string;
+  /** Animate the slice on mount. Default: true */
+  animate?: boolean;
+  /** Show glow effect on hover. Default: true */
+  showGlow?: boolean;
+  /**
+   * Hover effect type. Default: "translate"
+   * - "translate": Slice moves outward along its radial axis
+   * - "grow": Slice extends its outer radius (gets longer)
+   * - "none": No hover animation
+   */
+  hoverEffect?: PieSliceHoverEffect;
+  /** Distance in pixels for hover effect (translate distance or grow amount). Defaults to PieChart's hoverOffset */
+  hoverOffset?: number;
+  /** Additional CSS class */
+  className?: string;
+}
+
+interface AnimatedSliceTranslateProps {
+  index: number;
+  innerRadius: number;
+  outerRadius: number;
+  startAngle: number;
+  endAngle: number;
+  cornerRadius: number;
+  padAngle: number;
+  fill: string;
+  color: string;
+  isHovered: boolean;
+  isFaded: boolean;
+  animationKey: number;
+  showGlow: boolean;
+  hoverOffset: number;
+}
+
+function AnimatedSliceTranslate({
+  index,
+  innerRadius,
+  outerRadius,
+  startAngle,
+  endAngle,
+  cornerRadius,
+  padAngle,
+  fill,
+  color,
+  isHovered,
+  isFaded,
+  animationKey,
+  showGlow,
+  hoverOffset,
+}: AnimatedSliceTranslateProps) {
+  const {
+    enterTransition,
+    enterStaggerScale,
+    animationKey: pieAnimationKey,
+  } = usePieStable();
+  const animationDelay = (0.1 + index * 0.08) * enterStaggerScale;
+  const mountProgress = useMountProgress(
+    enterTransition,
+    animationDelay,
+    pieAnimationKey
+  );
+  const enterComplete = useEnterComplete(mountProgress);
+
+  const animatedPath = useTransform(mountProgress, (mount) => {
+    const currentEndAngle = startAngle + (endAngle - startAngle) * mount;
+    if (currentEndAngle <= startAngle + 0.01) {
+      return "";
+    }
+    return generateArcPath(
+      innerRadius,
+      outerRadius,
+      startAngle,
+      currentEndAngle,
+      cornerRadius,
+      padAngle
+    );
+  });
+
+  const offset = getSliceOffset(startAngle, endAngle, hoverOffset);
+  const glowColor = color;
+  const hitboxPath = generateArcPath(
+    innerRadius,
+    outerRadius,
+    startAngle,
+    endAngle,
+    cornerRadius,
+    padAngle
+  );
+
+  if (enterComplete) {
+    const shouldTranslate = isHovered;
+    return (
+      <motion.path
+        animate={{
+          opacity: isFaded ? 0.4 : 1,
+          x: shouldTranslate ? offset.x : 0,
+          y: shouldTranslate ? offset.y : 0,
+        }}
+        d={hitboxPath}
+        fill={fill}
+        pointerEvents="none"
+        style={{
+          filter:
+            showGlow && isHovered
+              ? `drop-shadow(0 0 12px ${glowColor})`
+              : "none",
+        }}
+        transition={{
+          opacity: { duration: 0.15 },
+          x: { type: "spring", stiffness: 400, damping: 25 },
+          y: { type: "spring", stiffness: 400, damping: 25 },
+        }}
+      />
+    );
   }
-
-  const { slices, innerRadius, outerRadius, cornerRadius, hoveredIndex, onHoverChange } = context;
-  const slice = slices[index];
-
-  if (!slice) return null;
-
-  // Calculate coordinates for the arc path
-  const path = getArcPath(0, 0, innerRadius, outerRadius, slice.startAngle, slice.endAngle);
-
-  // Compute translation direction (bisecting angle of the slice)
-  const middleAngleRad = ((slice.middleAngle - 90) * Math.PI) / 180;
-  const isHovered = hoveredIndex === index;
-  const dx = isHovered && hoverEffect === 'translate' ? hoverOffset * Math.cos(middleAngleRad) : 0;
-  const dy = isHovered && hoverEffect === 'translate' ? hoverOffset * Math.sin(middleAngleRad) : 0;
 
   return (
     <motion.path
-      d={path}
-      fill={slice.color}
-      stroke={cornerRadius > 0 ? slice.color : 'none'}
-      strokeWidth={cornerRadius > 0 ? cornerRadius / 2 : 0}
-      strokeLinejoin="round"
-      className="cursor-pointer outline-none select-none transition-shadow"
       animate={{
-        x: dx,
-        y: dy,
-        filter: isHovered ? 'drop-shadow(0px 4px 8px rgba(0,0,0,0.15))' : 'drop-shadow(0px 0px 0px rgba(0,0,0,0))',
+        opacity: isFaded ? 0.4 : 1,
+        x: isHovered ? offset.x : 0,
+        y: isHovered ? offset.y : 0,
       }}
-      transition={{ type: 'spring', stiffness: 400, damping: 28 }}
-      onMouseEnter={() => onHoverChange(index)}
-      onMouseLeave={() => onHoverChange(null)}
+      d={animatedPath}
+      fill={fill}
+      key={`slice-${animationKey}-${index}`}
+      pointerEvents="none"
+      style={{
+        filter:
+          showGlow && isHovered ? `drop-shadow(0 0 12px ${glowColor})` : "none",
+      }}
+      transition={{
+        opacity: { duration: 0.15 },
+        x: { type: "spring", stiffness: 400, damping: 25 },
+        y: { type: "spring", stiffness: 400, damping: 25 },
+      }}
     />
   );
 }
 
-PieSlice.displayName = 'PieSlice';
+interface AnimatedSliceGrowProps {
+  index: number;
+  innerRadius: number;
+  outerRadius: number;
+  startAngle: number;
+  endAngle: number;
+  cornerRadius: number;
+  padAngle: number;
+  fill: string;
+  color: string;
+  isHovered: boolean;
+  isFaded: boolean;
+  animationKey: number;
+  showGlow: boolean;
+  hoverOffset: number;
+}
+
+function AnimatedSliceGrow({
+  index,
+  innerRadius,
+  outerRadius,
+  startAngle,
+  endAngle,
+  cornerRadius,
+  padAngle,
+  fill,
+  color,
+  isHovered,
+  isFaded,
+  animationKey,
+  showGlow,
+  hoverOffset,
+}: AnimatedSliceGrowProps) {
+  const {
+    enterTransition,
+    enterStaggerScale,
+    animationKey: pieAnimationKey,
+  } = usePieStable();
+  const animationDelay = (0.1 + index * 0.08) * enterStaggerScale;
+  const mountProgress = useMountProgress(
+    enterTransition,
+    animationDelay,
+    pieAnimationKey
+  );
+  const enterComplete = useEnterComplete(mountProgress);
+
+  const growSpring = useSpring(outerRadius, {
+    stiffness: 400,
+    damping: 25,
+  });
+
+  useEffect(() => {
+    growSpring.set(isHovered ? outerRadius + hoverOffset : outerRadius);
+  }, [isHovered, hoverOffset, outerRadius, growSpring]);
+
+  const animatedPath = useTransform(
+    [mountProgress, growSpring],
+    ([mount, currentOuterRadius]) => {
+      const currentEndAngle =
+        startAngle + (endAngle - startAngle) * (mount as number);
+      if (currentEndAngle <= startAngle + 0.01) {
+        return "";
+      }
+      return generateArcPath(
+        innerRadius,
+        currentOuterRadius as number,
+        startAngle,
+        currentEndAngle,
+        cornerRadius,
+        padAngle
+      );
+    }
+  );
+
+  const glowColor = color;
+  const grownOuterRadius = isHovered ? outerRadius + hoverOffset : outerRadius;
+  const grownPath = generateArcPath(
+    innerRadius,
+    grownOuterRadius,
+    startAngle,
+    endAngle,
+    cornerRadius,
+    padAngle
+  );
+
+  if (enterComplete) {
+    return (
+      <motion.path
+        animate={{
+          opacity: isFaded ? 0.4 : 1,
+          d: grownPath,
+        }}
+        d={grownPath}
+        fill={fill}
+        pointerEvents="none"
+        style={{
+          filter:
+            showGlow && isHovered
+              ? `drop-shadow(0 0 12px ${glowColor})`
+              : "none",
+        }}
+        transition={{
+          opacity: { duration: 0.15 },
+          d: { type: "spring", stiffness: 400, damping: 25 },
+        }}
+      />
+    );
+  }
+
+  return (
+    <motion.path
+      animate={{
+        opacity: isFaded ? 0.4 : 1,
+      }}
+      d={animatedPath}
+      fill={fill}
+      key={`slice-${animationKey}-${index}`}
+      pointerEvents="none"
+      style={{
+        filter:
+          showGlow && isHovered ? `drop-shadow(0 0 12px ${glowColor})` : "none",
+      }}
+      transition={{
+        opacity: { duration: 0.15 },
+      }}
+    />
+  );
+}
+
+export const PieSlice = memo(function PieSlice({
+  index,
+  color: colorProp,
+  fill: fillProp,
+  animate = true,
+  showGlow = true,
+  hoverEffect = "translate",
+  hoverOffset: hoverOffsetProp,
+}: PieSliceProps) {
+  const {
+    arcs,
+    innerRadius,
+    outerRadius,
+    cornerRadius,
+    hoverOffset: contextHoverOffset,
+    animationKey,
+    geometryScrubbing,
+    scrubSlicePaths,
+    getColor,
+    getFill,
+  } = usePieStable();
+  const { hoveredIndex, setHoveredIndex } = usePieHover();
+
+  // Use prop if provided, otherwise use context value
+  const hoverOffset = hoverOffsetProp ?? contextHoverOffset;
+
+  const arcData = arcs[index];
+  if (!arcData) {
+    return null;
+  }
+
+  const color = colorProp || getColor(index);
+  const fill = fillProp || getFill(index);
+
+  if (geometryScrubbing) {
+    const scrubPath = scrubSlicePaths?.[index];
+    if (!scrubPath) {
+      return null;
+    }
+    return <path d={scrubPath} fill={fill} pointerEvents="none" />;
+  }
+
+  const isHovered = hoveredIndex === index;
+  const isFaded = hoveredIndex !== null && hoveredIndex !== index;
+
+  // Calculate values for non-animated/static paths
+  const offset = getSliceOffset(
+    arcData.startAngle,
+    arcData.endAngle,
+    hoverOffset
+  );
+
+  // Generate the static hitbox path (always uses base outer radius)
+  const hitboxPath = generateArcPath(
+    innerRadius,
+    outerRadius,
+    arcData.startAngle,
+    arcData.endAngle,
+    cornerRadius,
+    arcData.padAngle
+  );
+
+  // Generate the visible path for grow effect
+  const grownOuterRadius = isHovered ? outerRadius + hoverOffset : outerRadius;
+  const grownPath = generateArcPath(
+    innerRadius,
+    grownOuterRadius,
+    arcData.startAngle,
+    arcData.endAngle,
+    cornerRadius,
+    arcData.padAngle
+  );
+
+  // Render animated slice based on effect type
+  const renderAnimatedSlice = () => {
+    if (hoverEffect === "grow") {
+      return (
+        <AnimatedSliceGrow
+          animationKey={animationKey}
+          color={color}
+          cornerRadius={cornerRadius}
+          endAngle={arcData.endAngle}
+          fill={fill}
+          hoverOffset={hoverOffset}
+          index={index}
+          innerRadius={innerRadius}
+          isFaded={isFaded}
+          isHovered={isHovered}
+          outerRadius={outerRadius}
+          padAngle={arcData.padAngle}
+          showGlow={showGlow}
+          startAngle={arcData.startAngle}
+        />
+      );
+    }
+
+    // Default: translate effect (also covers "none" with hoverOffset=0)
+    return (
+      <AnimatedSliceTranslate
+        animationKey={animationKey}
+        color={color}
+        cornerRadius={cornerRadius}
+        endAngle={arcData.endAngle}
+        fill={fill}
+        hoverOffset={hoverEffect === "none" ? 0 : hoverOffset}
+        index={index}
+        innerRadius={innerRadius}
+        isFaded={isFaded}
+        isHovered={isHovered}
+        outerRadius={outerRadius}
+        padAngle={arcData.padAngle}
+        showGlow={showGlow}
+        startAngle={arcData.startAngle}
+      />
+    );
+  };
+
+  // Render static (non-animated) slice
+  const renderStaticSlice = () => {
+    if (hoverEffect === "grow") {
+      return (
+        <motion.path
+          animate={{
+            opacity: isFaded ? 0.4 : 1,
+            d: grownPath,
+          }}
+          d={hitboxPath}
+          fill={fill}
+          pointerEvents="none"
+          style={{
+            filter:
+              showGlow && isHovered ? `drop-shadow(0 0 12px ${color})` : "none",
+          }}
+          transition={{
+            opacity: { duration: 0.15 },
+            d: { type: "spring", stiffness: 400, damping: 25 },
+          }}
+        />
+      );
+    }
+
+    // Default: translate effect
+    const shouldTranslate = hoverEffect !== "none" && isHovered;
+    const translateX = shouldTranslate ? offset.x : 0;
+    const translateY = shouldTranslate ? offset.y : 0;
+
+    return (
+      <motion.path
+        animate={{
+          opacity: isFaded ? 0.4 : 1,
+          x: translateX,
+          y: translateY,
+        }}
+        d={hitboxPath}
+        fill={fill}
+        pointerEvents="none"
+        style={{
+          filter:
+            showGlow && isHovered ? `drop-shadow(0 0 12px ${color})` : "none",
+        }}
+        transition={{
+          opacity: { duration: 0.15 },
+          x: { type: "spring", stiffness: 400, damping: 25 },
+          y: { type: "spring", stiffness: 400, damping: 25 },
+        }}
+      />
+    );
+  };
+
+  return (
+    <g style={{ cursor: "pointer" }}>
+      {/* Invisible hitbox - stays in place, handles hover events */}
+      {/* biome-ignore lint/a11y/noStaticElementInteractions: SVG path used as hover hitbox for visualization */}
+      <path
+        d={hitboxPath}
+        fill="transparent"
+        onMouseEnter={() => setHoveredIndex(index)}
+        onMouseLeave={() => setHoveredIndex(null)}
+      />
+
+      {/* Visible slice - animates based on hover effect, no pointer events */}
+      {animate ? renderAnimatedSlice() : renderStaticSlice()}
+    </g>
+  );
+});
+
+PieSlice.displayName = "PieSlice";
+
+export default PieSlice;

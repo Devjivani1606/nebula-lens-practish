@@ -1,26 +1,18 @@
-'use client';
-
-import React, { useContext } from 'react';
+import React from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { PieChartContext } from './pie-chart';
+import { usePie } from './pie-context';
 
 export interface PieCenterProps {
   prefix?: string;
 }
 
 export function PieCenter({ prefix = '' }: PieCenterProps) {
-  const context = useContext(PieChartContext);
-
-  if (!context) {
-    throw new Error('PieCenter must be used within a PieChart component');
-  }
-
-  const { slices, hoveredIndex, totalValue } = context;
+  const { data, hoveredIndex, totalValue } = usePie();
 
   // Determine what label and value to show
-  const isHovered = hoveredIndex !== null && slices[hoveredIndex];
-  const activeLabel = isHovered ? slices[hoveredIndex].label : 'TOTAL';
-  const activeValue = isHovered ? slices[hoveredIndex].value : totalValue;
+  const isHovered = hoveredIndex !== null && data[hoveredIndex];
+  const activeLabel = isHovered ? data[hoveredIndex].label : 'TOTAL';
+  const activeValue = isHovered ? data[hoveredIndex].value : totalValue;
 
   return (
     <div className="flex flex-col items-center justify-center text-center pointer-events-none select-none">
