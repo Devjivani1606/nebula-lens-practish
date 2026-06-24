@@ -493,7 +493,7 @@ def normalize_account(
             cost_results: dict = {}
             if request.include_cost:
                 try:
-                    cost_results = cost_engine.calculate_all(nodes, metrics_results, region=primary_region)
+                    cost_results = cost_engine.calculate_all(nodes, metrics_results, region=primary_region, credentials=cw_credentials)
                 except Exception as ce:
                     logger.error(f"[Normalize] CostEngine error: {ce}")
 
