@@ -70,7 +70,8 @@ export function useLensVisuals(nodeId: string) {
     const cost = rawCost !== undefined ? Number(rawCost) : undefined;
 
     if (cost === undefined || isNaN(cost)) {
-      return { opacity: 0.2, isHighlighted: false, isDimmed: true, heatmapColor: undefined };
+      //FALLBACK: If cost is missing, don't dim the node out so it remains fully visible.
+      return { opacity: 1, isHighlighted: false, isDimmed: false, heatmapColor: undefined };
     }
 
     let heatmapColor = "rgba(34, 197, 94, 0.04)";

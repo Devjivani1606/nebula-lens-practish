@@ -60,6 +60,11 @@ type CanvasState = {
   // Inspector State
   isInspectorPinned: boolean;
   setInspectorPinned: (pinned: boolean) => void;
+
+  // Phase 3D: Edge hover traceability state
+  // Excluded from zundo partialize so hover changes never pollute undo history.
+  hoveredEdgeId: string | null;
+  setHoveredEdgeId: (id: string | null) => void;
 };
 
 // Wrap the store creator in `temporal`
@@ -136,6 +141,10 @@ export const useCanvasStore = create<CanvasState>()(
 
       isInspectorPinned: false,
       setInspectorPinned: (pinned) => set({ isInspectorPinned: pinned }),
+
+      // Phase 3D: Edge hover traceability
+      hoveredEdgeId: null,
+      setHoveredEdgeId: (id) => set({ hoveredEdgeId: id }),
 
       tickTelemetry: () => set((state) => {
         const newNodes = state.nodes.map(node => {
