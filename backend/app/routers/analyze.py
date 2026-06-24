@@ -216,7 +216,7 @@ def analyze_account(request: AnalyzeRequest, db: Session = Depends(get_db)):
         primary_region = list(region_groups.keys())[0] if region_groups else "ap-south-1"
 
         logger.info(f"[Analyze] Running CostEngine for {len(nodes)} nodes...")
-        cost_results = cost_engine.calculate_all(nodes, metrics_results, region=primary_region)
+        cost_results = cost_engine.calculate_all(nodes, metrics_results, region=primary_region, credentials=credentials)
 
         # ── Step 8: Merge everything into enriched nodes ──────────────────────
         enriched_nodes = []
