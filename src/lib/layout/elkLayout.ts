@@ -77,6 +77,187 @@ export function estimateTextWidth(text: string): number {
   return text.length * 7 + 16;
 }
 
+// ─── Phase 2A: Model order assignment for target nodes ──────────────────────
+
+/**
+ * assignModelOrder
+ * ────────────────
+ * Assigns ELK model order hints to every node so that target nodes (S3/SQS)
+ * are vertically sorted to match the Y-index of their primary Lambda source.
+ *
+ * This directly fixes the root cause of the central crossing wall:
+ * "Target nodes not vertically ordered to match source Y-positions".
+ *
+ * ASSUMPTION: Lambda nodes are the primary sources. The first edge that points
+ * to a given target determines its vertical grouping.
+ *
+ * @param nodes  React Flow nodes (NOT mutated — returns deep copies)
+ * @param edges  React Flow edges
+ * @returns      New node array with elk.layered.crossingMinimization.nodeOrder
+ *               set on each node according to its primary source order.
+ */
+export function assignModelOrder(nodes: Node[], edges: Edge[]): Node[] {
+  // Deep clone to avoid mutating original data (hard constraint)
+  const clonedNodes: Node[] = nodes.map(n => ({ ...n, properties: { ...(n as any).properties } }));
+
+  // Map: nodeId → primary source node id (first edge pointing to this target wins)
+  const targetSourceMap = new Map<string, string>();
+  for (const edge of edges) {
+    if (!targetSourceMap.has(edge.target)) {
+      targetSourceMap.set(edge.target, edge.source);
+    }
+  }
+
+  // Container types that should NOT be used as ordering anchors
+  const CONTAINER_TYPES = new Set(['VPC', 'AvailabilityZone', 'Subnet', 'IGW']);
+
+  // Find all unique source nodes that have outgoing edges (excluding containers)
+  // Sort by current Y position as the initial order hint.
+  const sourceNodeIds = new Set<string>();
+  for (const edge of edges) sourceNodeIds.add(edge.source);
+
+  const sourceNodes = clonedNodes
+    .filter(n => sourceNodeIds.has(n.id) && !CONTAINER_TYPES.has(n.type ?? ''))
+    .sort((a, b) => (a.position?.y ?? 0) - (b.position?.y ?? 0));
+
+  const sourceOrder = new Map<string, number>();
+  sourceNodes.forEach((node, index) => sourceOrder.set(node.id, index));
+
+  // Apply model order to all nodes:
+  //   - Source nodes: ordered by their own Y index
+  //   - Target nodes: ordered by their primary source's index
+  //   - Containers / unconnected: large order so they sort stably to the end
+  return clonedNodes.map(node => {
+    let order: number;
+    if (sourceOrder.has(node.id)) {
+      order = (sourceOrder.get(node.id) ?? 99) * 10;
+    } else if (CONTAINER_TYPES.has(node.type ?? '')) {
+      order = 995; // Containers always last
+    } else {
+      const primarySource = targetSourceMap.get(node.id);
+      order = primarySource !== undefined
+        ? (sourceOrder.get(primarySource) ?? 99) * 10 + 5 // Targets cluster near their source
+        : 990; // Unconnected target nodes at end
+    }
+    return {
+      ...node,
+      data: {
+        ...node.data,
+        _elkModelOrder: String(order),
+      },
+    };
+  });
+}
+
+// ─── Phase 2B: Port-based edge distribution on Lambda nodes ───────────────────
+
+/**
+ * addPortsToFanOutNodes  (was: addPortsToLambdaNodes)
+ * ──────────────────────
+ * Distributes outgoing edges from ANY node that has ≥2 outgoing edges across
+ * evenly-spaced EAST ports instead of routing all edges from a single center point.
+ *
+ * This applies to:
+ *   - Lambda nodes (multiple S3/SQS/DB targets)
+ *   - API Gateway nodes (fan-out to Lambda + SQS)
+ *   - IAM Role nodes (fan-out to ECS + EKS + Lambda + Step Functions)
+ *   - ECS, Step Functions, CloudFront, and any other multi-target source
+ *
+ * Nodes with only 1 outgoing edge are left unchanged (no benefit from porting).
+ *
+ * IMMUTABLE: Does not mutate the input — returns a new ELKNode tree.
+ */
+export function addPortsToFanOutNodes(elkGraph: import('elkjs/lib/elk-api').ElkNode): import('elkjs/lib/elk-api').ElkNode {
+  // Build: sourceNodeId → outgoing edges (in declaration order)
+  // Only include nodes with ≥2 outgoing edges — single-edge nodes don't need port distribution
+  const outgoingEdgesMap = new Map<string, import('elkjs/lib/elk-api').ElkExtendedEdge[]>();
+
+  if (elkGraph.edges) {
+    for (const edge of elkGraph.edges) {
+      const sourceId = edge.sources?.[0];
+      if (!sourceId) continue;
+      if (!outgoingEdgesMap.has(sourceId)) {
+        outgoingEdgesMap.set(sourceId, []);
+      }
+      outgoingEdgesMap.get(sourceId)!.push(edge);
+    }
+  }
+
+  // Filter to only nodes with 2+ outgoing edges
+  for (const [id, edges] of outgoingEdgesMap) {
+    if (edges.length < 2) outgoingEdgesMap.delete(id);
+  }
+
+  /**
+   * Recursively patch fan-out nodes anywhere in the ELK tree.
+   * Fan-out nodes may live inside VPC/AZ/Subnet containers.
+   */
+  function patchNode(node: import('elkjs/lib/elk-api').ElkNode): import('elkjs/lib/elk-api').ElkNode {
+    // Recurse into children first (depth-first, non-mutating)
+    const patchedChildren = node.children?.map(patchNode);
+
+    // Only add ports to nodes that have 2+ outgoing edges
+    const outgoing = outgoingEdgesMap.get(node.id);
+    if (!outgoing || outgoing.length < 2) {
+      return patchedChildren ? { ...node, children: patchedChildren } : node;
+    }
+
+    // Node dimensions (fall back to defaults if not yet set by RF)
+    const nodeHeight = node.height ?? DEFAULT_NODE_HEIGHT;
+    const portCount = outgoing.length;
+    const portSpacing = nodeHeight / (portCount + 1);
+
+    // Create evenly distributed EAST output ports
+    const ports = outgoing.map((_edge, index) => ({
+      id: `${node.id}-port-out-${index}`,
+      x: node.width ?? DEFAULT_NODE_WIDTH,
+      y: portSpacing * (index + 1),
+      width: 0,
+      height: 0,
+      properties: {
+        'port.side': 'EAST',
+        'port.index': String(index),
+      },
+    }));
+
+    return {
+      ...node,
+      ...(patchedChildren ? { children: patchedChildren } : {}),
+      ports,
+      layoutOptions: {
+        ...node.layoutOptions,
+        'portConstraints': 'FIXED_ORDER',
+        'elk.portConstraints': 'FIXED_ORDER',
+      },
+    };
+  }
+
+  // Patch all fan-out nodes in the tree
+  const patchedRoot: import('elkjs/lib/elk-api').ElkNode = {
+    ...elkGraph,
+    children: elkGraph.children?.map(patchNode),
+  };
+
+  // Rewrite edge sources to use port IDs for fan-out nodes
+  // Build a per-source counter so each edge gets a unique port index
+  const portCounters = new Map<string, number>();
+
+  const patchedEdges = elkGraph.edges?.map(edge => {
+    const sourceId = edge.sources?.[0];
+    if (!sourceId || !outgoingEdgesMap.has(sourceId)) return edge;
+
+    const idx = portCounters.get(sourceId) ?? 0;
+    portCounters.set(sourceId, idx + 1);
+
+    return {
+      ...edge,
+      sources: [`${sourceId}-port-out-${idx}`],
+    };
+  }) ?? [];
+
+  return { ...patchedRoot, edges: patchedEdges };
+}
+
 // ─── Graph converter ──────────────────────────────────────────────────────────
 
 /**
@@ -161,7 +342,20 @@ export function convertToElkGraph(
         width = 280;
         height = 140;
       }
-      return { id: rfNode.id, width, height };
+      // Phase 2A: Attach model order to ELK node layoutOptions so ELK's
+      // crossing minimization sweep respects the declared vertical ordering.
+      const modelOrder = (rfNode.data as any)?._elkModelOrder;
+      const nodeLayoutOptions: Record<string, string> = {};
+      if (modelOrder !== undefined) {
+        nodeLayoutOptions['elk.layered.crossingMinimization.nodeOrder'] = modelOrder;
+      }
+
+      return {
+        id: rfNode.id,
+        width,
+        height,
+        ...(Object.keys(nodeLayoutOptions).length > 0 ? { layoutOptions: nodeLayoutOptions } : {}),
+      };
     }
   }
 
@@ -198,10 +392,14 @@ export function convertToElkGraph(
     };
 
     if (labelText) {
+      // PINCH FIX: Pass width=0, height=0 so ELK allocates NO physical space for labels.
+      // When labels have real widths, ELK inserts a virtual 'label column' midway between
+      // layers and routes ALL splines through it — creating the crossing pinch point.
+      // Labels are rendered independently by AnimatedEdge in React Flow's EdgeLabelRenderer.
       elkEdge.labels = [{
         text: labelText,
-        width: estimateTextWidth(labelText),
-        height: 20,
+        width: 0,
+        height: 0,
       }];
     }
     elkEdges.push(elkEdge);
@@ -285,14 +483,22 @@ export async function runLayout(
     return { nodes, edges };
   }
 
-  // ── Step 1: Build ELK graph ────────────────────────────────────────────────
-  const elkGraph = convertToElkGraph(nodes, edges, ROOT_LAYOUT_OPTIONS);
+  // ── Step 1: Transformation pipeline (Phase 2) ─────────────────────────────
+  // Order matters:
+  //   assignModelOrder()   → annotates nodes with vertical-order hints
+  //   convertToElkGraph()  → converts RF graph to ELK format (reads _elkModelOrder)
+  //   addPortsToLambdaNodes() → distributes lambda fan-out edges to separate ports
+  //   elk.layout()         → runs the layout engine
+  const orderedNodes = assignModelOrder(nodes, edges);
+  const elkGraph = convertToElkGraph(orderedNodes, edges, ROOT_LAYOUT_OPTIONS);
+  const portedElkGraph = addPortsToFanOutNodes(elkGraph);
+
 
   // ── Step 2: Run ELK layout ────────────────────────────────────────────────
   // elk.bundled.js includes the layout engine inline (no Web Worker needed),
   // making it safe to instantiate per call in a Vite/Next.js bundler context.
   const elk = new ELK();
-  const layoutResult = await elk.layout(elkGraph);
+  const layoutResult = await elk.layout(portedElkGraph);
 
   const table2: any[] = [];
   function walkElk(node: ELKNode, depth: number, parentShortId: string) {
