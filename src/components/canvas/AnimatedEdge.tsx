@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useTheme } from 'next-themes';
 import {
   BaseEdge,
   EdgeLabelRenderer,
@@ -14,6 +15,83 @@ import { useCanvasStore } from '../../store/useCanvasStore';
 import { useBlastRadius } from '../../hooks/useBlastRadius';
 import { useSecurityAudit } from '../../hooks/useSecurityAudit';
 
+// ─── Phase 3C: Theme-aware dual-palette edge coloring (Option A) ──────────────
+//
+// Design contract:
+//   - Both palettes share the SAME hue order at each index.
+//     Index 0 is always "indigo", index 1 is always "emerald", etc.
+//   - The hash maps a source node ID to a palette index — this index is
+//     IDENTICAL across both themes, so a node that's "indigo" in dark mode
+//     is also "indigo" (darker shade) in light mode. Color identity is stable.
+//   - Dark theme  → light-vibrant shades (high luminance to pop on dark canvas)
+//   - Light theme → dark-saturated shades (low luminance for contrast on white)
+//
+// Hue families (by index):
+//   0: indigo   1: emerald   2: pink     3: amber    4: cyan
+//   5: violet   6: orange    7: green    8: red      9: sky
+
+/** Light-vibrant shades — legible on dark glassmorphic canvas (#0a0a0a..#1e1e2e). */
+const DARK_PALETTE = [
+  '#818CF8', // indigo-400
+  '#34D399', // emerald-400
+  '#F472B6', // pink-400
+  '#FBBF24', // amber-400
+  '#22D3EE', // cyan-400
+  '#A78BFA', // violet-400
+  '#FB923C', // orange-400
+  '#4ADE80', // green-400
+  '#F87171', // red-400
+  '#38BDF8', // sky-400
+];
+
+/** Dark-saturated shades — legible on light canvas (#f8fafc..#ffffff). */
+const LIGHT_PALETTE = [
+  '#4338CA', // indigo-700
+  '#059669', // emerald-600
+  '#BE185D', // pink-700
+  '#B45309', // amber-700
+  '#0891B2', // cyan-600
+  '#6D28D9', // violet-700
+  '#C2410C', // orange-700
+  '#15803D', // green-700
+  '#B91C1C', // red-700
+  '#0369A1', // sky-700
+];
+
+// Cache: `${sourceId}:${isDark}` → color.
+// Keyed by theme so toggling dark/light immediately invalidates stale entries.
+const edgeColorCache = new Map<string, string>();
+
+/**
+ * djb2 hash → palette index. Stable for the lifetime of the page.
+ * The same sourceId always maps to the same palette index, guaranteeing that
+ * a node's color identity is consistent across both themes.
+ */
+function hashToPaletteIndex(sourceId: string, paletteLength: number): number {
+  let hash = 5381;
+  for (let i = 0; i < sourceId.length; i++) {
+    hash = ((hash << 5) + hash) + sourceId.charCodeAt(i);
+    hash = hash & hash; // keep 32-bit
+  }
+  return Math.abs(hash) % paletteLength;
+}
+
+/**
+ * Returns a theme-aware, stable color for any source node ID.
+ * - Dark theme:  light-vibrant shade (pops on dark canvas)
+ * - Light theme: dark-saturated shade (contrast on white canvas)
+ * Same hue family across both themes — color identity is preserved.
+ */
+function getSourceColor(sourceId: string, isDark: boolean): string {
+  const cacheKey = `${sourceId}:${isDark}`;
+  if (edgeColorCache.has(cacheKey)) return edgeColorCache.get(cacheKey)!;
+
+  const palette = isDark ? DARK_PALETTE : LIGHT_PALETTE;
+  const color = palette[hashToPaletteIndex(sourceId, palette.length)];
+  edgeColorCache.set(cacheKey, color);
+  return color;
+}
+
 export default function AnimatedEdge({
   id,
   source,
@@ -25,6 +103,17 @@ export default function AnimatedEdge({
   selected, // Destructure selected state
 }: EdgeProps) {
   const [isHovered, setIsHovered] = useState(false);
+
+  // Theme detection for Option A dual-palette coloring.
+  // resolvedTheme handles 'system' by resolving to the actual OS preference.
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme !== 'light'; // default to dark if unresolved (SSR)
+
+  // Phase 3D: Read the globally hovered edge id from store for cross-edge dimming
+  const hoveredEdgeId = useCanvasStore((state) => state.hoveredEdgeId);
+  const setHoveredEdgeId = useCanvasStore((state) => state.setHoveredEdgeId);
+  // Edges list needed for source lookup during hover (subscribed, no getState call)
+  const allEdges = useCanvasStore((state) => state.edges);
 
   // 1. Hook into React Flow's internal state to watch node coordinates in real-time
   const sourceNode = useInternalNode(source);
@@ -54,6 +143,18 @@ export default function AnimatedEdge({
   const isDimmed = isBlastRadiusMode && !isInsideBlastRadius;
   let currentOpacity = isDimmed ? 0.1 : 1;
   const isConnectedToSelected = source === selectedNodeId || target === selectedNodeId;
+
+  // Phase 3D: Structural lens hover traceability.
+  // When another edge is being hovered, dim this one unless it shares the same source lambda.
+  const isStructuralLens = activeLens === 'structural';
+  const anotherEdgeHovered = hoveredEdgeId !== null && hoveredEdgeId !== id;
+  const hoveredEdgeSource = anotherEdgeHovered
+    ? allEdges.find(e => e.id === hoveredEdgeId)?.source ?? null
+    : null;
+  const sameSourceAsHovered = hoveredEdgeSource === source;
+  if (isStructuralLens && anotherEdgeHovered && !isHovered && !sameSourceAsHovered) {
+    currentOpacity = 0.08;
+  }
 
 
   // If the nodes haven't rendered yet, don't draw the edge
@@ -151,22 +252,30 @@ export default function AnimatedEdge({
   // 6. DEFAULT STRUCTURAL STYLING: Parse the semantic telemetry context
   const lowerLabel = typeof label === 'string' ? label.toLowerCase() : '';
 
-  let strokeColor = 'rgba(255,255,255,0.15)'; // Default
-  let particleColor = '#94a3b8';
-  let strokeDasharray: string | undefined = undefined;
+  // Phase 3C: Assign a distinct, stable, THEME-AWARE color to every source node.
+  // Dark theme  → light-vibrant shade (high luminance on dark canvas)
+  // Light theme → dark-saturated shade (high contrast on white canvas)
+  // Same hue family in both themes — color identity is preserved across toggles.
+  const sourceColor = getSourceColor(source, isDark);
+
+
+  let strokeColor = sourceColor;
+  let particleColor = sourceColor;
+  let strokeDasharray: string | undefined = '6, 4'; // Default dashed for all structural edges
   let duration = '3s';
   let particleRadius = 3;
-  let edgeWidth = 1; // Default edge thickness
+  let edgeWidth = 1.5; // Slightly thicker by default so the color is visible
   let glowColor = 'transparent';
-  let animationClass = '';
+  let animationClass = 'animate-[dash-flow_3s_linear_infinite]';
 
-  // Data flow edges
-  if (lowerLabel.includes('post') || lowerLabel.includes('http') || lowerLabel.includes('api') || lowerLabel.includes('trigger') || lowerLabel.includes('event') || lowerLabel.includes('read') || lowerLabel.includes('write') || lowerLabel.includes('state') || lowerLabel.includes('store') || lowerLabel.includes('asset') || lowerLabel.includes('s3') ||lowerLabel.includes('invoke') || // Add this
-    lowerLabel.includes('send')) {
-    strokeColor = '#7C6FF7'; // Brand Accent
-    particleColor = '#7C6FF7';
-    edgeWidth = 1;
-    strokeDasharray = '6, 6';
+  // Data flow edges — keep dashes, just ensure animation is applied
+  if (lowerLabel.includes('post') || lowerLabel.includes('http') || lowerLabel.includes('api') ||
+      lowerLabel.includes('trigger') || lowerLabel.includes('event') || lowerLabel.includes('read') ||
+      lowerLabel.includes('write') || lowerLabel.includes('state') || lowerLabel.includes('store') ||
+      lowerLabel.includes('asset') || lowerLabel.includes('s3') || lowerLabel.includes('invoke') ||
+      lowerLabel.includes('send')) {
+    // Source color is already set — just keep the dashes and animation active
+    strokeDasharray = '6, 4';
     animationClass = 'animate-[dash-flow_3s_linear_infinite]';
   }
 
@@ -275,8 +384,14 @@ export default function AnimatedEdge({
       </defs>
 
       <g
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
+        onMouseEnter={() => {
+          setIsHovered(true);
+          setHoveredEdgeId(id);
+        }}
+        onMouseLeave={() => {
+          setIsHovered(false);
+          setHoveredEdgeId(null);
+        }}
       >
         <BaseEdge
           id={id}
