@@ -7,7 +7,9 @@ import { useStore } from 'zustand';
 import { useCanvasStore } from '../../store/useCanvasStore';
 import { useAutoLayout } from '../../lib/layout/useAutoLayout';
 import { useLayerEngine } from '../../hooks/useLayerEngine';
-import LayerPanel from '../LayerPanel';
+import LayerPanel from '../layers/LayerPanel';
+import { useLayerStore } from '../../store/layerStore';
+import { systemLayers } from '../../lib/layers/systemLayers';
 
 import LambdaNode from '../nodes/LambdaNode';
 import S3Node from '../nodes/S3Node';
@@ -83,7 +85,13 @@ export default function ArchitectureCanvas() {
 
   const [mounted, setMounted] = useState(false);
   const [lensFlash, setLensFlash] = useState(false);
-  useEffect(() => setMounted(true), []);
+  
+  useEffect(() => {
+    setMounted(true);
+    // Initialize system layers on boot
+    const registerLayer = useLayerStore.getState().registerLayer;
+    systemLayers.forEach(layer => registerLayer(layer));
+  }, []);
 
   const {
     nodes,
