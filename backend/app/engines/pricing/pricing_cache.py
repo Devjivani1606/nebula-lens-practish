@@ -62,7 +62,7 @@ class PricingCache:
     # ─────────────────────────────────────────────────────────────────────────
 
     def _init_db(self):
-        """Create pricing_cache table if it doesn't exist."""
+        """Create pricing_cache table if it doesn't exist and seed default values."""
         try:
             from app.database import engine
             from sqlalchemy import text
@@ -74,9 +74,59 @@ class PricingCache:
                         fetched_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
                     )
                 """))
+                
+                # Seed standard fallback/default prices to prevent warning spam in environments without AWS credentials
+                default_seeds = {
+                    # S3
+                    "s3::ap-south-1::storage": 0.023,
+                    "s3::ap-south-1::put": 0.000005,
+                    "s3::ap-south-1::get": 0.0000004,
+                    "s3::ap-south-1::transfer": 0.09,
+                    # DynamoDB
+                    "dynamodb::ap-south-1::storage": 0.25,
+                    "dynamodb::ap-south-1::rru": 0.25,
+                    "dynamodb::ap-south-1::wru": 1.25,
+                    "dynamodb::ap-south-1::rcu_hourly": 0.00013,
+                    "dynamodb::ap-south-1::wcu_hourly": 0.00065,
+                    # SQS
+                    "sqs::ap-south-1::standard": 0.0000004,
+                    # Lambda
+                    "lambda::ap-south-1::requests": 0.0000002,
+                    "lambda::ap-south-1::gb_seconds": 0.0000166667,
+                    # EC2 & EBS & Data Transfer
+                    "ec2::ap-south-1::t3.micro": 0.0112,
+                    "ebs::ap-south-1::gp2": 0.114,
+                    "data_transfer::ap-south-1::out": 0.09,
+                    # RDS
+                    "rds::ap-south-1::instance:db.serverless:PostgreSQL:Single-AZ": 0.12,
+                    "rds::ap-south-1::storage:gp2": 0.115,
+                    # SNS
+                    "sns::ap-south-1::requests:standard": 0.50,
+                    # CloudFront
+                    "cloudfront::ap-south-1::requests": 0.0075,
+                    "cloudfront::ap-south-1::transfer": 0.085,
+                    # ECS
+                    "ecs::ap-south-1::fargate_vcpu": 0.04048,
+                    "ecs::ap-south-1::fargate_memory": 0.004445,
+                    # Secrets Manager
+                    "secretsmanager::ap-south-1::secrets": 0.40,
+                    "secretsmanager::ap-south-1::requests": 0.05,
+                    # EKS
+                    "eks::ap-south-1::cluster": 0.10,
+                }
+                
+                for key, val in default_seeds.items():
+                    conn.execute(
+                        text("""
+                            INSERT INTO pricing_cache (cache_key, price, fetched_at)
+                            VALUES (:k, :p, NOW())
+                            ON CONFLICT (cache_key) DO NOTHING
+                        """),
+                        {"k": key, "p": val}
+                    )
                 conn.commit()
             self._db_ready = True
-            logger.info("[PricingCache] DB table ready")
+            logger.info("[PricingCache] DB table ready and default prices seeded")
         except Exception as e:
             logger.warning(f"[PricingCache] DB init failed — memory-only mode: {e}")
             self._db_ready = False

@@ -19,8 +19,8 @@ from app.engines.metrics.sns_metrics       import SNSMetricsCollector,        SN
 from app.engines.metrics.dynamodb_metrics  import DynamoDBMetricsCollector,   DynamoDBMetricsMapper
 from app.engines.metrics.cloudfront_metrics import CloudFrontMetricsCollector, CloudFrontMetricsMapper
 from app.engines.metrics.ecs_metrics       import ECSMetricsCollector,        ECSMetricsMapper
-# from app.engines.metrics.eks_metrics       import EKSMetricsCollector,        EKSMetricsMapper
-# from app.engines.metrics.secretsmanager_metrics import SecretsManagerMetricsCollector, SecretsManagerMetricsMapper
+from app.engines.metrics.eks_metrics       import EKSMetricsCollector,        EKSMetricsMapper
+from app.engines.metrics.secretsmanager_metrics import SecretsManagerMetricsCollector, SecretsManagerMetricsMapper
 # from app.engines.metrics.stepfunctions_metrics import StepFunctionsMetricsCollector, StepFunctionsMetricsMapper
 
 __all__ = [
@@ -42,4 +42,6 @@ __all__ = [
     "DynamoDBMetricsCollector",  "DynamoDBMetricsMapper",
     "CloudFrontMetricsCollector","CloudFrontMetricsMapper",
     "ECSMetricsCollector",       "ECSMetricsMapper",
+    "EKSMetricsCollector",       "EKSMetricsMapper",
+    "SecretsManagerMetricsCollector", "SecretsManagerMetricsMapper",
 ]

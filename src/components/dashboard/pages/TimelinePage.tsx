@@ -4,11 +4,13 @@ import { useState, useEffect } from "react";
 import { useCanvasStore } from "@/store/useCanvasStore";
 import { useDashboardStore } from "../useDashboardStore";
 import { 
-  Clock, ArrowsClockwise, Eye, GitFork, 
-  TrendUp, ArrowUpRight, ArrowDownRight, Folder, Info
+  Clock, ArrowsClockwise, GitFork, 
+  TrendUp, Folder, Info, Trash, Plus
 } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
+import { MotionCarousel } from "@/components/animate-ui/components/community/motion-carousel";
+import { ManagementBar } from "@/components/animate-ui/components/community/management-bar";
 
 interface SnapshotVersion {
   version_id: string;
@@ -45,8 +47,15 @@ export default function TimelinePage() {
   const [loadingHistory, setLoadingHistory] = useState(true);
   const [loadingDiff, setLoadingDiff] = useState(false);
   const [activeTab, setActiveTab] = useState<"summary" | "changes">("summary");
+  const [isScanLoading, setIsScanLoading] = useState(false);
 
-  const { fetchInfrastructure, setActiveSnapshotId, selectedAccountId } = useCanvasStore();
+  const { 
+    fetchInfrastructure, 
+    setActiveSnapshotId, 
+    selectedAccountId, 
+    connectedAccounts 
+  } = useCanvasStore();
+  
   const { setActiveSection } = useDashboardStore();
 
   const fetchHistory = async () => {
@@ -59,7 +68,11 @@ export default function TimelinePage() {
         const list = data.versions || [];
         setVersions(list);
         if (list.length > 0) {
-          setSelectedVersion(list[0]);
+          // Keep current index focused if it still exists, else default to first
+          const prevSelected = list.find((v: SnapshotVersion) => v.version_id === selectedVersion?.version_id);
+          setSelectedVersion(prevSelected || list[0]);
+        } else {
+          setSelectedVersion(null);
         }
       }
     } catch (e) {
@@ -94,6 +107,72 @@ export default function TimelinePage() {
     }
   }, [selectedVersion]);
 
+  const selectedIndex = versions.findIndex(v => v.version_id === selectedVersion?.version_id);
+
+  const handlePrev = () => {
+    if (selectedIndex > 0) {
+      setSelectedVersion(versions[selectedIndex - 1]);
+    }
+  };
+
+  const handleNext = () => {
+    if (selectedIndex < versions.length - 1) {
+      setSelectedVersion(versions[selectedIndex + 1]);
+    }
+  };
+
+  const handleCarouselSelect = (index: number) => {
+    if (versions[index]) {
+      setSelectedVersion(versions[index]);
+    }
+  };
+
+  const handleTriggerScan = async () => {
+    const currentAccount = connectedAccounts.find(a => a.id === selectedAccountId);
+    const awsAccountId = currentAccount?.account_id;
+    if (!awsAccountId) {
+      alert("Please select a connected AWS Account first.");
+      return;
+    }
+
+    setIsScanLoading(true);
+    try {
+      const res = await fetch(`/api/scan/trigger?account_id=${awsAccountId}`, {
+        method: "POST",
+      });
+      if (res.ok) {
+        alert("Infrastructure scan successfully enqueued!");
+        setTimeout(fetchHistory, 3000);
+      } else {
+        alert("Failed to queue new scan. Make sure your local scan worker is active.");
+      }
+    } catch (err) {
+      console.error("Scan error:", err);
+    } finally {
+      setIsScanLoading(false);
+    }
+  };
+
+  const handleDeleteSnapshot = async () => {
+    if (!selectedVersion) return;
+    const confirm = window.confirm(`Permanently delete ${selectedVersion.label} and all its data?`);
+    if (!confirm) return;
+
+    try {
+      const res = await fetch(`/api/db/data?table=snapshots&id=${selectedVersion.version_id}`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        alert("Snapshot deleted successfully.");
+        await fetchHistory();
+      } else {
+        alert("Failed to delete snapshot.");
+      }
+    } catch (err) {
+      console.error("Delete snapshot error:", err);
+    }
+  };
+
   const handleViewGraph = async (version: SnapshotVersion) => {
     setActiveSnapshotId(version.version_id);
     await fetchInfrastructure(version.version_id);
@@ -124,140 +203,63 @@ export default function TimelinePage() {
           size="sm"
           onClick={fetchHistory}
           disabled={loadingHistory}
-          className="h-9 gap-2 border-[var(--gl-border)] hover:bg-[var(--gl-bg-muted)] text-xs text-[var(--gl-text-secondary)]"
+          className="h-9 gap-2 border-[var(--gl-border)] hover:bg-[var(--gl-bg-muted)] text-xs text-[var(--gl-text-secondary)] rounded-xl"
         >
           <ArrowsClockwise size={14} className={loadingHistory ? "animate-spin" : ""} />
           Refresh
         </Button>
       </div>
 
-      {/* Main Split Layout */}
+      {/* Main Content Split Layout */}
       <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
         
-        {/* Left Section: Scrollable Vertical Timeline */}
-        <div className="flex-1 overflow-y-auto p-8 relative">
+        {/* Left/Center Section: Interactive Carousel & Management Bar */}
+        <div className="flex-1 overflow-y-auto p-8 flex flex-col justify-between gap-8 border-b lg:border-b-0 lg:border-r border-[var(--gl-border)]">
           {loadingHistory ? (
-            <div className="flex flex-col items-center justify-center h-64 gap-3 text-xs text-[var(--gl-text-muted)]">
-              <ArrowsClockwise size={24} className="animate-spin text-indigo-500" />
-              Loading history feed...
+            <div className="flex flex-col items-center justify-center flex-1 min-h-[300px] gap-3 text-xs text-[var(--gl-text-muted)]">
+              <ArrowsClockwise size={28} className="animate-spin text-indigo-500" />
+              Loading timeline snapshots...
             </div>
           ) : versions.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-64 italic text-xs text-[var(--gl-text-muted)]">
-              No snapshot history available for this account. Run an infrastructure scan first.
+            <div className="flex flex-col items-center justify-center flex-1 min-h-[300px] text-center gap-4">
+              <span className="italic text-xs text-[var(--gl-text-muted)]">
+                No snapshot history available for this account. Run an infrastructure scan first.
+              </span>
+              <Button onClick={handleTriggerScan} className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl gap-2 font-bold text-xs h-9">
+                <Plus size={16} /> Connect & Scan Now
+              </Button>
             </div>
           ) : (
-            <div className="relative max-w-2xl mx-auto pl-8">
-              
-              {/* Vertical line connector */}
-              <div 
-                className="absolute left-3.5 top-2 bottom-2 w-0.5 bg-gradient-to-b from-indigo-500 to-slate-200 dark:to-slate-800" 
-              />
+            <div className="w-full flex flex-col flex-1 justify-center gap-8 py-4">
+              {/* Premium Scale Motion Carousel */}
+              <div className="w-full max-w-5xl mx-auto">
+                <MotionCarousel 
+                  versions={versions} 
+                  selectedIndex={selectedIndex >= 0 ? selectedIndex : 0} 
+                  onSelect={handleCarouselSelect}
+                />
+              </div>
 
-              <div className="flex flex-col gap-8">
-                {versions.map((v) => {
-                  const isSelected = selectedVersion?.version_id === v.version_id;
-                  const totalChanges = v.changes.added + v.changes.removed + v.changes.modified;
-
-                  return (
-                    <motion.div
-                      key={v.version_id}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.35 }}
-                      onClick={() => setSelectedVersion(v)}
-                      className={`relative group cursor-pointer border rounded-2xl p-5 shadow-sm transition-all duration-200 ${
-                        isSelected
-                          ? "bg-[var(--gl-bg-panel)] border-indigo-500 ring-1 ring-indigo-500/20"
-                          : "bg-[var(--gl-bg-panel)] border-[var(--gl-border)] hover:border-indigo-400/50 hover:bg-[var(--gl-bg-muted)]"
-                      }`}
-                    >
-                      {/* Timeline Node Dot */}
-                      <div 
-                        className={`absolute -left-[30px] top-[24px] w-4.5 h-4.5 rounded-full border-2 transition-all duration-200 ${
-                          isSelected
-                            ? "bg-indigo-500 border-indigo-500 shadow-[0_0_12px_rgba(99,102,241,0.5)] scale-110"
-                            : "bg-[var(--gl-bg-base)] border-indigo-400 group-hover:bg-indigo-400"
-                        }`}
-                      />
-
-                      {/* Card Content */}
-                      <div className="flex flex-col gap-2.5">
-                        <div className="flex justify-between items-start gap-4">
-                          <div className="flex flex-col gap-0.5">
-                            <div className="flex items-center gap-2">
-                              <span className="text-sm font-bold text-[var(--gl-text-primary)]">
-                                {v.label}
-                              </span>
-                              {v.is_latest && (
-                                <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-blue-500/10 text-blue-400 border border-blue-500/20 uppercase tracking-wide">
-                                  Current
-                                </span>
-                              )}
-                            </div>
-                            <span className="text-[10px] text-[var(--gl-text-muted)]">
-                              {new Date(v.created_at).toLocaleString()}
-                            </span>
-                          </div>
-
-                          <div className="flex flex-col items-end gap-0.5">
-                            <span className="text-sm font-bold text-[var(--gl-text-primary)]">
-                              ${v.costs.total_monthly.toFixed(2)}/mo
-                            </span>
-                            <span className="text-[9px] uppercase tracking-wider font-bold text-[var(--gl-text-muted)]">
-                              Est. Run Rate
-                            </span>
-                          </div>
-                        </div>
-
-                        {/* Quick Stats Grid */}
-                        <div className="grid grid-cols-3 gap-2 bg-[var(--gl-bg-muted)]/50 border border-[var(--gl-border)]/50 p-2.5 rounded-xl text-center text-xs">
-                          <div className="flex flex-col">
-                            <span className="text-[9px] uppercase font-bold tracking-wider text-[var(--gl-text-muted)]">Resources</span>
-                            <span className="font-bold text-[var(--gl-text-primary)] mt-0.5">
-                              {v.summary.total_resources}
-                            </span>
-                          </div>
-                          <div className="flex flex-col border-x border-[var(--gl-border)]/60">
-                            <span className="text-[9px] uppercase font-bold tracking-wider text-[var(--gl-text-muted)]">Changes</span>
-                            <span className={`font-bold mt-0.5 ${totalChanges > 0 ? "text-indigo-400" : "text-[var(--gl-text-muted)]"}`}>
-                              {totalChanges > 0 ? `+${totalChanges}` : "0"}
-                            </span>
-                          </div>
-                          <div className="flex flex-col">
-                            <span className="text-[9px] uppercase font-bold tracking-wider text-[var(--gl-text-muted)] font-sans">Compare</span>
-                            <div className="flex justify-center items-center gap-1.5 mt-0.5 font-bold">
-                              {v.changes.added > 0 && <span className="text-emerald-400" title="Added">+{v.changes.added}</span>}
-                              {v.changes.removed > 0 && <span className="text-red-400" title="Removed">-{v.changes.removed}</span>}
-                              {v.changes.modified > 0 && <span className="text-amber-400" title="Modified">~{v.changes.modified}</span>}
-                              {totalChanges === 0 && <span className="text-[var(--gl-text-muted)] font-normal italic">-</span>}
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Buttons Footer */}
-                        <div className="flex justify-end items-center gap-2.5 mt-1 border-t border-[var(--gl-border)]/50 pt-2.5">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleViewGraph(v);
-                            }}
-                            className="flex items-center gap-1 text-[10px] uppercase tracking-wider font-bold text-blue-400 hover:text-blue-500 transition-colors"
-                          >
-                            <Eye size={12} />
-                            View Canvas
-                          </button>
-                        </div>
-                      </div>
-                    </motion.div>
-                  );
-                })}
+              {/* Management Control Center */}
+              <div className="w-full">
+                <ManagementBar 
+                  currentIndex={selectedIndex >= 0 ? selectedIndex : 0} 
+                  totalIndex={versions.length} 
+                  onPrev={handlePrev}
+                  onNext={handleNext}
+                  onDelete={handleDeleteSnapshot}
+                  onScan={handleTriggerScan}
+                  onReplay={() => selectedVersion && handleViewGraph(selectedVersion)}
+                  isScanLoading={isScanLoading}
+                  isReplayDisabled={!selectedVersion}
+                />
               </div>
             </div>
           )}
         </div>
 
         {/* Right Section: Inspector Details Panel */}
-        <div className="w-full lg:w-[420px] border-t lg:border-t-0 lg:border-l border-[var(--gl-border)] bg-[var(--gl-bg-panel)] flex flex-col overflow-hidden shrink-0">
+        <div className="w-full lg:w-[420px] bg-[var(--gl-bg-panel)] flex flex-col overflow-hidden shrink-0">
           <AnimatePresence mode="wait">
             {selectedVersion ? (
               <motion.div
@@ -269,7 +271,7 @@ export default function TimelinePage() {
               >
                 {/* Panel Header */}
                 <div className="p-6 border-b border-[var(--gl-border)] flex flex-col gap-1 shrink-0">
-                  <span className="text-[10px] uppercase font-bold tracking-widest text-indigo-400">Snapshot Info</span>
+                  <span className="text-[10px] uppercase font-bold tracking-widest text-indigo-400">Snapshot Inspector</span>
                   <h2 className="text-lg font-bold text-[var(--gl-text-primary)]">{selectedVersion.label}</h2>
                   <p className="text-[10px] text-[var(--gl-text-muted)]">
                     Scanned on {new Date(selectedVersion.created_at).toLocaleString()}
@@ -418,7 +420,6 @@ export default function TimelinePage() {
                     onClick={() => handleViewGraph(selectedVersion)}
                     className="w-full h-11 bg-indigo-600 hover:bg-indigo-700 text-white font-bold gap-2 text-sm rounded-xl shadow-lg shadow-indigo-600/20 transition-all duration-200"
                   >
-                    <Eye size={18} />
                     Replay Graph State
                   </Button>
                 </div>
