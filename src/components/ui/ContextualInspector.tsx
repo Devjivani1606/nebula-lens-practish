@@ -188,7 +188,7 @@ export default function ContextualInspector() {
 
   const estimatedGlobalCost = useMemo(() => {
     return nodes.reduce((sum, node) => {
-      const cost = (node.data as any)?.metrics?.estMonthlyCost;
+      const cost = (node.data as any)?.cost?.monthlyCost;
       return sum + (Number(cost) || 0);
     }, 0);
   }, [nodes]);
@@ -196,8 +196,8 @@ export default function ContextualInspector() {
   const costBreakdown = useMemo(() => {
     let total = 0;
     let nodeType = '';
-    if (selectedNode && data?.metrics?.estMonthlyCost) {
-      total = data.metrics.estMonthlyCost;
+    if (selectedNode && data?.cost?.monthlyCost) {
+      total = data.cost.monthlyCost;
       nodeType = selectedNode.type || '';
     } else {
       total = estimatedGlobalCost;
@@ -452,7 +452,7 @@ export default function ContextualInspector() {
                       <motion.div variants={staggerItem}>
                         <h4 className="text-xs font-medium tracking-[0.7px] uppercase text-[var(--gl-text-muted)] mb-1">Estimated Cost</h4>
                         <p className="text-xl font-medium tracking-[-0.5px] text-[var(--gl-text-primary)] mt-1">
-                          $<AnimatedCounter value={selectedNode ? Number(data?.metrics?.estMonthlyCost || 0) : estimatedGlobalCost} /><span className="text-xs text-[var(--gl-text-muted)]">/mo</span>
+                          $<AnimatedCounter value={selectedNode ? Number(data?.cost?.monthlyCost || 0) : estimatedGlobalCost} /><span className="text-xs text-[var(--gl-text-muted)]">/mo</span>
                         </p>
                       </motion.div>
 

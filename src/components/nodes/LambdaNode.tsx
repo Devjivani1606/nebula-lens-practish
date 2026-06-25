@@ -16,7 +16,7 @@ function LambdaNode({ id, data, selected, positionAbsoluteX }: { id: string; dat
   // Ask the hook how this specific node should look right now
   const { opacity, isHighlighted, isDimmed, heatmapColor, borderColor: lensBorderColor, shadowColor } = useLensVisuals(id);
   const activeLens = useCanvasStore((state) => state.activeLens);
-  const cost = data.metrics?.estMonthlyCost;
+  const cost = data.cost?.monthlyCost;
 
   const activeShadow = shadowColor
     ? `0px 4px 12px ${shadowColor}`

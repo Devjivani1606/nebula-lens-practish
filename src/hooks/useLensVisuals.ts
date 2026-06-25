@@ -66,7 +66,7 @@ export function useLensVisuals(nodeId: string) {
       return { opacity: 0.3, isHighlighted: false, isDimmed: true, heatmapColor: undefined };
     }
 
-    const rawCost = (currentNode?.data as any)?.metrics?.estMonthlyCost;
+    const rawCost = (currentNode?.data as any)?.cost?.monthlyCost;
     const cost = rawCost !== undefined ? Number(rawCost) : undefined;
 
     if (cost === undefined || isNaN(cost)) {

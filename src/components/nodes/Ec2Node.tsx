@@ -16,7 +16,7 @@ const springTransition = { type: "spring", stiffness: 400, damping: 30 } as cons
 function Ec2Node({ id, data, selected, positionAbsoluteX }: { id: string; data: any; selected?: boolean; positionAbsoluteX?: number }) {
   const { opacity, isHighlighted, isDimmed, heatmapColor, borderColor: lensBorderColor, shadowColor } = useLensVisuals(id);
   const activeLens = useCanvasStore((state) => state.activeLens);
-  const cost = data.metrics?.estMonthlyCost;
+  const cost = data.cost?.monthlyCost;
 
   const activeShadow = shadowColor
     ? `0px 4px 12px ${shadowColor}`

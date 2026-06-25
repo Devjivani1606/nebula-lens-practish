@@ -177,7 +177,7 @@ export const systemLayers: LayerDefinition[] = [
     rules: {
       operator: 'OR',
       rules: [
-        { field: 'data.metrics.estMonthlyCost', operator: 'regex', value: '.*' }, // Fallback rule for testing
+        { field: 'data.cost.monthlyCost', operator: 'regex', value: '.*' }, // Fallback rule for testing
         // You can add more rules based on actual tags in data
       ]
     }
