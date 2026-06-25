@@ -1,7 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.database import get_db
-from app.models.models import AwsAccount, Snapshot, NormalizedNode, NormalizedEdge, Resource, Relationship, ScanJob
+from app.models.models import (
+    AwsAccount, Snapshot, NormalizedNode, NormalizedEdge, 
+    Resource, Relationship, ScanJob, User, ServiceScan, SnapshotDiff
+)
 from typing import Dict, Any, List
 
 router = APIRouter(prefix="/api/db", tags=["Database Inspector"])
@@ -17,7 +20,10 @@ def get_db_stats(db: Session = Depends(get_db)):
             "relationships_raw": db.query(Relationship).count(),
             "normalized_nodes": db.query(NormalizedNode).count(),
             "normalized_edges": db.query(NormalizedEdge).count(),
-            "scan_jobs": db.query(ScanJob).count()
+            "scan_jobs": db.query(ScanJob).count(),
+            "users": db.query(User).count(),
+            "service_scans": db.query(ServiceScan).count(),
+            "snapshot_diffs": db.query(SnapshotDiff).count()
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -176,6 +182,66 @@ def get_db_jobs(db: Session = Depends(get_db)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@router.get("/users")
+def get_db_users(db: Session = Depends(get_db)):
+    """Fetch all rows from users table."""
+    try:
+        users = db.query(User).order_by(User.created_at.desc()).all()
+        return [
+            {
+                "id": str(u.id),
+                "email": u.email,
+                "name": u.name,
+                "auth0_id": u.auth0_id,
+                "created_at": u.created_at.isoformat() if u.created_at else None
+            }
+            for u in users
+        ]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/service_scans")
+def get_db_service_scans(db: Session = Depends(get_db)):
+    """Fetch all rows from service_scans table."""
+    try:
+        scans = db.query(ServiceScan).order_by(ServiceScan.started_at.desc()).all()
+        return [
+            {
+                "id": str(s.id),
+                "scan_job_id": str(s.scan_job_id),
+                "service": s.service,
+                "region": s.region,
+                "status": s.status,
+                "resources_found": s.resources_found,
+                "error_message": s.error_message,
+                "started_at": s.started_at.isoformat() if s.started_at else None,
+                "completed_at": s.completed_at.isoformat() if s.completed_at else None
+            }
+            for s in scans
+        ]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/snapshot_diffs")
+def get_db_snapshot_diffs(db: Session = Depends(get_db)):
+    """Fetch all rows from snapshot_diffs table."""
+    try:
+        diffs = db.query(SnapshotDiff).order_by(SnapshotDiff.created_at.desc()).all()
+        return [
+            {
+                "id": str(d.id),
+                "from_snapshot": str(d.from_snapshot),
+                "to_snapshot": str(d.to_snapshot),
+                "change_type": d.change_type,
+                "resource_arn": d.resource_arn,
+                "resource_type": d.resource_type,
+                "created_at": d.created_at.isoformat() if d.created_at else None
+            }
+            for d in diffs
+        ]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 @router.delete("/delete/{table}/{row_id}")
 def delete_db_row(table: str, row_id: str, db: Session = Depends(get_db)):
     """Delete a row from a database table by ID."""
@@ -194,6 +260,12 @@ def delete_db_row(table: str, row_id: str, db: Session = Depends(get_db)):
             model = Relationship
         elif table == "jobs":
             model = ScanJob
+        elif table == "users":
+            model = User
+        elif table == "service_scans":
+            model = ServiceScan
+        elif table == "snapshot_diffs":
+            model = SnapshotDiff
         else:
             raise HTTPException(status_code=400, detail="Invalid table name")
 
