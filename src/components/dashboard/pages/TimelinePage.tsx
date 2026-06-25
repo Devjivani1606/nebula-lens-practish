@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useCanvasStore } from "@/store/useCanvasStore";
 import { useDashboardStore } from "../useDashboardStore";
 import { 
@@ -11,6 +11,9 @@ import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { MotionCarousel } from "@/components/animate-ui/components/community/motion-carousel";
 import { ManagementBar } from "@/components/animate-ui/components/community/management-bar";
+import { PieChart } from "@/components/charts/pie-chart";
+import { PieSlice } from "@/components/charts/pie-slice";
+import { PieCenter } from "@/components/charts/pie-center";
 
 interface SnapshotVersion {
   version_id: string;
@@ -48,6 +51,7 @@ export default function TimelinePage() {
   const [loadingDiff, setLoadingDiff] = useState(false);
   const [activeTab, setActiveTab] = useState<"summary" | "changes">("summary");
   const [isScanLoading, setIsScanLoading] = useState(false);
+  const [hoveredSlice, setHoveredSlice] = useState<number | null>(null);
 
   const { 
     fetchInfrastructure, 
@@ -185,6 +189,18 @@ export default function TimelinePage() {
     return idx !== -1 ? str.substring(idx + 1) : str;
   };
 
+  const pieChartData = useMemo(() => {
+    if (!selectedVersion) return [];
+    const colors = ['#8b5cf6', '#3b82f6', '#f59e0b', '#10b981', '#ec4899', '#ef4444', '#f97316', '#38bdf8'];
+    return Object.entries(selectedVersion.costs.by_service)
+      .filter(([_, cost]) => cost > 0)
+      .map(([service, cost], idx) => ({
+        label: service.toUpperCase(),
+        value: cost,
+        color: colors[idx % colors.length]
+      }));
+  }, [selectedVersion]);
+
   return (
     <div className="flex flex-col h-full overflow-hidden bg-[var(--gl-bg-base)]">
       {/* Page Header */}
@@ -271,7 +287,7 @@ export default function TimelinePage() {
               >
                 {/* Panel Header */}
                 <div className="p-6 border-b border-[var(--gl-border)] flex flex-col gap-1 shrink-0">
-                  <span className="text-[10px] uppercase font-bold tracking-widest text-indigo-400">Snapshot Inspector</span>
+                  <span className="text-[10px] uppercase font-bold tracking-widest text-indigo-400">Architecture Audit Deck</span>
                   <h2 className="text-lg font-bold text-[var(--gl-text-primary)]">{selectedVersion.label}</h2>
                   <p className="text-[10px] text-[var(--gl-text-muted)]">
                     Scanned on {new Date(selectedVersion.created_at).toLocaleString()}
@@ -321,33 +337,48 @@ export default function TimelinePage() {
                         </div>
                       </div>
 
-                      {/* Service Breakdown */}
+                      {/* Service Breakdown (Bklit-UI Donut Chart) */}
                       <div className="flex flex-col gap-3">
                         <h3 className="text-[10px] font-bold uppercase tracking-widest text-[var(--gl-text-muted)]">Cost By Service</h3>
                         <div className="flex flex-col gap-2.5">
-                          {Object.keys(selectedVersion.costs.by_service).length === 0 ? (
+                          {pieChartData.length === 0 ? (
                             <span className="text-xs text-[var(--gl-text-muted)] italic">No cost distribution details.</span>
                           ) : (
-                            Object.entries(selectedVersion.costs.by_service).map(([service, cost]) => (
-                              <div key={service} className="flex flex-col gap-1">
-                                <div className="flex justify-between items-center text-xs">
-                                  <span className="font-bold text-[var(--gl-text-secondary)] uppercase">{service}</span>
-                                  <span className="font-mono font-medium text-[var(--gl-text-primary)]">${cost.toFixed(2)}</span>
-                                </div>
-                                <div className="w-full h-1.5 bg-[var(--gl-border)] rounded-full overflow-hidden">
-                                  <div
-                                    style={{
-                                      width: `${
-                                        selectedVersion.costs.total_monthly > 0
-                                          ? (cost / selectedVersion.costs.total_monthly) * 100
-                                          : 0
-                                      }%`
-                                    }}
-                                    className="h-full bg-indigo-500 rounded-full"
-                                  />
-                                </div>
+                            <div className="w-full py-4 bg-slate-50/50 dark:bg-slate-900/30 rounded-xl border border-[var(--gl-border)] flex flex-col items-center justify-center">
+                              <div className="w-40 h-40 flex items-center justify-center">
+                                <PieChart
+                                  data={pieChartData}
+                                  innerRadius={48}
+                                  padAngle={0.03}
+                                  cornerRadius={4}
+                                  hoveredIndex={hoveredSlice}
+                                  onHoverChange={setHoveredSlice}
+                                >
+                                  {pieChartData.map((slice, idx) => (
+                                    <PieSlice key={slice.label} index={idx} hoverEffect="translate" hoverOffset={6} />
+                                  ))}
+                                  <PieCenter prefix="$" />
+                                </PieChart>
                               </div>
-                            ))
+                              
+                              {/* Interactive Legend Grid */}
+                              <div className="w-full px-4 mt-4 grid grid-cols-2 gap-2">
+                                {pieChartData.map((slice, idx) => (
+                                  <div
+                                    key={slice.label}
+                                    className={`flex items-center gap-2 px-2 py-1 rounded transition-colors ${
+                                      hoveredSlice === idx ? 'bg-slate-200/50 dark:bg-slate-800/50' : ''
+                                    }`}
+                                    onMouseEnter={() => setHoveredSlice(idx)}
+                                    onMouseLeave={() => setHoveredSlice(null)}
+                                  >
+                                    <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: slice.color }} />
+                                    <span className="text-[10px] font-semibold text-[var(--gl-text-muted)] truncate">{slice.label}</span>
+                                    <span className="text-[10px] font-bold font-mono text-[var(--gl-text-primary)] ml-auto">${slice.value.toFixed(0)}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
                           )}
                         </div>
                       </div>
