@@ -22,6 +22,12 @@ export async function GET(request: NextRequest) {
     path = snapshot_id ? `/api/db/relationships?snapshot_id=${snapshot_id}` : '/api/db/relationships';
   } else if (table === 'jobs') {
     path = '/api/db/jobs';
+  } else if (table === 'users') {
+    path = '/api/db/users';
+  } else if (table === 'service_scans') {
+    path = '/api/db/service_scans';
+  } else if (table === 'snapshot_diffs') {
+    path = '/api/db/snapshot_diffs';
   } else {
     return NextResponse.json({ error: "Invalid table name" }, { status: 400 });
   }
