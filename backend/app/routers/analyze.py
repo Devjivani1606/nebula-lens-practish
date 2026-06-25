@@ -127,7 +127,7 @@ def analyze_account(request: AnalyzeRequest, db: Session = Depends(get_db)):
             raise HTTPException(status_code=404, detail="No snapshots found for this account")
 
         # ── Step 3: Get Resources ─────────────────────────────────────────────
-        SUPPORTED = {"vpc", "subnet", "ec2", "lambda", "rds", "sqs", "s3", "apigateway"}
+        SUPPORTED = {"vpc", "subnet", "ec2", "lambda", "rds", "sqs", "s3", "apigateway", "eks", "secretsmanager", "stepfunctions"}
         resources = db.query(Resource).filter(
             Resource.snapshot_id == snapshot.id,
             Resource.service.in_(SUPPORTED)
