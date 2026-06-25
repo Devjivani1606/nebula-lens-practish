@@ -106,24 +106,7 @@ export const useCanvasStore = create<CanvasState>()(
       },
 
       activeLens: 'structural',
-      setActiveLens: (lens) => {
-        const prevLens = get().activeLens;
-        set({ activeLens: lens });
-
-        // Sync with layerStore
-        const layerState = useLayerStore.getState();
-        if (prevLens === 'security' && layerState.activeLayers.includes('security-layer')) {
-          layerState.toggleLayer('security-layer');
-        } else if (prevLens === 'cost' && layerState.activeLayers.includes('cost-layer')) {
-          layerState.toggleLayer('cost-layer');
-        }
-
-        if (lens === 'security' && !layerState.activeLayers.includes('security-layer')) {
-          layerState.toggleLayer('security-layer');
-        } else if (lens === 'cost' && !layerState.activeLayers.includes('cost-layer')) {
-          layerState.toggleLayer('cost-layer');
-        }
-      },
+      setActiveLens: (lens) => set({ activeLens: lens }),
 
       focusedNodeId: null,
       setFocusedNodeId: (id) => set({ focusedNodeId: id }),
@@ -133,7 +116,7 @@ export const useCanvasStore = create<CanvasState>()(
 
       isLiveStreamActive: false,
 
-      
+
       toggleLiveStream: () => set((state) => ({ isLiveStreamActive: !state.isLiveStreamActive })),
 
       isTourActive: false,
