@@ -1,3 +1,4 @@
+
 # pyrefly: ignore [missing-import]
 from sqlalchemy import create_engine   # handles the opening and maintanence of the connection pool
 from sqlalchemy.ext.declarative import declarative_base  # base class for all the models
@@ -9,7 +10,12 @@ load_dotenv()
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 
-engine = create_engine(DATABASE_URL)
+engine = create_engine(
+    DATABASE_URL, 
+    pool_size=20, 
+    max_overflow=30, 
+    pool_timeout=60
+)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
