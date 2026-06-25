@@ -31,7 +31,9 @@ type CanvasState = {
   onNodesChange: (changes: NodeChange[]) => void;
   onEdgesChange: (changes: EdgeChange[]) => void;
   onConnect: (connection: Connection) => void;
-  fetchInfrastructure: () => Promise<void>;
+  fetchInfrastructure: (snapshotId?: string | null) => Promise<void>;
+  activeSnapshotId: string | null;
+  setActiveSnapshotId: (id: string | null) => void;
 
   // AWS Account state
   selectedAccountId: string | null;
@@ -78,6 +80,8 @@ export const useCanvasStore = create<CanvasState>()(
 
       selectedNodeId: null,
       setSelectedNodeId: (id) => set({ selectedNodeId: id }),
+      activeSnapshotId: null,
+      setActiveSnapshotId: (id) => set({ activeSnapshotId: id }),
 
       onNodesChange: (changes: NodeChange[]) => {
         set({ nodes: applyNodeChanges(changes, get().nodes) as CloudNode[] });
@@ -177,11 +181,17 @@ export const useCanvasStore = create<CanvasState>()(
         return { nodes: newNodes };
       }),
 
-      fetchInfrastructure: async () => {
+      fetchInfrastructure: async (snapshotId) => {
         set({ isLoading: true });
         try {
+          const activeSnap = snapshotId !== undefined ? snapshotId : get().activeSnapshotId;
           const accountId = get().selectedAccountId;
-          const url = accountId ? `/api/infrastructure?account_id=${accountId}` : '/api/infrastructure';
+          let url = '/api/infrastructure';
+          if (activeSnap) {
+            url = `/api/history?snapshot_id=${activeSnap}`;
+          } else if (accountId) {
+            url = `/api/infrastructure?account_id=${accountId}`;
+          }
           const response = await fetch(url);
           if (!response.ok) throw new Error('Failed to capture cloud layout topology');
           const data = await response.json();
