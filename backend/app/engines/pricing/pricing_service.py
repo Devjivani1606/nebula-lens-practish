@@ -274,6 +274,34 @@ def _ecs_fargate_memory_filters(location: str) -> tuple[str, list[dict]]:
     ]
 
 
+def _eks_cluster_filters(location: str) -> tuple[str, list[dict]]:
+    return "AmazonEKS", [
+        {"Type": "TERM_MATCH", "Field": "location",      "Value": location},
+        {"Type": "TERM_MATCH", "Field": "productFamily", "Value": "Compute"},
+    ]
+
+
+def _secretsmanager_secrets_filters(location: str) -> tuple[str, list[dict]]:
+    return "AWSSecretsManager", [
+        {"Type": "TERM_MATCH", "Field": "location",      "Value": location},
+        {"Type": "TERM_MATCH", "Field": "productFamily", "Value": "Secret"},
+    ]
+
+
+def _secretsmanager_requests_filters(location: str) -> tuple[str, list[dict]]:
+    return "AWSSecretsManager", [
+        {"Type": "TERM_MATCH", "Field": "location",      "Value": location},
+        {"Type": "TERM_MATCH", "Field": "productFamily", "Value": "API Request"},
+    ]
+
+
+def _stepfunctions_transitions_filters(location: str) -> tuple[str, list[dict]]:
+    return "AWSStepFunctions", [
+        {"Type": "TERM_MATCH", "Field": "location",      "Value": location},
+        {"Type": "TERM_MATCH", "Field": "productFamily", "Value": "State Transitions"},
+    ]
+
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # PRICE EXTRACTION FROM AWS PRICING API RESPONSE
@@ -542,6 +570,10 @@ class PricingService:
             ("cloudfront",   "transfer"):   lambda: _cloudfront_data_transfer_filters(location),
             ("ecs",          "fargate_vcpu"):   lambda: _ecs_fargate_vcpu_filters(location),
             ("ecs",          "fargate_memory"): lambda: _ecs_fargate_memory_filters(location),
+            ("eks",          "cluster"):     lambda: _eks_cluster_filters(location),
+            ("secretsmanager", "secrets"):   lambda: _secretsmanager_secrets_filters(location),
+            ("secretsmanager", "requests"):  lambda: _secretsmanager_requests_filters(location),
+            ("stepfunctions", "transitions"): lambda: _stepfunctions_transitions_filters(location),
         }
 
         handler = dispatch.get((service, resource_type))
