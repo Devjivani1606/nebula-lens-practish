@@ -45,7 +45,16 @@ export const useLayerStore = create<LayerStoreState>((set, get) => ({
 
   toggleLayer: (id: string) => set((state) => {
     const currentState = state.layerStates[id];
-    if (!currentState) return state;
+    if (!currentState) {
+      // Layer was never registered (e.g. inline LayerPanel items like iam_permissions).
+      // Bootstrap it as enabled on first toggle instead of silently doing nothing.
+      return {
+        layerStates: {
+          ...state.layerStates,
+          [id]: { enabled: true, opacity: 100, locked: false }
+        }
+      };
+    }
     return {
       layerStates: {
         ...state.layerStates,
