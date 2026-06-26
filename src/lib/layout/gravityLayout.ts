@@ -148,12 +148,12 @@ function toElkNode(
 
   const layoutOptions: Record<string, string> = isContainer
     ? {
-        'elk.padding': '[top=52,left=28,bottom=28,right=28]',
-        'elk.algorithm': 'layered',
-        'elk.direction': 'RIGHT',
-        'elk.spacing.nodeNode': '40',
-        'elk.layered.spacing.nodeNodeBetweenLayers': '80',
-      }
+      'elk.padding': '[top=52,left=28,bottom=28,right=28]',
+      'elk.algorithm': 'layered',
+      'elk.direction': 'RIGHT',
+      'elk.spacing.nodeNode': '40',
+      'elk.layered.spacing.nodeNodeBetweenLayers': '80',
+    }
     : {};
 
   return {
