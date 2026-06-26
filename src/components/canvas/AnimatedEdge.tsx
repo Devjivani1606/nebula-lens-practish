@@ -97,11 +97,11 @@ export default function AnimatedEdge({
   source,
   target,
   style = {},
-  label,
   markerEnd,
   data, // NEW: Added data prop to access our transferCost
   selected, // Destructure selected state
 }: EdgeProps) {
+  const label = data?.label as string | undefined;
   const [isHovered, setIsHovered] = useState(false);
 
   // Theme detection for Option A dual-palette coloring.
@@ -267,6 +267,15 @@ export default function AnimatedEdge({
   let edgeWidth = 1.5; // Slightly thicker by default so the color is visible
   let glowColor = 'transparent';
   let animationClass = 'animate-[dash-flow_3s_linear_infinite]';
+  const isIamPermission = data?.category === 'iam_permission';
+
+  if (isIamPermission) {
+    strokeColor = '#f59e0b';
+    particleColor = '#f59e0b';
+    strokeDasharray = '8, 4';
+    duration = '4s'; // Slower movement for IAM edges
+    glowColor = 'rgba(245, 158, 11, 0.2)';
+  }
 
   // Data flow edges — keep dashes, just ensure animation is applied
   if (lowerLabel.includes('post') || lowerLabel.includes('http') || lowerLabel.includes('api') ||
@@ -457,6 +466,10 @@ export default function AnimatedEdge({
               <span className="flex items-center gap-1">
                 {transferCost > 100 && <span className="animate-pulse text-red-500">⚠️</span>}
                 ${transferCost} <span className="text-[8px] text-slate-500">/mo</span>
+              </span>
+            ) : isIamPermission ? (
+              <span className="flex items-center gap-1 font-bold text-[#f59e0b]">
+                🛡️ {label}
               </span>
             ) : (
               label
