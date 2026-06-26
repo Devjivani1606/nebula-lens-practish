@@ -60,6 +60,17 @@ const useEmblaControls = (
   const [prevDisabled, setPrevDisabled] = React.useState(true);
   const [nextDisabled, setNextDisabled] = React.useState(true);
 
+  const selectedIndexRef = React.useRef(selectedIndex);
+  const onSelectRef = React.useRef(onSelect);
+
+  React.useEffect(() => {
+    selectedIndexRef.current = selectedIndex;
+  }, [selectedIndex]);
+
+  React.useEffect(() => {
+    onSelectRef.current = onSelect;
+  }, [onSelect]);
+
   const onDotClick = React.useCallback(
     (index: number) => emblaApi?.scrollTo(index),
     [emblaApi],
@@ -70,12 +81,12 @@ const useEmblaControls = (
 
   const updateSelectionState = React.useCallback((api: EmblaCarouselType) => {
     const apiIndex = api.selectedScrollSnap();
-    if (apiIndex !== selectedIndex) {
-      onSelect(apiIndex);
+    if (apiIndex !== selectedIndexRef.current) {
+      onSelectRef.current(apiIndex);
     }
     setPrevDisabled(!api.canScrollPrev());
     setNextDisabled(!api.canScrollNext());
-  }, [selectedIndex, onSelect]);
+  }, []);
 
   const onInit = React.useCallback((api: EmblaCarouselType) => {
     setScrollSnaps(api.scrollSnapList());
