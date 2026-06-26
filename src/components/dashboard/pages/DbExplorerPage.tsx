@@ -111,16 +111,29 @@ export default function DbExplorerPage() {
   return (
     <div className="flex flex-col h-full overflow-y-auto">
       {/* Header */}
-      <div className="p-8 pb-4 flex justify-between items-center gap-4">
-        <div className="flex flex-col gap-2">
-          <h1 className="text-2xl font-bold tracking-tight text-[var(--gl-text-primary)] flex items-center gap-2">
-            <Database size={24} className="text-indigo-500" />
-            Database Explorer
-          </h1>
-          <p className="text-[var(--gl-text-muted)]">
-            Inspect raw tables and metadata populated by Gravity Lens scan engines.
-          </p>
+      <div className="px-8 py-6 flex justify-between items-center gap-6 border-b border-[var(--gl-border)]/50 bg-[var(--gl-bg-panel)]/40 backdrop-blur-md shrink-0 relative overflow-hidden">
+        {/* Glow Accent */}
+        <div className="absolute top-0 left-1/4 w-96 h-24 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 blur-3xl rounded-full -translate-y-1/2 pointer-events-none" />
+        
+        <div className="flex items-center gap-4 relative z-10">
+          <div className="p-3 bg-gradient-to-br from-indigo-500/10 to-purple-500/5 border border-indigo-500/20 rounded-2xl text-indigo-400 shadow-inner">
+            <Database size={24} className="animate-pulse" />
+          </div>
+          <div className="flex flex-col gap-1">
+            <div className="flex items-center gap-2">
+              <span className="px-2 py-0.5 rounded-full text-[9px] font-black bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 uppercase tracking-widest font-mono">
+                System Schema
+              </span>
+            </div>
+            <h1 className="text-xl font-extrabold tracking-tight text-[var(--gl-text-primary)]">
+              Database Explorer
+            </h1>
+            <p className="text-[11px] text-[var(--gl-text-muted)] max-w-2xl font-medium">
+              Inspect raw tables and metadata populated by Gravity Lens scan engines.
+            </p>
+          </div>
         </div>
+
         <Button
           variant="outline"
           size="sm"
@@ -129,10 +142,10 @@ export default function DbExplorerPage() {
             fetchTableData(activeTab);
           }}
           disabled={loadingStats || loadingTable}
-          className="h-9 gap-2 border-[var(--gl-border)] hover:bg-[var(--gl-bg-muted)] text-xs"
+          className="h-9 gap-2 border-[var(--gl-border)] hover:bg-[var(--gl-bg-muted)] text-xs text-[var(--gl-text-secondary)] rounded-xl relative z-10 font-bold px-4"
         >
           <ArrowsClockwise size={14} className={(loadingStats || loadingTable) ? "animate-spin" : ""} />
-          Refresh
+          Refresh Stats
         </Button>
       </div>
 
