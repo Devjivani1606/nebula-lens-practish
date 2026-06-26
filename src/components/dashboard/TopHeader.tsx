@@ -27,7 +27,7 @@ const SECTION_LABELS: Record<DashboardSection, string> = {
   cost: "Cost Analysis",
   "db-explorer": "Database Explorer",
   settings: "Settings",
-  logs: ""
+  logs: "Scan Job Logs"
 };
 
 export function TopHeader() {
@@ -90,45 +90,6 @@ export function TopHeader() {
 
       {/* Spacer */}
       <div className="flex-1" />
-
-      {/* AWS Account Selector Dropdown */}
-      {connectedAccounts.length > 0 && (
-        <div className="flex items-center gap-1.5">
-          <span className="text-[10px] uppercase tracking-wider font-semibold text-[var(--gl-text-muted)] hidden lg:inline">Account:</span>
-          <select
-            value={selectedAccountId || ""}
-            onChange={async (e) => {
-              const val = e.target.value;
-              setSelectedAccountId(val || null);
-              // Wait for state to apply then fetch
-              setTimeout(() => {
-                fetchInfrastructure();
-              }, 50);
-            }}
-            className="h-8 px-2 rounded-lg border border-[var(--gl-border)] bg-[var(--gl-bg-panel)] text-xs text-[var(--gl-text-secondary)] focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer max-w-[200px] truncate"
-          >
-            <option value="">Latest (All Accounts)</option>
-            {connectedAccounts.map((account) => (
-              <option key={account.id} value={account.id}>
-                {account.account_name} ({account.account_id})
-              </option>
-            ))}
-          </select>
-        </div>
-      )}
-
-      {/* Sync Infrastructure */}
-      <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-        <Button
-          variant="outline"
-          onClick={() => fetchInfrastructure()}
-          disabled={isLoading}
-          className="h-8 px-3 text-xs font-bold text-[var(--gl-text-secondary)] border-[var(--gl-border)] hover:bg-[var(--gl-bg-muted)] hover:text-[var(--gl-text-primary)]"
-        >
-          <ArrowsClockwise weight="bold" className={`mr-2 h-3.5 w-3.5 ${isLoading ? 'animate-spin text-blue-400' : ''}`} />
-          {isLoading ? 'Scanning...' : 'Sync AWS'}
-        </Button>
-      </motion.div>
 
       {/* Product Tour Recap */}
       <Tooltip>

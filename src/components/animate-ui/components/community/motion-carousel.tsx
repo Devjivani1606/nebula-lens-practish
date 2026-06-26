@@ -60,6 +60,17 @@ const useEmblaControls = (
   const [prevDisabled, setPrevDisabled] = React.useState(true);
   const [nextDisabled, setNextDisabled] = React.useState(true);
 
+  const selectedIndexRef = React.useRef(selectedIndex);
+  const onSelectRef = React.useRef(onSelect);
+
+  React.useEffect(() => {
+    selectedIndexRef.current = selectedIndex;
+  }, [selectedIndex]);
+
+  React.useEffect(() => {
+    onSelectRef.current = onSelect;
+  }, [onSelect]);
+
   const onDotClick = React.useCallback(
     (index: number) => emblaApi?.scrollTo(index),
     [emblaApi],
@@ -70,12 +81,12 @@ const useEmblaControls = (
 
   const updateSelectionState = React.useCallback((api: EmblaCarouselType) => {
     const apiIndex = api.selectedScrollSnap();
-    if (apiIndex !== selectedIndex) {
-      onSelect(apiIndex);
+    if (apiIndex !== selectedIndexRef.current) {
+      onSelectRef.current(apiIndex);
     }
     setPrevDisabled(!api.canScrollPrev());
     setNextDisabled(!api.canScrollNext());
-  }, [selectedIndex, onSelect]);
+  }, []);
 
   const onInit = React.useCallback((api: EmblaCarouselType) => {
     setScrollSnaps(api.scrollSnapList());
@@ -136,7 +147,7 @@ function MotionCarousel({ versions, selectedIndex, onSelect, options }: PropType
         <div className="flex touch-pan-y touch-pinch-zoom">
           {versions.map((v, index) => {
             const isActive = index === selectedIndex;
-            const totalChanges = v.changes.added + v.changes.removed + v.changes.modified;
+            const totalChanges = (v.changes?.added || 0) + (v.changes?.removed || 0) + (v.changes?.modified || 0);
 
             return (
               <motion.div
@@ -177,7 +188,7 @@ function MotionCarousel({ versions, selectedIndex, onSelect, options }: PropType
                       </div>
                       <div className="flex flex-col items-end">
                         <span className="text-lg font-black text-[var(--gl-text-primary)] leading-none">
-                          ${v.costs.total_monthly.toFixed(2)}
+                          ${(v.costs?.total_monthly || 0).toFixed(2)}
                         </span>
                         <span className="text-[8px] uppercase tracking-widest font-bold text-[var(--gl-text-muted)] mt-1">
                           / month
@@ -191,7 +202,7 @@ function MotionCarousel({ versions, selectedIndex, onSelect, options }: PropType
                     <div className="flex flex-col">
                       <span className="text-[8px] uppercase font-bold tracking-wider text-[var(--gl-text-muted)]">Resources</span>
                       <span className="font-extrabold text-[var(--gl-text-primary)] mt-0.5">
-                        {v.summary.total_resources}
+                        {v.summary?.total_resources || 0}
                       </span>
                     </div>
                     <div className="flex flex-col border-x border-[var(--gl-border)]/60">
@@ -203,9 +214,9 @@ function MotionCarousel({ versions, selectedIndex, onSelect, options }: PropType
                     <div className="flex flex-col">
                       <span className="text-[8px] uppercase font-bold tracking-wider text-[var(--gl-text-muted)]">Compare</span>
                       <div className="flex justify-center items-center gap-1 mt-0.5 font-bold">
-                        {v.changes.added > 0 && <span className="text-emerald-400" title="Added">+{v.changes.added}</span>}
-                        {v.changes.removed > 0 && <span className="text-red-400" title="Removed">-{v.changes.removed}</span>}
-                        {v.changes.modified > 0 && <span className="text-amber-400" title="Modified">~{v.changes.modified}</span>}
+                        {(v.changes?.added || 0) > 0 && <span className="text-emerald-400" title="Added">+{v.changes?.added}</span>}
+                        {(v.changes?.removed || 0) > 0 && <span className="text-red-400" title="Removed">-{v.changes?.removed}</span>}
+                        {(v.changes?.modified || 0) > 0 && <span className="text-amber-400" title="Modified">~{v.changes?.modified}</span>}
                         {totalChanges === 0 && <span className="text-[var(--gl-text-muted)] font-normal italic">-</span>}
                       </div>
                     </div>
@@ -275,7 +286,6 @@ function DotButton({ selected = false, label, onClick }: { selected?: boolean; l
         animate={{
           opacity: selected ? 1 : 0,
           scale: selected ? 1 : 0,
-          filter: selected ? 'blur(0)' : 'blur(4px)',
         }}
         transition={transition}
       >

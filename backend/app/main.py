@@ -18,12 +18,14 @@ logger = logging.getLogger(__name__)
 
 Base.metadata.create_all(bind=engine)
 
-# Ensure confidence and evidence columns exist in PostgreSQL if table is already created
+# Ensure confidence, evidence, and category columns exist in PostgreSQL if table is already created
 from sqlalchemy import text
 try:
     with engine.begin() as conn:
         conn.execute(text("ALTER TABLE relationships ADD COLUMN IF NOT EXISTS confidence INTEGER;"))
         conn.execute(text("ALTER TABLE relationships ADD COLUMN IF NOT EXISTS evidence JSONB;"))
+        conn.execute(text("ALTER TABLE relationships ADD COLUMN IF NOT EXISTS category VARCHAR(50);"))
+        conn.execute(text("ALTER TABLE normalized_edges ADD COLUMN IF NOT EXISTS category VARCHAR(50);"))
     logger.info("Database alter statements executed successfully (if needed).")
 except Exception as e:
     logger.warning(f"Database alter statements failed or not applicable (e.g. SQLite/existing): {e}")

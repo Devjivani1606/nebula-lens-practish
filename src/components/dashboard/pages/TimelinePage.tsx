@@ -67,12 +67,12 @@ export default function TimelinePage() {
       const res = await fetch(url);
       if (res.ok) {
         const data = await res.json();
-        const list = data.versions || [];
+        const list = (data.versions || []).reverse();
         setVersions(list);
         if (list.length > 0) {
-          // Keep current index focused if it still exists, else default to first
+          // Keep current index focused if it still exists, else default to latest (last in ascending array)
           const prevSelected = list.find((v: SnapshotVersion) => v.version_id === selectedVersion?.version_id);
-          setSelectedVersion(prevSelected || list[0]);
+          setSelectedVersion(prevSelected || list[list.length - 1]);
         } else {
           setSelectedVersion(null);
         }
@@ -108,6 +108,7 @@ export default function TimelinePage() {
       fetchDiff(selectedVersion.version_id);
       // Auto-open inspector when a version is selected
       setIsInspectorOpen(true);
+      setHoveredSlice(null); // Reset hovered slice to prevent React loop crashes
     }
   }, [selectedVersion]);
 
@@ -190,7 +191,7 @@ export default function TimelinePage() {
   };
 
   const pieChartData = useMemo(() => {
-    if (!selectedVersion) return [];
+    if (!selectedVersion || !selectedVersion.costs?.by_service) return [];
     const colors = ['#8b5cf6', '#3b82f6', '#f59e0b', '#10b981', '#ec4899', '#ef4444', '#f97316', '#38bdf8'];
     return Object.entries(selectedVersion.costs.by_service)
       .filter(([_, cost]) => cost > 0)
@@ -338,7 +339,7 @@ export default function TimelinePage() {
                       <div className="flex flex-col">
                         <span className="text-[10px] uppercase font-bold tracking-wider text-[var(--gl-text-muted)]">Monthly Run Rate</span>
                         <span className="text-2xl font-extrabold text-[var(--gl-text-primary)] mt-1">
-                          ${selectedVersion.costs.total_monthly.toFixed(2)}
+                          ${(selectedVersion.costs?.total_monthly || 0).toFixed(2)}
                         </span>
                       </div>
                       <div className="p-3 bg-indigo-500/10 rounded-2xl text-indigo-400">

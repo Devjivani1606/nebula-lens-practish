@@ -28,14 +28,13 @@ export default function TopNav() {
       <div className="flex items-center gap-3">
 
   {/* 1. THE LOGO FIX */}
-  <div className="flex items-center justify-center shrink-0 overflow-hidden rounded-xl bg-white dark:bg-slate-800 shadow-sm ring-1 ring-slate-900/5 dark:ring-slate-100/5">
+  <div className="flex items-center justify-center shrink-0 overflow-hidden rounded-xl bg-[#0A0A0A] shadow-sm ring-1 ring-white/10">
     <Image
       src="/logo/singleLogo.svg"
       alt="Gravity Lens Logo"
       width={36}
       height={36}
-      // mix-blend-multiply is a CSS trick that makes white backgrounds turn transparent!
-      className="object-contain mix-blend-multiply"
+      className="object-contain"
       priority
     />
   </div>

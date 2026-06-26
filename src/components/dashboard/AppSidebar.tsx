@@ -7,6 +7,7 @@ import {
   Scroll,
   Clock,
   Gear,
+  Terminal,
 } from "@phosphor-icons/react";
 import { NavMain, type NavMainItem } from "./NavMain";
 import { NavUser } from "./NavUser";
@@ -38,6 +39,7 @@ const navigationItems: NavMainItem[] = [
   },
   { title: "Timeline Scrubber", id: "timeline", icon: Clock },
   { title: "Database Explorer", id: "db-explorer", icon: Scroll },
+  { title: "Scan Job Logs", id: "logs", icon: Terminal },
   { title: "Settings", id: "settings", icon: Gear },
 ];
 

@@ -59,6 +59,10 @@ export default function SettingsPage() {
       setStatusMessage({ text: "Please enter a valid IAM Role ARN.", isError: true });
       return;
     }
+    if (!accountName.trim()) {
+      setStatusMessage({ text: "Please enter a valid Account Name.", isError: true });
+      return;
+    }
 
     setSubmitLoading(true);
     setStatusMessage(null);
@@ -69,7 +73,7 @@ export default function SettingsPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           role_arn: roleArn.trim(),
-          account_name: accountName.trim() || null,
+          account_name: accountName.trim(),
         }),
       });
 
@@ -193,9 +197,10 @@ export default function SettingsPage() {
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-semibold text-[var(--gl-text-primary)]">Account Name (Optional)</label>
+                  <label className="text-xs font-semibold text-[var(--gl-text-primary)]">Account Name</label>
                   <input
                     type="text"
+                    required
                     value={accountName}
                     onChange={(e) => setAccountName(e.target.value)}
                     placeholder="Production Cloud"
@@ -278,6 +283,125 @@ export default function SettingsPage() {
                 ))}
               </div>
             )}
+          </div>
+        </section>
+
+        {/* Supported Services & Boto3 Live Info */}
+        <section className="flex flex-col gap-4">
+          <h2 className="text-[11px] uppercase text-[var(--gl-text-muted)] tracking-[0.7px] font-medium">
+            SUPPORTED AWS SERVICES & BOTO3 ANALYTICS
+          </h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* 16 Supported Services */}
+            <div className="bg-[var(--gl-bg-panel)] border border-[var(--gl-border)] rounded-xl p-6 shadow-sm flex flex-col gap-4">
+              <div className="flex flex-col gap-1">
+                <h3 className="font-semibold text-base text-[var(--gl-text-primary)]">Supported Cloud Services (16)</h3>
+                <p className="text-xs text-[var(--gl-text-muted)]">
+                  Active Resource types scanned dynamically and rendered on the interactive canvas:
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2 text-xs font-semibold text-[var(--gl-text-secondary)]">
+                <div className="flex items-center gap-2 bg-[var(--gl-bg-muted)]/50 px-2.5 py-1.5 rounded-lg border border-[var(--gl-border)]">
+                  <span className="w-1.5 h-1.5 bg-blue-500 rounded-full shrink-0" />
+                  EC2 Instances
+                </div>
+                <div className="flex items-center gap-2 bg-[var(--gl-bg-muted)]/50 px-2.5 py-1.5 rounded-lg border border-[var(--gl-border)]">
+                  <span className="w-1.5 h-1.5 bg-blue-500 rounded-full shrink-0" />
+                  Lambda Functions
+                </div>
+                <div className="flex items-center gap-2 bg-[var(--gl-bg-muted)]/50 px-2.5 py-1.5 rounded-lg border border-[var(--gl-border)]">
+                  <span className="w-1.5 h-1.5 bg-blue-500 rounded-full shrink-0" />
+                  EKS Clusters
+                </div>
+                <div className="flex items-center gap-2 bg-[var(--gl-bg-muted)]/50 px-2.5 py-1.5 rounded-lg border border-[var(--gl-border)]">
+                  <span className="w-1.5 h-1.5 bg-blue-500 rounded-full shrink-0" />
+                  ECS Containers
+                </div>
+                <div className="flex items-center gap-2 bg-[var(--gl-bg-muted)]/50 px-2.5 py-1.5 rounded-lg border border-[var(--gl-border)]">
+                  <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full shrink-0" />
+                  RDS Databases
+                </div>
+                <div className="flex items-center gap-2 bg-[var(--gl-bg-muted)]/50 px-2.5 py-1.5 rounded-lg border border-[var(--gl-border)]">
+                  <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full shrink-0" />
+                  DynamoDB Tables
+                </div>
+                <div className="flex items-center gap-2 bg-[var(--gl-bg-muted)]/50 px-2.5 py-1.5 rounded-lg border border-[var(--gl-border)]">
+                  <span className="w-1.5 h-1.5 bg-purple-500 rounded-full shrink-0" />
+                  S3 Buckets
+                </div>
+                <div className="flex items-center gap-2 bg-[var(--gl-bg-muted)]/50 px-2.5 py-1.5 rounded-lg border border-[var(--gl-border)]">
+                  <span className="w-1.5 h-1.5 bg-orange-500 rounded-full shrink-0" />
+                  VPC & Subnets
+                </div>
+                <div className="flex items-center gap-2 bg-[var(--gl-bg-muted)]/50 px-2.5 py-1.5 rounded-lg border border-[var(--gl-border)]">
+                  <span className="w-1.5 h-1.5 bg-orange-500 rounded-full shrink-0" />
+                  API Gateway
+                </div>
+                <div className="flex items-center gap-2 bg-[var(--gl-bg-muted)]/50 px-2.5 py-1.5 rounded-lg border border-[var(--gl-border)]">
+                  <span className="w-1.5 h-1.5 bg-orange-500 rounded-full shrink-0" />
+                  ALB Load Balancers
+                </div>
+                <div className="flex items-center gap-2 bg-[var(--gl-bg-muted)]/50 px-2.5 py-1.5 rounded-lg border border-[var(--gl-border)]">
+                  <span className="w-1.5 h-1.5 bg-pink-500 rounded-full shrink-0" />
+                  CloudFront CDN
+                </div>
+                <div className="flex items-center gap-2 bg-[var(--gl-bg-muted)]/50 px-2.5 py-1.5 rounded-lg border border-[var(--gl-border)]">
+                  <span className="w-1.5 h-1.5 bg-teal-500 rounded-full shrink-0" />
+                  SQS Message Queues
+                </div>
+                <div className="flex items-center gap-2 bg-[var(--gl-bg-muted)]/50 px-2.5 py-1.5 rounded-lg border border-[var(--gl-border)]">
+                  <span className="w-1.5 h-1.5 bg-teal-500 rounded-full shrink-0" />
+                  SNS Topics
+                </div>
+                <div className="flex items-center gap-2 bg-[var(--gl-bg-muted)]/50 px-2.5 py-1.5 rounded-lg border border-[var(--gl-border)]">
+                  <span className="w-1.5 h-1.5 bg-teal-500 rounded-full shrink-0" />
+                  EventBridge Rules
+                </div>
+                <div className="flex items-center gap-2 bg-[var(--gl-bg-muted)]/50 px-2.5 py-1.5 rounded-lg border border-[var(--gl-border)]">
+                  <span className="w-1.5 h-1.5 bg-yellow-500 rounded-full shrink-0" />
+                  Secrets Manager
+                </div>
+                <div className="flex items-center gap-2 bg-[var(--gl-bg-muted)]/50 px-2.5 py-1.5 rounded-lg border border-[var(--gl-border)]">
+                  <span className="w-1.5 h-1.5 bg-indigo-500 rounded-full shrink-0" />
+                  Step Functions
+                </div>
+              </div>
+            </div>
+
+            {/* Boto3 API Analytics */}
+            <div className="bg-[var(--gl-bg-panel)] border border-[var(--gl-border)] rounded-xl p-6 shadow-sm flex flex-col gap-4">
+              <div className="flex flex-col gap-1">
+                <h3 className="font-semibold text-base text-[var(--gl-text-primary)]">Boto3 Live Data Pipeline</h3>
+                <p className="text-xs text-[var(--gl-text-muted)]">
+                  Real-time metrics regarding the underlying python AWS SDK integrations:
+                </p>
+              </div>
+
+              <div className="flex flex-col gap-3.5 text-xs text-[var(--gl-text-secondary)]">
+                <div className="flex justify-between items-center py-1 border-b border-[var(--gl-border)]/50">
+                  <span className="font-medium">Authentication Pattern</span>
+                  <span className="font-mono bg-[var(--gl-bg-muted)] px-2 py-0.5 rounded border border-[var(--gl-border)] text-[10px] text-blue-400">AWS STS Role Assumption</span>
+                </div>
+                <div className="flex justify-between items-center py-1 border-b border-[var(--gl-border)]/50">
+                  <span className="font-medium">Estimated Requests / Scan</span>
+                  <span className="font-bold text-[var(--gl-text-primary)]">50 - 150 API Calls</span>
+                </div>
+                <div className="flex justify-between items-center py-1 border-b border-[var(--gl-border)]/50">
+                  <span className="font-medium">Automatic Scan Frequency</span>
+                  <span className="font-bold text-[var(--gl-text-primary)]">Every 5 Minutes</span>
+                </div>
+                <div className="flex justify-between items-center py-1">
+                  <span className="font-medium">Throttling (Rate Limiting)</span>
+                  <span className="font-mono bg-[var(--gl-bg-muted)] px-2 py-0.5 rounded border border-[var(--gl-border)] text-[10px] text-emerald-400">Adaptive Auto-Retry</span>
+                </div>
+
+                <div className="p-3 bg-indigo-500/5 border border-indigo-500/10 rounded-lg text-[10px] leading-relaxed text-[var(--gl-text-muted)] mt-1">
+                  💡 <strong className="text-[var(--gl-text-secondary)]">Did you know?</strong> Read-only describe and listing operations using AWS Boto3 SDK do not modify any assets and are generally covered under the AWS Free Tier, resulting in $0.00 cost.
+                </div>
+              </div>
+            </div>
           </div>
         </section>
 
