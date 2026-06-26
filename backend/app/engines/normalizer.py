@@ -82,7 +82,8 @@ class NormalizationEngine:
         Build a standard React Flow edge.
         Always uses animatedEdge type.
         """
-        edge_id = f"edge-{source_arn[-8:]}-{target_arn[-8:]}"
+        uid = hashlib.sha256(f"{source_arn}|{label}|{target_arn}".encode()).hexdigest()[:8]
+        edge_id = f"edge-{uid}"
         return {
             "id": edge_id,
             "source": source_arn,

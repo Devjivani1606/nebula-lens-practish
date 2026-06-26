@@ -67,15 +67,17 @@ class SnapshotEngine:
 
         # Save all edges as relationships
         for edge in all_edges:
+            edge_data = edge.get('data', {})
             relationship = Relationship(
                 snapshot_id=snapshot.id,
                 edge_id=edge['id'],
                 source_arn=edge['source'],
                 target_arn=edge['target'],
-                edge_type=edge['type'],
-                label=edge.get('label', ''),
-                confidence=edge.get('confidence'),
-                evidence=edge.get('evidence')
+                edge_type=edge.get('type', 'animatedEdge'),
+                label=edge_data.get('label', ''),
+                confidence=edge_data.get('confidence'),
+                evidence=edge_data.get('evidence'),
+                category=edge_data.get('category', 'runtime')
             )
             db.add(relationship)
 
