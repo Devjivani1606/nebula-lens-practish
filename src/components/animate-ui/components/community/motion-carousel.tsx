@@ -275,7 +275,6 @@ function DotButton({ selected = false, label, onClick }: { selected?: boolean; l
         animate={{
           opacity: selected ? 1 : 0,
           scale: selected ? 1 : 0,
-          filter: selected ? 'blur(0px)' : 'blur(4px)',
         }}
         transition={transition}
       >
