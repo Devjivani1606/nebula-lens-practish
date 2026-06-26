@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useEffect } from 'react';
 import { useCanvasStore } from '../store/useCanvasStore';
 import { useLayerStore } from '../store/layerStore';
 import { selectLayerStack } from '../store/selectors/layerSelectors';
@@ -11,6 +11,17 @@ export function useLayerEngine() {
 
   const layers = useLayerStore((state) => state.layers);
   const layerStates = useLayerStore((state) => state.layerStates);
+
+  useEffect(() => {
+    if (layerStates['iam_permissions'] === undefined) {
+      useLayerStore.setState((state) => ({
+        layerStates: {
+          ...state.layerStates,
+          'iam_permissions': { enabled: false, opacity: 100, locked: false }
+        }
+      }));
+    }
+  }, [layerStates]);
 
   const visibleNodes = useMemo(() => {
     const layerStack = selectLayerStack({ layers, layerStates });
@@ -32,8 +43,13 @@ export function useLayerEngine() {
   }, [nodes, layers, layerStates]); // Only recompute when nodes array OR layer definitions/states change
 
   const visibleEdges = useMemo(() => {
-    return computeVisibleEdges(edges, visibleNodes);
-  }, [edges, visibleNodes]); // Only recompute when edges array OR visibleNodes change
+    const iamEnabled = layerStates['iam_permissions']?.enabled ?? false;
+    const baseEdges = iamEnabled 
+      ? edges 
+      : edges.filter(edge => edge.data?.category !== 'iam_permission');
+
+    return computeVisibleEdges(baseEdges, visibleNodes);
+  }, [edges, visibleNodes, layerStates]); // Only recompute when edges array OR visibleNodes change
 
   return { visibleNodes, visibleEdges };
 }

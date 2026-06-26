@@ -384,7 +384,7 @@ export function convertToElkGraph(
       continue;
     }
 
-    const labelText = typeof edge.label === 'string' ? edge.label : null;
+    const labelText = typeof edge.data?.label === 'string' ? edge.data.label : null;
     const elkEdge: ElkExtendedEdge = {
       id: edge.id,
       sources: [edge.source],
