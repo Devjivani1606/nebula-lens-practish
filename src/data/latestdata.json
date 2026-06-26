@@ -597,9 +597,9 @@
       "source": "api-gateway-ingress",
       "target": "sqs-job-queue",
       "type": "animatedEdge",
-      "label": "POST /jobs",
       "data": {
-        "transferCost": 4
+        "label": "POST /jobs",
+        "category": "runtime"
       },
       "networkMeta": {
         "direction": "outbound",
@@ -611,9 +611,9 @@
       "source": "sqs-job-queue",
       "target": "lambda-processor",
       "type": "animatedEdge",
-      "label": "Triggers Event",
       "data": {
-        "transferCost": 12
+        "label": "Triggers Event",
+        "category": "runtime"
       },
       "networkMeta": {
         "direction": "outbound",
@@ -625,9 +625,9 @@
       "source": "lambda-processor",
       "target": "db-mongo-cluster",
       "type": "animatedEdge",
-      "label": "Reads/Writes State",
       "data": {
-        "transferCost": 145
+        "label": "Reads/Writes State",
+        "category": "runtime"
       },
       "networkMeta": {
         "direction": "outbound",
@@ -639,9 +639,9 @@
       "source": "lambda-processor",
       "target": "s3-asset-bucket",
       "type": "animatedEdge",
-      "label": "Stores Assets",
       "data": {
-        "transferCost": 45
+        "label": "Stores Assets",
+        "category": "runtime"
       },
       "networkMeta": {
         "direction": "outbound",
@@ -653,140 +653,200 @@
       "source": "iam-role-main",
       "target": "ecs-service",
       "type": "animatedEdge",
-      "label": "Assumes Role"
+      "data": {
+        "label": "Assumes Role",
+        "category": "iam_permission"
+      }
     },
     {
       "id": "edge-iam-eks",
       "source": "iam-role-main",
       "target": "eks-cluster",
       "type": "animatedEdge",
-      "label": "Assumes Role"
+      "data": {
+        "label": "Assumes Role",
+        "category": "iam_permission"
+      }
     },
     {
       "id": "edge-iam-lambda",
       "source": "iam-role-main",
       "target": "lambda-processor",
       "type": "animatedEdge",
-      "label": "Assumes Role"
+      "data": {
+        "label": "Assumes Role",
+        "category": "iam_permission"
+      }
     },
     {
       "id": "edge-iam-sf",
       "source": "iam-role-main",
       "target": "step-functions-sm",
       "type": "animatedEdge",
-      "label": "Assumes Role"
+      "data": {
+        "label": "Assumes Role",
+        "category": "iam_permission"
+      }
     },
     {
       "id": "edge-sg-ecs",
       "source": "sg-web",
       "target": "ecs-service",
       "type": "animatedEdge",
-      "label": "Secures"
+      "data": {
+        "label": "Secures",
+        "category": "runtime"
+      }
     },
     {
       "id": "edge-sg-alb",
       "source": "sg-web",
       "target": "alb-main",
       "type": "animatedEdge",
-      "label": "Secures"
+      "data": {
+        "label": "Secures",
+        "category": "runtime"
+      }
     },
     {
       "id": "edge-eni-ecs",
       "source": "eni-web",
       "target": "ecs-service",
       "type": "animatedEdge",
-      "label": "Attached To"
+      "data": {
+        "label": "Attached To",
+        "category": "runtime"
+      }
     },
     {
       "id": "edge-cf-alb",
       "source": "cloudfront-dist",
       "target": "alb-main",
       "type": "animatedEdge",
-      "label": "Forwards To"
+      "data": {
+        "label": "Forwards To",
+        "category": "runtime"
+      }
     },
     {
       "id": "edge-cf-api",
       "source": "cloudfront-dist",
       "target": "api-gateway-ingress",
       "type": "animatedEdge",
-      "label": "Forwards To"
+      "data": {
+        "label": "Forwards To",
+        "category": "runtime"
+      }
     },
     {
       "id": "edge-alb-ecs",
       "source": "alb-main",
       "target": "ecs-service",
       "type": "animatedEdge",
-      "label": "Routes Traffic"
+      "data": {
+        "label": "Routes Traffic",
+        "category": "runtime"
+      }
     },
     {
       "id": "edge-sns-sqs",
       "source": "sns-topic",
       "target": "sqs-job-queue",
       "type": "animatedEdge",
-      "label": "Publishes"
+      "data": {
+        "label": "Publishes",
+        "category": "runtime"
+      }
     },
     {
       "id": "edge-eb-lambda",
       "source": "event-bridge-rule",
       "target": "lambda-processor",
       "type": "animatedEdge",
-      "label": "Triggers"
+      "data": {
+        "label": "Triggers",
+        "category": "runtime"
+      }
     },
     {
       "id": "edge-eb-sf",
       "source": "event-bridge-rule",
       "target": "step-functions-sm",
       "type": "animatedEdge",
-      "label": "Triggers"
+      "data": {
+        "label": "Triggers",
+        "category": "runtime"
+      }
     },
     {
       "id": "edge-ecs-dynamo",
       "source": "ecs-service",
       "target": "dynamodb-table",
       "type": "animatedEdge",
-      "label": "Reads/Writes"
+      "data": {
+        "label": "Reads/Writes",
+        "category": "runtime"
+      }
     },
     {
       "id": "edge-ecs-rds",
       "source": "ecs-service",
       "target": "rds-instance",
       "type": "animatedEdge",
-      "label": "Reads/Writes"
+      "data": {
+        "label": "Reads/Writes",
+        "category": "runtime"
+      }
     },
     {
       "id": "edge-eks-rds",
       "source": "eks-cluster",
       "target": "rds-instance",
       "type": "animatedEdge",
-      "label": "Reads/Writes"
+      "data": {
+        "label": "Reads/Writes",
+        "category": "runtime"
+      }
     },
     {
       "id": "edge-sf-lambda",
       "source": "step-functions-sm",
       "target": "lambda-processor",
       "type": "animatedEdge",
-      "label": "Invokes"
+      "data": {
+        "label": "Invokes",
+        "category": "runtime"
+      }
     },
     {
       "id": "edge-sf-sns",
       "source": "step-functions-sm",
       "target": "sns-topic",
       "type": "animatedEdge",
-      "label": "Publishes"
+      "data": {
+        "label": "Publishes",
+        "category": "runtime"
+      }
     },
     {
       "id": "edge-sm-ecs",
       "source": "secrets-manager-secret",
       "target": "ecs-service",
       "type": "animatedEdge",
-      "label": "Reads Secret"
+      "data": {
+        "label": "Reads Secret",
+        "category": "runtime"
+      }
     },
     {
       "id": "edge-sm-rds",
       "source": "secrets-manager-secret",
       "target": "rds-instance",
       "type": "animatedEdge",
-      "label": "Manages Creds"
+      "data": {
+        "label": "Manages Creds",
+        "category": "runtime"
+      }
     }
   ]
 }
