@@ -115,6 +115,34 @@ export default function LayerPanel() {
                 <LayerGroup title="Custom Layers" items={customLayers} onToggle={toggleLayer} />
               )}
               
+              <div className="space-y-1">
+                <button className="w-full flex items-center gap-1.5 px-2 py-1 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider hover:text-slate-800 dark:hover:text-slate-200 transition-colors cursor-default">
+                  <CaretDown className="w-3.5 h-3.5" />
+                  Edge Filters (1)
+                </button>
+                <div className="px-1">
+                  <LayerItem 
+                    item={{
+                      definition: {
+                        id: 'iam_permissions',
+                        label: 'IAM Permissions',
+                        description: 'Show IAM-derived access paths',
+                        icon: 'shield',
+                        color: '#eab308',
+                        isSystem: true,
+                        isEnabled: false,
+                        blendMode: 'additive',
+                        priority: 50,
+                        tags: ['security', 'edge'],
+                        rules: { operator: 'OR', rules: [] }
+                      },
+                      state: layerStates['iam_permissions'] || { enabled: false, opacity: 100, locked: false }
+                    }} 
+                    onToggle={toggleLayer} 
+                  />
+                </div>
+              </div>
+              
               {filteredLayers.length === 0 && (
                 <div className="p-6 text-center text-slate-500 dark:text-slate-400 text-sm flex flex-col items-center">
                   <EyeSlash className="w-8 h-8 mb-2 opacity-20" />
