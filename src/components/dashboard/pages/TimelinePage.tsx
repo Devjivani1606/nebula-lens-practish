@@ -409,9 +409,9 @@ export default function TimelinePage() {
                       </div>
                     ) : (
                       <div className="flex flex-col gap-3">
-                        {diffItems.map((item) => (
+                        {diffItems.map((item, idx) => (
                           <div
-                            key={item.id}
+                            key={item.id || `${item.resource_arn}-${idx}`}
                             className={`p-3 rounded-xl border flex flex-col gap-1.5 ${
                               item.change_type === "added"
                                 ? "bg-emerald-500/5 border-emerald-500/20 text-emerald-400"
