@@ -15,9 +15,12 @@ interface DbStats {
   normalized_nodes: number;
   normalized_edges: number;
   scan_jobs: number;
+  users: number;
+  service_scans: number;
+  snapshot_diffs: number;
 }
 
-type TableTab = "accounts" | "snapshots" | "nodes" | "edges" | "resources" | "relationships" | "jobs";
+type TableTab = "accounts" | "snapshots" | "nodes" | "edges" | "resources" | "relationships" | "jobs" | "users" | "service_scans" | "snapshot_diffs";
 
 export default function DbExplorerPage() {
   const [stats, setStats] = useState<DbStats | null>(null);
@@ -188,7 +191,7 @@ export default function DbExplorerPage() {
         {/* Tab Controls & Search */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-[var(--gl-border)] pb-2 mt-2">
           <div className="flex flex-wrap gap-2 p-1 bg-[var(--gl-bg-muted)] border border-[var(--gl-border)] rounded-lg">
-            {(["accounts", "snapshots", "nodes", "edges", "resources", "relationships", "jobs"] as TableTab[]).map((tab) => (
+            {(["accounts", "snapshots", "nodes", "edges", "resources", "relationships", "jobs", "users", "service_scans", "snapshot_diffs"] as TableTab[]).map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
@@ -292,6 +295,36 @@ export default function DbExplorerPage() {
                         <th className="p-4">Status</th>
                         <th className="p-4">Triggered By</th>
                         <th className="p-4">Created At</th>
+                      </>
+                    )}
+                    {activeTab === "users" && (
+                      <>
+                        <th className="p-4">ID</th>
+                        <th className="p-4">Email</th>
+                        <th className="p-4">Name</th>
+                        <th className="p-4">Auth0 ID</th>
+                        <th className="p-4">Created At</th>
+                      </>
+                    )}
+                    {activeTab === "service_scans" && (
+                      <>
+                        <th className="p-4">ID</th>
+                        <th className="p-4">Job ID</th>
+                        <th className="p-4">Service</th>
+                        <th className="p-4">Region</th>
+                        <th className="p-4">Status</th>
+                        <th className="p-4">Found</th>
+                        <th className="p-4">Error</th>
+                      </>
+                    )}
+                    {activeTab === "snapshot_diffs" && (
+                      <>
+                        <th className="p-4">ID</th>
+                        <th className="p-4">From Snap</th>
+                        <th className="p-4">To Snap</th>
+                        <th className="p-4">Change Type</th>
+                        <th className="p-4">Resource ARN</th>
+                        <th className="p-4">Resource Type</th>
                       </>
                     )}
                     <th className="p-4 text-right">Actions</th>
@@ -450,6 +483,62 @@ export default function DbExplorerPage() {
                           </td>
                           <td className="p-4 font-sans">{row.triggered_by || "scheduler"}</td>
                           <td className="p-4 font-sans">{row.created_at ? new Date(row.created_at).toLocaleString() : "N/A"}</td>
+                        </>
+                      )}
+                      {activeTab === "users" && (
+                        <>
+                          <td className="p-4">{row.id ? row.id.substring(0, 8) : "N/A"}...</td>
+                          <td className="p-4 font-bold text-[var(--gl-text-primary)]">{row.email}</td>
+                          <td className="p-4 font-sans font-medium">{row.name || "N/A"}</td>
+                          <td className="p-4 truncate max-w-[150px]">{row.auth0_id || "N/A"}</td>
+                          <td className="p-4 font-sans">{row.created_at ? new Date(row.created_at).toLocaleString() : "N/A"}</td>
+                        </>
+                      )}
+                      {activeTab === "service_scans" && (
+                        <>
+                          <td className="p-4">{row.id ? row.id.substring(0, 8) : "N/A"}...</td>
+                          <td className="p-4">{row.scan_job_id ? row.scan_job_id.substring(0, 8) : "N/A"}...</td>
+                          <td className="p-4">
+                            <span className="px-2 py-0.5 rounded-md text-[9px] font-bold bg-indigo-500/10 text-indigo-400 uppercase">
+                              {row.service || "N/A"}
+                            </span>
+                          </td>
+                          <td className="p-4">{row.region}</td>
+                          <td className="p-4">
+                            <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold border ${
+                              row.status === "success"
+                                ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                                : row.status === "failed"
+                                ? "bg-red-500/10 text-red-400 border-red-500/20"
+                                : "bg-amber-500/10 text-amber-400 border-amber-500/20"
+                            }`}>
+                              {row.status}
+                            </span>
+                          </td>
+                          <td className="p-4 font-bold">{row.resources_found}</td>
+                          <td className="p-4 font-sans max-w-[200px] truncate" title={row.error_message}>{row.error_message || "N/A"}</td>
+                        </>
+                      )}
+                      {activeTab === "snapshot_diffs" && (
+                        <>
+                          <td className="p-4">{row.id ? row.id.substring(0, 8) : "N/A"}...</td>
+                          <td className="p-4">{row.from_snapshot ? row.from_snapshot.substring(0, 8) : "N/A"}...</td>
+                          <td className="p-4">{row.to_snapshot ? row.to_snapshot.substring(0, 8) : "N/A"}...</td>
+                          <td className="p-4">
+                            <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold border uppercase tracking-wider ${
+                              row.change_type === "added"
+                                ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                                : row.change_type === "removed"
+                                ? "bg-red-500/10 text-red-400 border-red-500/20"
+                                : "bg-amber-500/10 text-amber-400 border-amber-500/20"
+                            }`}>
+                              {row.change_type}
+                            </span>
+                          </td>
+                          <td className="p-4 max-w-[250px] truncate font-mono" title={row.resource_arn}>
+                            {safeLastSegment(row.resource_arn)}
+                          </td>
+                          <td className="p-4 font-sans font-medium">{row.resource_type || "N/A"}</td>
                         </>
                       )}
 

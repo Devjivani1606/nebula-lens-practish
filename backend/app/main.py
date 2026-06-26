@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from app.database import engine, Base
-from app.routers import aws_accounts, graph, normalize, analyze, db_inspector
+from app.routers import aws_accounts, graph, normalize, analyze, db_inspector, history
 from app.models.models import ScanJob, ScanStatus
 from app.database import SessionLocal
 # pyrefly: ignore [missing-import]
@@ -47,6 +47,8 @@ app.include_router(graph.router)
 app.include_router(normalize.router)
 app.include_router(analyze.router)
 app.include_router(db_inspector.router)
+app.include_router(history.router)
+
 
 
 def process_pending_scans():

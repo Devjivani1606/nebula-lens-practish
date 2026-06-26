@@ -1078,14 +1078,14 @@ class NormalizationEngine:
         except:
             states = {}
         metrics = {"states": states, "region": region}
-        node = self.build_node(arn, "stepfunctionsNode", name, "stepfunctions", region, account_id, metrics)
+        node = self.build_node(arn, "stepFunctionsNode", name, "stepfunctions", region, account_id, metrics)
         return {"node": node, "resource_arn": arn, "resource_name": name, "raw_id": arn}
 
     def normalize_secretsmanager(self, secret, region, account_id):
         arn = secret['ARN']
         name = secret['Name']
         metrics = {"rotationLambdaARN": secret.get('RotationLambdaARN', ''), "region": region}
-        node = self.build_node(arn, "secretsmanagerNode", name, "secretsmanager", region, account_id, metrics)
+        node = self.build_node(arn, "secretsManagerNode", name, "secretsmanager", region, account_id, metrics)
         return {"node": node, "resource_arn": arn, "resource_name": name, "raw_id": arn}
 
     def normalize_eks(self, cluster, nodegroup_arns, region, account_id):

@@ -31,6 +31,9 @@ from app.engines.costs.sns_cost          import SNSCostCalculator
 from app.engines.costs.dynamodb_cost     import DynamoDBCostCalculator
 from app.engines.costs.cloudfront_cost   import CloudFrontCostCalculator
 from app.engines.costs.ecs_cost          import ECSCostCalculator
+from app.engines.costs.eks_cost          import EKSCostCalculator
+from app.engines.costs.secretsmanager_cost import SecretsManagerCostCalculator
+from app.engines.costs.stepfunctions_cost import StepFunctionsCostCalculator
 
 logger = logging.getLogger(__name__)
 
@@ -68,6 +71,9 @@ class CostEngine:
             DynamoDBCostCalculator(),
             CloudFrontCostCalculator(),
             ECSCostCalculator(),
+            EKSCostCalculator(),
+            SecretsManagerCostCalculator(),
+            StepFunctionsCostCalculator(),
         ]
         for calc in builtins:
             self.register(calc)

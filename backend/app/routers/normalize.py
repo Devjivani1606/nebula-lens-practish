@@ -118,7 +118,8 @@ def normalize_account(
         # Step 2: Fetch all supported resources
         SUPPORTED_SERVICES = {
             "vpc", "subnet", "ec2", "lambda", "rds", "sqs", "s3",
-            "apigateway", "eventbridge", "dynamodb", "ecs", "sns", "cloudfront"
+            "apigateway", "eventbridge", "dynamodb", "ecs", "sns", "cloudfront",
+            "eks", "secretsmanager", "stepfunctions"
         }
 
         resources = db.query(Resource).filter(

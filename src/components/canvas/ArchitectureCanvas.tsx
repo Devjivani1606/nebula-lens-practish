@@ -106,7 +106,9 @@ export default function ArchitectureCanvas() {
     fetchInfrastructure,
     isLoading,
     isInspectorPinned,
-    isTourActive
+    isTourActive,
+    activeSnapshotId,
+    setActiveSnapshotId
   } = useCanvasStore();
 
   const { fitView, setCenter, getNode } = useReactFlow();
@@ -400,6 +402,22 @@ export default function ArchitectureCanvas() {
                 Redo ↪
               </Button>
             </Panel>
+            
+            {activeSnapshotId && (
+              <Panel position="top-center" className="bg-amber-500/10 dark:bg-amber-500/20 border border-amber-500/30 dark:border-amber-500/50 text-amber-600 dark:text-amber-400 font-medium px-4 py-2 rounded-xl backdrop-blur-md flex items-center gap-3 shadow-lg z-[100] text-xs">
+                <span>Viewing Historical Version ({nodes.length} resources)</span>
+                <Button
+                  size="sm"
+                  className="bg-amber-500 hover:bg-amber-600 text-white font-bold h-7 px-3 text-[10px]"
+                  onClick={() => {
+                    setActiveSnapshotId(null);
+                    fetchInfrastructure(null);
+                  }}
+                >
+                  Reset to Live
+                </Button>
+              </Panel>
+            )}
 
             <Panel position="top-left" className="mt-16 z-50">
               <LayerPanel />
