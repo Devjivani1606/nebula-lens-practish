@@ -1,7 +1,7 @@
 /**
  * src/lib/layout/useAutoLayout.ts
  * ─────────────────────────────────────────────────────────────────────────────
- * React hook that wraps runLayout() with:
+ * React hook that wraps runGravityLayout() with:
  *   - Loading state (isLayouting)
  *   - Node/edge count guard (don't re-run if nothing changed)
  *   - Depth map computation for staggered animation (returned to caller)
@@ -16,10 +16,7 @@
 
 import { useState, useCallback, useRef } from 'react';
 import type { Node, Edge } from '@xyflow/react';
-import { runLayout } from './elkLayout';
-
-// ─── Container type set (must match elkLayout.ts) ─────────────────────────────
-const CONTAINER_TYPES = new Set(['VPC', 'AvailabilityZone', 'Subnet']);
+import { runGravityLayout } from './gravityLayout';
 
 /**
  * computeDepthMap
@@ -36,7 +33,7 @@ const CONTAINER_TYPES = new Set(['VPC', 'AvailabilityZone', 'Subnet']);
  */
 export function computeDepthMap(nodes: Node[]): Map<string, number> {
   const parentOf = new Map<string, string | null>(
-    nodes.map((n) => [n.id, (n as any).parentId ?? null])
+    nodes.map((n) => [n.id, (n as any).parentId ?? (n as any).parentNode ?? null])
   );
 
   const depthCache = new Map<string, number>();
@@ -81,7 +78,7 @@ export interface AutoLayoutResult {
   triggerLayout: (
     nodes: Node[],
     edges: Edge[],
-    options?: { force?: boolean }
+    options?: { force?: boolean; excludeCategories?: string[] }
   ) => Promise<{ nodes: Node[]; depthMap: Map<string, number> } | null>;
 }
 
@@ -95,12 +92,16 @@ export function useAutoLayout(): AutoLayoutResult {
   const triggerLayout = useCallback(async (
     nodes: Node[],
     edges: Edge[],
-    options: { force?: boolean } = {}
+    options: { force?: boolean; excludeCategories?: string[] } = {}
   ): Promise<{ nodes: Node[]; depthMap: Map<string, number> } | null> => {
     // Guard: don't stack concurrent layout runs
     if (runningRef.current) return null;
 
     // Guard: skip if structure hasn't changed (unless forced)
+    // Note: IAM toggle changes edges but we still skip re-layout here because
+    // runGravityLayout internally filters IAM edges. The hash includes all edges
+    // so an IAM-only edge toggle WILL change the hash — but since the structural
+    // graph is identical, ELK would produce the same result anyway.
     const hash = nodeEdgeHash(nodes, edges);
     if (!options.force && hash === lastHashRef.current) return null;
 
@@ -108,7 +109,7 @@ export function useAutoLayout(): AutoLayoutResult {
     setIsLayouting(true);
 
     try {
-      const result = await runLayout(nodes, edges);
+      const result = await runGravityLayout(nodes, edges);
       lastHashRef.current = hash;
 
       // Compute depth map on the *original* nodes (parentId relationships
@@ -117,7 +118,7 @@ export function useAutoLayout(): AutoLayoutResult {
 
       return { nodes: result.nodes, depthMap };
     } catch (err) {
-      console.error('[useAutoLayout] ELK layout failed:', err);
+      console.error('[useAutoLayout] Layout failed:', err);
       return null;
     } finally {
       runningRef.current = false;

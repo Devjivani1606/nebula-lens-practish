@@ -440,3 +440,18 @@ input[type='range'].gl-scrubber::-webkit-slider-thumb:active {
   transform: scale(1.2);
   box-shadow: 0 0 0 5px rgba(59, 130, 246, 0.3), 0 2px 12px rgba(0, 0, 0, 0.5);
 }
+
+/* --- ADDON 4: Ghost Group Interaction Suppression --- */
+.react-flow__node-group[style*="pointer-events: none"] {
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+.react-flow__node-group[style*="pointer-events: none"]:hover {
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+.react-flow__node-group[style*="pointer-events: none"] .react-flow__handle {
+  display: none !important;
+}

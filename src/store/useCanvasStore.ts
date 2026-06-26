@@ -196,9 +196,15 @@ export const useCanvasStore = create<CanvasState>()(
           if (!response.ok) throw new Error('Failed to capture cloud layout topology');
           const data = await response.json();
 
+          // ADDON: Validate parent references and purge ghost groups before setting state
+          const { validateParentRefs, purgeGhostGroups, normalizeEdges } = await import('../lib/layout/nodeUtils');
+          const safeNodes = validateParentRefs(data.nodes);
+          const cleanNodes = purgeGhostGroups(safeNodes, data.edges);
+          const cleanEdges = normalizeEdges(data.edges);
+
           set({
-            nodes: data.nodes,
-            edges: data.edges,
+            nodes: cleanNodes as CloudNode[],
+            edges: cleanEdges as CloudEdge[],
             isLoading: false
           });
         } catch (error) {

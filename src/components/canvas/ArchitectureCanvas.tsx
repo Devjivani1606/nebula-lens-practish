@@ -247,7 +247,8 @@ export default function ArchitectureCanvas() {
       currentNodes.map((n) => [n.id, { x: n.position.x, y: n.position.y }])
     );
 
-    const result = await triggerLayout(currentNodes, currentEdges, opts);
+    const layoutOpts = { ...opts, excludeCategories: ['iam_permission'] };
+    const result = await triggerLayout(currentNodes, currentEdges, layoutOpts);
     if (!result) return; // skipped (no change) or failed
 
     const { nodes: layoutedNodes, depthMap } = result;
@@ -266,14 +267,14 @@ export default function ArchitectureCanvas() {
     );
 
     // Apply layouted nodes as the target state in the store
-    useCanvasStore.setState({ nodes: layoutedNodes });
+    useCanvasStore.setState({ nodes: layoutedNodes as any });
 
     // Animate from old positions → ELK positions with depth stagger
     // Duration 500ms + easeInOut (springEase approximates cubic-bezier(0.4,0,0.2,1))
     const ELK_ANIMATION_DURATION = 500;
     animateTransition(
       oldPositions,
-      layoutedNodes,
+      layoutedNodes as any,
       delayMap,
       ELK_ANIMATION_DURATION,
       // onComplete: sequence fitView to avoid conflict with inspector CSS transition
@@ -369,10 +370,21 @@ export default function ArchitectureCanvas() {
             onConnect={onConnect}
             fitView
             minZoom={0.3}
-            maxZoom={2.0}
-            defaultEdgeOptions={{ type: 'animatedEdge' }}
-            onNodeClick={(event, node) => setSelectedNodeId(node.id)}
+            nodesDraggable={true}
+            nodesConnectable={false}
+            elementsSelectable={true}
+            defaultEdgeOptions={{
+              type: 'smoothstep',
+              style: { strokeWidth: 1.5 },
+              pathOptions: { borderRadius: 8 },
+            } as any}
+            onNodeClick={(_, node) => {
+              // Container/group nodes never open the inspector panel
+              if (node.type === 'group' || node.draggable === false) return;
+              setSelectedNodeId(node.id);
+            }}
             onPaneClick={() => setSelectedNodeId(null)}
+            proOptions={{ hideAttribution: true }}
           >
 
             {/* Dynamic dot colors based on the theme! */}
