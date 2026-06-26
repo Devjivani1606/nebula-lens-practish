@@ -4,12 +4,18 @@ from sqlalchemy.orm import Session
 from sqlalchemy import or_
 from uuid import UUID as UUIDClass
 from app.database import get_db
-from app.models.models import AwsAccount, Snapshot, NormalizedNode, NormalizedEdge, SnapshotDiff, ChangeType
+from app.models.models import (
+    AwsAccount, Snapshot, NormalizedNode, NormalizedEdge,
+    SnapshotDiff, ChangeType, Resource, Relationship
+)
 from app.engines.cost_engine import cost_engine
 import logging
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/history", tags=["History"])
+
+# Process-level cache for snapshot stats to prevent redundant calculations
+HISTORY_STATS_CACHE = {}
 
 
 # Helper to convert NormalizedNode to the dict format expected by cost_engine and React Flow
@@ -28,6 +34,27 @@ def row_to_node_dict(row: NormalizedNode) -> Dict[str, Any]:
             "insights": row.insights,
             "metrics": row.metrics or {},
             "tags": row.tags or {}
+        }
+    }
+
+
+# Helper to convert raw Resource to the React Flow node format
+def resource_row_to_node_dict(row: Resource) -> Dict[str, Any]:
+    meta = row.meta_data or {}
+    return {
+        "id": row.node_id,
+        "type": row.node_type,
+        "parentId": row.parent_node_id,
+        "position": {"x": 0, "y": 0},
+        "data": {
+            "name": row.resource_name,
+            "service": row.service,
+            "region": row.region,
+            "account_id": row.account_id,
+            "resource_arn": row.resource_arn,
+            "insights": meta.get("insights", ""),
+            "metrics": meta.get("metrics", {}),
+            "tags": meta.get("tags", {})
         }
     }
 
@@ -71,9 +98,30 @@ def get_snapshot_history(account_id: Optional[str] = None, db: Session = Depends
 
         versions_data = []
         for snap in snapshots:
-            # Fetch nodes to calculate cost and resource count
+            snap_id_str = str(snap.id)
+
+            # Check cache first to avoid heavy cost calculations on every load
+            if snap_id_str in HISTORY_STATS_CACHE:
+                cached_data = HISTORY_STATS_CACHE[snap_id_str]
+                versions_data.append({
+                    "version_id": snap_id_str,
+                    "version_number": snap.version_number,
+                    "label": snap.label or f"Version {snap.version_number}",
+                    "is_latest": snap.is_latest,
+                    "created_at": snap.created_at.isoformat() if snap.created_at else None,
+                    "summary": cached_data["summary"],
+                    "costs": cached_data["costs"],
+                    "changes": cached_data["changes"]
+                })
+                continue
+
+            # Fetch nodes to calculate cost and resource count (try normalized first, fall back to raw resources)
             nodes_rows = db.query(NormalizedNode).filter(NormalizedNode.snapshot_id == snap.id).all()
-            nodes_dicts = [row_to_node_dict(n) for n in nodes_rows]
+            if nodes_rows:
+                nodes_dicts = [row_to_node_dict(n) for n in nodes_rows]
+            else:
+                resource_rows = db.query(Resource).filter(Resource.snapshot_id == snap.id).all()
+                nodes_dicts = [resource_row_to_node_dict(r) for r in resource_rows]
             
             # Run offline cost calculation using fallback prices
             cost_results = cost_engine.calculate_all(nodes_dicts, {})
@@ -101,12 +149,7 @@ def get_snapshot_history(account_id: Optional[str] = None, db: Session = Depends
                 SnapshotDiff.change_type == ChangeType.modified
             ).count()
 
-            versions_data.append({
-                "version_id": str(snap.id),
-                "version_number": snap.version_number,
-                "label": snap.label or f"Version {snap.version_number}",
-                "is_latest": snap.is_latest,
-                "created_at": snap.created_at.isoformat() if snap.created_at else None,
+            stats = {
                 "summary": {
                     "total_resources": len(nodes_dicts),
                 },
@@ -119,6 +162,17 @@ def get_snapshot_history(account_id: Optional[str] = None, db: Session = Depends
                     "removed": removed_count,
                     "modified": modified_count
                 }
+            }
+            # Cache computed stats for this immutable snapshot
+            HISTORY_STATS_CACHE[snap_id_str] = stats
+
+            versions_data.append({
+                "version_id": snap_id_str,
+                "version_number": snap.version_number,
+                "label": snap.label or f"Version {snap.version_number}",
+                "is_latest": snap.is_latest,
+                "created_at": snap.created_at.isoformat() if snap.created_at else None,
+                **stats
             })
 
         return {
@@ -147,21 +201,38 @@ def get_snapshot_graph(snapshot_id: str, db: Session = Depends(get_db)):
 
     # Fetch nodes
     nodes_rows = db.query(NormalizedNode).filter(NormalizedNode.snapshot_id == snapshot.id).all()
-    nodes_dicts = [row_to_node_dict(n) for n in nodes_rows]
+    if nodes_rows:
+        nodes_dicts = [row_to_node_dict(n) for n in nodes_rows]
+    else:
+        resource_rows = db.query(Resource).filter(Resource.snapshot_id == snapshot.id).all()
+        nodes_dicts = [resource_row_to_node_dict(r) for r in resource_rows]
 
     # Fetch edges
     edges_rows = db.query(NormalizedEdge).filter(NormalizedEdge.snapshot_id == snapshot.id).all()
     edges_dicts = []
-    for e in edges_rows:
-        edges_dicts.append({
-            "id": e.edge_id,
-            "source": e.source_arn,
-            "target": e.target_arn,
-            "type": e.edge_type,
-            "label": e.label,
-            "confidence": e.confidence,
-            "evidence": e.evidence
-        })
+    if edges_rows:
+        for e in edges_rows:
+            edges_dicts.append({
+                "id": e.edge_id,
+                "source": e.source_arn,
+                "target": e.target_arn,
+                "type": e.edge_type,
+                "label": e.label,
+                "confidence": e.confidence,
+                "evidence": e.evidence
+            })
+    else:
+        relationships = db.query(Relationship).filter(Relationship.snapshot_id == snapshot.id).all()
+        for r in relationships:
+            edges_dicts.append({
+                "id": r.edge_id,
+                "source": r.source_arn,
+                "target": r.target_arn,
+                "type": r.edge_type,
+                "label": r.label,
+                "confidence": r.confidence,
+                "evidence": r.evidence
+            })
 
     # Run cost engine to enrich the returned nodes so the Canvas shows the correct cost lens values
     cost_results = cost_engine.calculate_all(nodes_dicts, {})
