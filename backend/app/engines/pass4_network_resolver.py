@@ -1,5 +1,6 @@
 from app.engines.pass4_network_mapper import Pass4NetworkMapper
 import logging
+import hashlib
 
 logger = logging.getLogger(__name__)
 
@@ -12,7 +13,7 @@ class Pass4NetworkTopologyResolver:
     def __init__(self):
         pass
 
-    def _edge(self, source, target, label, confidence, evidence_reason, matched_on, rule_name):
+    def _edge(self, source, target, label, confidence, evidence_reason, matched_on, rule_name, category="inferred"):
         evidence = {
             "source": "NETWORK_TOPOLOGY",
             "rule": rule_name,
@@ -20,14 +21,16 @@ class Pass4NetworkTopologyResolver:
             "confidence_reason": evidence_reason,
             "matched_on": matched_on
         }
+        uid = hashlib.sha256(f"{source}|{label}|{target}".encode()).hexdigest()[:8]
         return {
-            "id": f"edge-{source[-10:]}-{target[-10:]}",
+            "id": f"edge-{category}-{uid}",
             "source": source,
             "target": target,
             "type": "animatedEdge",
             "label": label,
             "confidence": confidence,
-            "evidence": [evidence]
+            "evidence": [evidence],
+            "category": category
         }
 
     def run_pass4(self, nodes):

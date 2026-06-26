@@ -1,3 +1,4 @@
+import hashlib
 import logging
 import boto3
 from typing import List, Dict, Any, Set
@@ -134,7 +135,7 @@ class RelationshipEngine:
                     lam_arn = self._strip_q(raw)
                     if lam_arn in node_by_arn:
                         edges.append(self._edge(
-                            apigw_arn, lam_arn, "invokes", 100, ["api_gateway_integration"]
+                            apigw_arn, lam_arn, "invokes", 100, ["api_gateway_integration"], category="runtime"
                         ))
 
         # [100] SQS → Lambda (event source mapping stored on lambda node)
@@ -143,7 +144,7 @@ class RelationshipEngine:
                 src = esm.get("eventSourceArn") or esm.get("EventSourceArn", "")
                 if src and src in node_by_arn:
                     edges.append(self._edge(
-                        src, lam_arn, "triggers", 100, ["event_source_mapping"]
+                        src, lam_arn, "triggers", 100, ["event_source_mapping"], category="runtime"
                     ))
 
         # [100] S3 → Lambda (bucket notification config)
@@ -153,7 +154,7 @@ class RelationshipEngine:
                 func_arn = self._strip_q(cfg.get("LambdaFunctionArn", ""))
                 if func_arn and func_arn in node_by_arn:
                     edges.append(self._edge(
-                        s3_arn, func_arn, "triggers", 100, ["s3_bucket_notification"]
+                        s3_arn, func_arn, "triggers", 100, ["s3_bucket_notification"], category="runtime"
                     ))
 
         # [100] EventBridge → Lambda / SQS (rule targets)
@@ -162,7 +163,7 @@ class RelationshipEngine:
                 tgt_arn = self._strip_q(tgt.get("Arn") or tgt.get("arn", ""))
                 if tgt_arn and tgt_arn in node_by_arn:
                     edges.append(self._edge(
-                        eb_arn, tgt_arn, "triggers", 100, ["eventbridge_rule_target"]
+                        eb_arn, tgt_arn, "triggers", 100, ["eventbridge_rule_target"], category="runtime"
                     ))
 
         # [100] SNS → Lambda / SQS (topic subscriptions stored on sns node)
@@ -171,7 +172,7 @@ class RelationshipEngine:
                 endpoint_arn = self._strip_q(endpoint_arn)
                 if endpoint_arn and endpoint_arn in node_by_arn:
                     edges.append(self._edge(
-                        sns_arn, endpoint_arn, "triggers", 100, ["sns_subscription"]
+                        sns_arn, endpoint_arn, "triggers", 100, ["sns_subscription"], category="runtime"
                     ))
 
         # [100] DynamoDB → Lambda (stream as event source mapping on lambda)
@@ -183,7 +184,7 @@ class RelationshipEngine:
                     table_arn = src.split("/stream/")[0] if "/stream/" in src else src
                     if table_arn in node_by_arn:
                         edges.append(self._edge(
-                            table_arn, lam_arn, "triggers", 100, ["dynamodb_stream_esm"]
+                            table_arn, lam_arn, "triggers", 100, ["dynamodb_stream_esm"], category="runtime"
                         ))
 
         # [90] CloudFront → S3 (origin domain name matches bucket)
@@ -192,7 +193,7 @@ class RelationshipEngine:
                 for s3_arn, _ in by_service.get("s3", []):
                     if bucket_name and s3_arn.endswith(f":::{bucket_name}"):
                         edges.append(self._edge(
-                            cf_arn, s3_arn, "serves_from", 90, ["cloudfront_s3_origin"]
+                            cf_arn, s3_arn, "serves_from", 90, ["cloudfront_s3_origin"], category="runtime"
                         ))
         # ── Step 2.5: Confidence engine — Pass 2 (Configuration Rules) ────────
         edges.extend(self._run_pass2_rules(node_by_arn, by_service, vpc_nodes_raw))
@@ -259,7 +260,7 @@ class RelationshipEngine:
                         break
                 if connected:
                     edges.append(self._edge(
-                        ec2_arn, rds_arn, "writes_to", 70, ["security_group_rule"]
+                        ec2_arn, rds_arn, "writes_to", 70, ["security_group_rule"], category="network"
                     ))
 
         # ── Step 4.5: Pass 4 Network Topology Inference ───────────────────────
@@ -271,28 +272,43 @@ class RelationshipEngine:
 
         # ── Step 5: Deduplicate ──────────────────────────────────────────────
         unique_map: Dict[tuple, dict] = {}
+        category_priority = {"runtime": 4, "network": 3, "inferred": 2, "iam_permission": 1}
         for e in edges:
-            key = (e["source"], e["target"])
+            e_data = e.get("data", e)
+            label = e_data.get("label", e.get("label", ""))
+            key = (e["source"], e["target"], label)
+
             if key not in unique_map:
                 e_copy = e.copy()
-                e_copy["labels"] = [e.get("label", "")]
-                if not isinstance(e_copy.get("evidence"), list):
-                    e_copy["evidence"] = [e_copy.get("evidence")] if e_copy.get("evidence") else []
+                # Ensure data dict exists for deep copy semantics on evidence
+                if "data" in e:
+                    e_copy["data"] = e["data"].copy()
+                
+                e_copy_data = e_copy.get("data", e_copy)
+                if not isinstance(e_copy_data.get("evidence"), list):
+                    e_copy_data["evidence"] = [e_copy_data.get("evidence")] if e_copy_data.get("evidence") else []
                 unique_map[key] = e_copy
             else:
                 existing = unique_map[key]
-                if e.get("label", "") not in existing["labels"]:
-                    existing["labels"].append(e.get("label", ""))
+                existing_data = existing.get("data", existing)
 
-                new_ev = e.get("evidence")
+                new_ev = e_data.get("evidence")
                 if isinstance(new_ev, list):
-                    existing["evidence"].extend(new_ev)
+                    existing_data["evidence"].extend(new_ev)
                 elif new_ev:
-                    existing["evidence"].append(new_ev)
+                    existing_data["evidence"].append(new_ev)
 
-                if e.get("confidence", 0) > existing.get("confidence", 0):
-                    existing["confidence"] = e.get("confidence", 0)
-                    existing["label"] = e.get("label", "")
+                if e_data.get("confidence", 0) > existing_data.get("confidence", 0):
+                    existing_data["confidence"] = e_data.get("confidence", 0)
+
+                # Only promote category when the incoming edge has strictly
+                # higher priority.  Use "" (→ priority 0) as the fallback so
+                # that an edge with a missing/unknown category never silently
+                # overwrites a correctly-set one (e.g. iam_permission → runtime).
+                e_cat = e_data.get("category", "")
+                ex_cat = existing_data.get("category", "")
+                if category_priority.get(e_cat, 0) > category_priority.get(ex_cat, 0):
+                    existing_data["category"] = e_cat
 
         unique = list(unique_map.values())
 
@@ -447,17 +463,22 @@ class RelationshipEngine:
         target: str,
         label: str,
         confidence: int,
-        evidence: Any
+        evidence: Any,
+        category: str = "runtime"
     ) -> dict:
-        """Build a standard React Flow edge dict."""
+        unique = f"{source}-{target}-{label}"
+        edge_id = "edge-" + hashlib.md5(unique.encode()).hexdigest()[:16]
         return {
-            "id": f"edge-{source[-10:]}-{target[-10:]}",
+            "id": edge_id,
             "source": source,
             "target": target,
             "type": "animatedEdge",
-            "label": label,
-            "confidence": confidence,
-            "evidence": evidence
+            "data": {
+                "label": label,
+                "confidence": confidence,
+                "evidence": evidence,
+                "category": category
+            }
         }
 
     def _m(self, node_result: dict) -> dict:
@@ -493,7 +514,7 @@ class RelationshipEngine:
             for tgt_arn, _ in by_service.get(svc, []):
                 if self._arn_ok(tgt_arn, permitted):
                     edges.append(self._edge(
-                        source_arn, tgt_arn, label, 80, ["iam_policy_permission"]
+                        source_arn, tgt_arn, label, 80, ["iam_policy_permission"], category="iam_permission"
                     ))
         return edges
 
