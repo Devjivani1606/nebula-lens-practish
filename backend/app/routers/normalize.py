@@ -197,7 +197,7 @@ def normalize_account(
         edges = []
         seen_edge_keys = set()
 
-        def make_edge(src, tgt, label, confidence, evidence, edge_id=None):
+        def make_edge(src, tgt, label, confidence, evidence, edge_id=None, category="runtime"):
             key = (src, tgt, label)
             if key in seen_edge_keys:
                 return
@@ -206,15 +206,25 @@ def normalize_account(
             if src not in arn_to_node or tgt not in arn_to_node:
                 return
             seen_edge_keys.add(key)
-            eid = edge_id or f"edge-{src[-10:]}-{tgt[-10:]}"
+
+            if edge_id:
+                eid = edge_id
+            else:
+                import hashlib
+                eid = edge_id if edge_id else "edge-" + hashlib.md5(
+                f"{src}-{tgt}-{label}".encode()).hexdigest()[:16]
+
             edges.append({
                 "id": eid,
                 "source": src,
                 "target": tgt,
                 "type": "animatedEdge",
-                "label": label,
-                "confidence": confidence,
-                "evidence": evidence
+                "data": {
+                    "label": label,
+                    "confidence": confidence,
+                    "evidence": evidence,
+                    "category": category
+                }
             })
 
         def strip_q(arn):
@@ -315,6 +325,26 @@ def normalize_account(
                 if func_arn:
                     _infer_node(func_arn, "lambda", "lambdaNode", func_arn.split(":")[-1], _parse_region(func_arn), {"runtime": "unknown"})
 
+
+
+        # Merge DB relationships
+        relationships = db.query(Relationship).filter(
+            Relationship.snapshot_id == latest_snapshot.id
+        ).all()
+        for rel in relationships:
+            try:
+                make_edge(
+                    rel.source_arn, rel.target_arn,
+                    rel.label or "", rel.confidence or 80,
+                    rel.evidence or ["db_relationship"],
+                    edge_id=rel.edge_id,
+                    category=rel.category or "runtime"
+                )
+            except Exception as e:
+                logger.error(f"Failed to merge DB edge: {str(e)}")
+                continue
+
+
         # Step 6: Build all edges
 
         # [100] SQS / DynamoDB stream → Lambda via ESM
@@ -325,9 +355,9 @@ def normalize_account(
                     continue
                 if ":dynamodb:" in src_arn:
                     table_arn = src_arn.split("/stream/")[0] if "/stream/" in src_arn else src_arn
-                    make_edge(table_arn, lam_arn, "triggers", 100, ["dynamodb_stream_esm"])
+                    make_edge(table_arn, lam_arn, "triggers", 100, ["dynamodb_stream_esm"], category="runtime")
                 else:
-                    make_edge(src_arn, lam_arn, "triggers", 100, ["event_source_mapping"])
+                    make_edge(src_arn, lam_arn, "triggers", 100, ["event_source_mapping"], category="runtime")
 
         # [100] S3 → Lambda via bucket notification
         for s3_arn, s3_node in by_service.get("s3", []):
@@ -335,7 +365,7 @@ def normalize_account(
             for cfg in notif.get("LambdaFunctionConfigurations", []):
                 func_arn = strip_q(cfg.get("LambdaFunctionArn", ""))
                 if func_arn:
-                    make_edge(s3_arn, func_arn, "triggers", 100, ["s3_bucket_notification"])
+                    make_edge(s3_arn, func_arn, "triggers", 100, ["s3_bucket_notification"], category="runtime")
 
         # [100] APIGateway → Lambda via integration URI
         for apigw_arn, apigw_node in by_service.get("apigateway", []):
@@ -343,28 +373,28 @@ def normalize_account(
                 if isinstance(uri, str) and "/functions/" in uri and "/invocations" in uri:
                     func_arn = strip_q(uri.split("/functions/")[1].split("/invocations")[0])
                     if func_arn:
-                        make_edge(apigw_arn, func_arn, "invokes", 100, ["api_gateway_integration"])
+                        make_edge(apigw_arn, func_arn, "invokes", 100, ["api_gateway_integration"], category="runtime")
 
         # [100] EventBridge → Lambda / SQS via rule targets
         for eb_arn, eb_node in by_service.get("eventbridge", []):
             for tgt in get_metrics(eb_node).get("targets", []):
                 tgt_arn = strip_q(tgt.get("Arn") or tgt.get("arn", ""))
                 if tgt_arn:
-                    make_edge(eb_arn, tgt_arn, "triggers", 100, ["eventbridge_rule_target"])
+                    make_edge(eb_arn, tgt_arn, "triggers", 100, ["eventbridge_rule_target"], category="runtime")
 
         # [100] SNS → Lambda / SQS via subscriptions
         for sns_arn, sns_node in by_service.get("sns", []):
             for endpoint_arn in get_metrics(sns_node).get("subscriptionEndpoints", []):
                 endpoint_arn = strip_q(endpoint_arn)
                 if endpoint_arn:
-                    make_edge(sns_arn, endpoint_arn, "triggers", 100, ["sns_subscription"])
+                    make_edge(sns_arn, endpoint_arn, "triggers", 100, ["sns_subscription"], category="runtime")
 
         # [90] CloudFront → S3 via origin domain
         for cf_arn, cf_node in by_service.get("cloudfront", []):
             for bucket_name in get_metrics(cf_node).get("s3BucketNames", []):
                 for s3_arn, _ in by_service.get("s3", []):
                     if bucket_name and s3_arn.endswith(f":::{bucket_name}"):
-                        make_edge(cf_arn, s3_arn, "serves_from", 90, ["cloudfront_s3_origin"])
+                        make_edge(cf_arn, s3_arn, "serves_from", 90, ["cloudfront_s3_origin"], category="runtime")
 
         # [70] EC2 → RDS via Security Group overlap
         sg_ingress = {}
@@ -390,24 +420,8 @@ def normalize_account(
                 rds_sg_ids = [sg.get("VpcSecurityGroupId") for sg in rds_vpc_sgs if sg.get("VpcSecurityGroupId")]
                 for rds_sg in rds_sg_ids:
                     if any(r.get("sourceGroup") in ec2_sgs for r in sg_ingress.get(rds_sg, [])):
-                        make_edge(ec2_arn, rds_arn, "writes_to", 70, ["security_group_rule"])
+                        make_edge(ec2_arn, rds_arn, "writes_to", 70, ["security_group_rule"], category="network")
                         break
-
-        # Merge DB relationships
-        relationships = db.query(Relationship).filter(
-            Relationship.snapshot_id == latest_snapshot.id
-        ).all()
-        for rel in relationships:
-            try:
-                make_edge(
-                    rel.source_arn, rel.target_arn,
-                    rel.label or "", rel.confidence or 80,
-                    rel.evidence or ["db_relationship"],
-                    edge_id=rel.edge_id
-                )
-            except Exception as e:
-                logger.error(f"Failed to merge DB edge: {str(e)}")
-                continue
 
         # Step 7: Filter empty VPCs and Subnets
         connected_arns = {e["source"] for e in edges} | {e["target"] for e in edges}
@@ -580,9 +594,10 @@ def _save_normalized_output(db: Session, snapshot_id, nodes: list, edges: list) 
                 source_arn=edge["source"],
                 target_arn=edge["target"],
                 edge_type=edge.get("type", "animatedEdge"),
-                label=edge.get("label", ""),
-                confidence=edge.get("confidence"),
-                evidence=edge.get("evidence"),
+                label=edge.get("data", {}).get("label", ""),
+                confidence=edge.get("data", {}).get("confidence"),
+                evidence=edge.get("data", {}).get("evidence"),
+                category=edge.get("data", {}).get("category", "runtime"),
             ))
 
         db.commit()

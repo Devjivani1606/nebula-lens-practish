@@ -176,6 +176,7 @@ class Relationship(Base):
     label          = Column(String(100))
     confidence     = Column(Integer, nullable=True)
     evidence       = Column(JSONB, nullable=True)
+    category       = Column(String(50), nullable=True, default="runtime")
 
     created_at     = Column(DateTime(timezone=True), server_default=func.now())
 
@@ -257,6 +258,7 @@ class NormalizedEdge(Base):
     label          = Column(String(100))                 # triggers, writes_to, invokes etc
     confidence     = Column(Integer, nullable=True)      # 0–100
     evidence       = Column(JSONB, nullable=True)        # list of evidence type strings
+    category       = Column(String(50), nullable=True, default="runtime")
 
     created_at     = Column(DateTime(timezone=True), server_default=func.now())
 
