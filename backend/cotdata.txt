@@ -1,0 +1,5776 @@
+{
+  "success": true,
+  "message": "Successfully normalized snapshot v2",
+  "account_name": "AWS Account 618642320905",
+  "snapshot_version": 2,
+  "total_resources": 22,
+  "nodes": [
+    {
+      "id": "arn:aws:ec2:ap-south-1:618642320905:vpc/vpc-01d338cb77fe1754d",
+      "type": "vpcNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "name": "document-processing-vpc",
+        "service": "vpc",
+        "region": "ap-south-1",
+        "account_id": "618642320905",
+        "resource_arn": "arn:aws:ec2:ap-south-1:618642320905:vpc/vpc-01d338cb77fe1754d",
+        "insights": "Custom VPC",
+        "metrics": {
+          "state": "available",
+          "region": "ap-south-1",
+          "cidrBlock": "10.0.0.0/16",
+          "endpoints": [],
+          "isDefault": false,
+          "securityScan": "Pass",
+          "securityGroups": [
+            {
+              "groupId": "sg-0045b6268a4d09169",
+              "groupName": "launch-wizard-4",
+              "ipPermissions": [
+                {
+                  "toPort": 22,
+                  "fromPort": 22,
+                  "ipProtocol": "tcp",
+                  "userIdGroupPairs": []
+                }
+              ]
+            },
+            {
+              "groupId": "sg-08ce4cac5f5fa252a",
+              "groupName": "launch-wizard-2",
+              "ipPermissions": [
+                {
+                  "toPort": 22,
+                  "fromPort": 22,
+                  "ipProtocol": "tcp",
+                  "userIdGroupPairs": []
+                }
+              ]
+            },
+            {
+              "groupId": "sg-03df21c3da4ab40c2",
+              "groupName": "launch-wizard-3",
+              "ipPermissions": [
+                {
+                  "toPort": 22,
+                  "fromPort": 22,
+                  "ipProtocol": "tcp",
+                  "userIdGroupPairs": []
+                }
+              ]
+            },
+            {
+              "groupId": "sg-03855c0915c69c450",
+              "groupName": "launch-wizard-1",
+              "ipPermissions": [
+                {
+                  "toPort": 8000,
+                  "fromPort": 8000,
+                  "ipProtocol": "tcp",
+                  "userIdGroupPairs": []
+                },
+                {
+                  "toPort": 22,
+                  "fromPort": 22,
+                  "ipProtocol": "tcp",
+                  "userIdGroupPairs": []
+                }
+              ]
+            },
+            {
+              "groupId": "sg-06133dc8c5f7d8866",
+              "groupName": "default",
+              "ipPermissions": [
+                {
+                  "toPort": null,
+                  "fromPort": null,
+                  "ipProtocol": "-1",
+                  "userIdGroupPairs": [
+                    {
+                      "groupId": "sg-06133dc8c5f7d8866"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "tags": {},
+        "telemetryData": [],
+        "metricsSummary": {
+          "natGateways": 0,
+          "dataOutGB": 0,
+          "dataInGB": 0,
+          "dataProcessedGB": 0,
+          "activeConnections": 0,
+          "totalNatHours": 0,
+          "totalDataProcessedGB": 0
+        },
+        "telemetrySchema": [
+          {
+            "key": "bytes_out",
+            "label": "Data Out",
+            "unit": "Bytes",
+            "chart": "area"
+          },
+          {
+            "key": "bytes_in",
+            "label": "Data In",
+            "unit": "Bytes",
+            "chart": "area"
+          },
+          {
+            "key": "active_conns",
+            "label": "Active Connections",
+            "unit": "Count",
+            "chart": "line"
+          }
+        ],
+        "cost": {
+          "source": "pricing-api",
+          "confidence": "estimated",
+          "billingModel": "none",
+          "dailyCost": 0,
+          "monthlyCost": 0,
+          "yearlyCost": 0,
+          "currency": "USD",
+          "usageMetrics": {},
+          "lineItems": [],
+          "notes": "No NAT Gateways found in this VPC — no billable VPC cost"
+        }
+      },
+      "style": {
+        "width": 400,
+        "height": 300
+      }
+    },
+    {
+      "id": "arn:aws:ec2:ap-south-1:618642320905:subnet/subnet-0a46796d3ec513bb9",
+      "type": "subnetNode",
+      "position": {
+        "x": 60,
+        "y": 60
+      },
+      "data": {
+        "name": "doc-subnet-def",
+        "service": "subnet",
+        "region": "ap-south-1",
+        "account_id": "618642320905",
+        "resource_arn": "arn:aws:ec2:ap-south-1:618642320905:subnet/subnet-0a46796d3ec513bb9",
+        "insights": "Private Subnet",
+        "metrics": {
+          "type": "Private Subnet",
+          "region": "ap-south-1",
+          "cidrBlock": "10.0.2.0/24",
+          "availableIPs": 249,
+          "securityScan": "Pass",
+          "availabilityZone": "ap-south-1b"
+        },
+        "tags": {},
+        "telemetryData": [],
+        "metricsSummary": {
+          "subnetType": "Private Subnet",
+          "cidrBlock": "10.0.2.0/24",
+          "availableIPs": 249,
+          "az": "ap-south-1b",
+          "securityScan": "Pass"
+        },
+        "telemetrySchema": [],
+        "cost": {
+          "source": "pricing-api",
+          "confidence": "estimated",
+          "billingModel": "none",
+          "dailyCost": 0,
+          "monthlyCost": 0,
+          "yearlyCost": 0,
+          "currency": "USD",
+          "usageMetrics": {},
+          "lineItems": [],
+          "notes": "Subnets have no direct billing. VPC cost allocation requires at least one compute resource in the VPC."
+        }
+      },
+      "parentId": "arn:aws:ec2:ap-south-1:618642320905:vpc/vpc-01d338cb77fe1754d",
+      "extent": "parent",
+      "style": {
+        "width": 400,
+        "height": 300
+      }
+    },
+    {
+      "id": "arn:aws:lambda:ap-south-1:618642320905:function:upload-service",
+      "type": "lambdaNode",
+      "position": {
+        "x": 60,
+        "y": 60
+      },
+      "data": {
+        "name": "upload-service",
+        "service": "lambda",
+        "region": "ap-south-1",
+        "account_id": "618642320905",
+        "resource_arn": "arn:aws:lambda:ap-south-1:618642320905:function:upload-service",
+        "insights": "Inside VPC",
+        "metrics": {
+          "inVpc": true,
+          "vpcId": "vpc-01d338cb77fe1754d",
+          "memory": "128 MB",
+          "region": "ap-south-1",
+          "iamRole": "upload-service-role-hmp81fjn",
+          "roleArn": "arn:aws:iam::618642320905:role/service-role/upload-service-role-hmp81fjn",
+          "runtime": "python3.11",
+          "timeout": "3s",
+          "subnetIds": [
+            "subnet-0a46796d3ec513bb9",
+            "subnet-033c759f193a2f570"
+          ],
+          "environment": {},
+          "functionArn": "arn:aws:lambda:ap-south-1:618642320905:function:upload-service",
+          "securityScan": "Pass",
+          "securityGroupIds": [
+            "sg-06133dc8c5f7d8866"
+          ],
+          "eventSourceMappings": []
+        },
+        "tags": {},
+        "telemetryData": [],
+        "metricsSummary": {
+          "invocations": 0,
+          "errors": 0,
+          "errorRate": 0,
+          "avgDurationMs": 0,
+          "p99DurationMs": 0,
+          "maxConcurrency": 0,
+          "throttles": 0,
+          "memoryMB": 128,
+          "gbSeconds": 0
+        },
+        "telemetrySchema": [
+          {
+            "key": "invocations",
+            "label": "Invocations",
+            "unit": "Count",
+            "chart": "bar"
+          },
+          {
+            "key": "errors",
+            "label": "Errors",
+            "unit": "Count",
+            "chart": "bar"
+          },
+          {
+            "key": "duration",
+            "label": "Avg Duration",
+            "unit": "Milliseconds",
+            "chart": "line"
+          }
+        ],
+        "cost": {
+          "source": "pricing-api",
+          "confidence": "estimated",
+          "billingModel": "pay-per-use",
+          "dailyCost": 0,
+          "monthlyCost": 0,
+          "yearlyCost": 0,
+          "currency": "USD",
+          "usageMetrics": {
+            "monthlyRequests": 0,
+            "monthlyGbSeconds": 0,
+            "billableRequests": 0,
+            "billableGbSeconds": 0
+          },
+          "lineItems": [
+            {
+              "description": "Lambda Requests",
+              "quantity": 0,
+              "unit": "per 1M requests",
+              "unitPrice": 0,
+              "cost": 0
+            },
+            {
+              "description": "Lambda Compute (GB-seconds)",
+              "quantity": 0,
+              "unit": "per 1K GB-seconds",
+              "unitPrice": 0,
+              "cost": 0
+            }
+          ],
+          "notes": "Estimated monthly cost for upload-service in ap-south-1"
+        }
+      },
+      "parentId": "arn:aws:ec2:ap-south-1:618642320905:subnet/subnet-0a46796d3ec513bb9",
+      "extent": "parent"
+    },
+    {
+      "id": "arn:aws:lambda:ap-south-1:618642320905:function:audit-worker",
+      "type": "lambdaNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "name": "audit-worker",
+        "service": "lambda",
+        "region": "ap-south-1",
+        "account_id": "618642320905",
+        "resource_arn": "arn:aws:lambda:ap-south-1:618642320905:function:audit-worker",
+        "insights": "Public Lambda",
+        "metrics": {
+          "inVpc": false,
+          "vpcId": "",
+          "memory": "128 MB",
+          "region": "ap-south-1",
+          "iamRole": "audit-worker-role-t1rv9t3b",
+          "roleArn": "arn:aws:iam::618642320905:role/service-role/audit-worker-role-t1rv9t3b",
+          "runtime": "python3.11",
+          "timeout": "3s",
+          "subnetIds": [],
+          "environment": {},
+          "functionArn": "arn:aws:lambda:ap-south-1:618642320905:function:audit-worker",
+          "securityScan": "Warning: Lambda not in VPC",
+          "securityGroupIds": [],
+          "eventSourceMappings": [
+            {
+              "state": "Enabled",
+              "eventSourceArn": "arn:aws:sqs:ap-south-1:618642320905:audit-queue"
+            }
+          ]
+        },
+        "tags": {},
+        "telemetryData": [],
+        "metricsSummary": {
+          "invocations": 0,
+          "errors": 0,
+          "errorRate": 0,
+          "avgDurationMs": 0,
+          "p99DurationMs": 0,
+          "maxConcurrency": 0,
+          "throttles": 0,
+          "memoryMB": 128,
+          "gbSeconds": 0
+        },
+        "telemetrySchema": [
+          {
+            "key": "invocations",
+            "label": "Invocations",
+            "unit": "Count",
+            "chart": "bar"
+          },
+          {
+            "key": "errors",
+            "label": "Errors",
+            "unit": "Count",
+            "chart": "bar"
+          },
+          {
+            "key": "duration",
+            "label": "Avg Duration",
+            "unit": "Milliseconds",
+            "chart": "line"
+          }
+        ],
+        "cost": {
+          "source": "pricing-api",
+          "confidence": "estimated",
+          "billingModel": "pay-per-use",
+          "dailyCost": 0,
+          "monthlyCost": 0,
+          "yearlyCost": 0,
+          "currency": "USD",
+          "usageMetrics": {
+            "monthlyRequests": 0,
+            "monthlyGbSeconds": 0,
+            "billableRequests": 0,
+            "billableGbSeconds": 0
+          },
+          "lineItems": [
+            {
+              "description": "Lambda Requests",
+              "quantity": 0,
+              "unit": "per 1M requests",
+              "unitPrice": 0,
+              "cost": 0
+            },
+            {
+              "description": "Lambda Compute (GB-seconds)",
+              "quantity": 0,
+              "unit": "per 1K GB-seconds",
+              "unitPrice": 0,
+              "cost": 0
+            }
+          ],
+          "notes": "Estimated monthly cost for audit-worker in ap-south-1"
+        }
+      }
+    },
+    {
+      "id": "arn:aws:lambda:ap-south-1:618642320905:function:document-processor",
+      "type": "lambdaNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "name": "document-processor",
+        "service": "lambda",
+        "region": "ap-south-1",
+        "account_id": "618642320905",
+        "resource_arn": "arn:aws:lambda:ap-south-1:618642320905:function:document-processor",
+        "insights": "Public Lambda",
+        "metrics": {
+          "inVpc": false,
+          "vpcId": "",
+          "memory": "128 MB",
+          "region": "ap-south-1",
+          "iamRole": "document-processor-role-qj0h76z6",
+          "roleArn": "arn:aws:iam::618642320905:role/service-role/document-processor-role-qj0h76z6",
+          "runtime": "python3.11",
+          "timeout": "3s",
+          "subnetIds": [],
+          "environment": {},
+          "functionArn": "arn:aws:lambda:ap-south-1:618642320905:function:document-processor",
+          "securityScan": "Warning: Lambda not in VPC",
+          "securityGroupIds": [],
+          "eventSourceMappings": [
+            {
+              "state": "Enabled",
+              "eventSourceArn": "arn:aws:sqs:ap-south-1:618642320905:document-processing-queue"
+            }
+          ]
+        },
+        "tags": {},
+        "telemetryData": [],
+        "metricsSummary": {
+          "invocations": 0,
+          "errors": 0,
+          "errorRate": 0,
+          "avgDurationMs": 0,
+          "p99DurationMs": 0,
+          "maxConcurrency": 0,
+          "throttles": 0,
+          "memoryMB": 128,
+          "gbSeconds": 0
+        },
+        "telemetrySchema": [
+          {
+            "key": "invocations",
+            "label": "Invocations",
+            "unit": "Count",
+            "chart": "bar"
+          },
+          {
+            "key": "errors",
+            "label": "Errors",
+            "unit": "Count",
+            "chart": "bar"
+          },
+          {
+            "key": "duration",
+            "label": "Avg Duration",
+            "unit": "Milliseconds",
+            "chart": "line"
+          }
+        ],
+        "cost": {
+          "source": "pricing-api",
+          "confidence": "estimated",
+          "billingModel": "pay-per-use",
+          "dailyCost": 0,
+          "monthlyCost": 0,
+          "yearlyCost": 0,
+          "currency": "USD",
+          "usageMetrics": {
+            "monthlyRequests": 0,
+            "monthlyGbSeconds": 0,
+            "billableRequests": 0,
+            "billableGbSeconds": 0
+          },
+          "lineItems": [
+            {
+              "description": "Lambda Requests",
+              "quantity": 0,
+              "unit": "per 1M requests",
+              "unitPrice": 0,
+              "cost": 0
+            },
+            {
+              "description": "Lambda Compute (GB-seconds)",
+              "quantity": 0,
+              "unit": "per 1K GB-seconds",
+              "unitPrice": 0,
+              "cost": 0
+            }
+          ],
+          "notes": "Estimated monthly cost for document-processor in ap-south-1"
+        }
+      }
+    },
+    {
+      "id": "arn:aws:lambda:ap-south-1:618642320905:function:s3-file-reader",
+      "type": "lambdaNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "name": "s3-file-reader",
+        "service": "lambda",
+        "region": "ap-south-1",
+        "account_id": "618642320905",
+        "resource_arn": "arn:aws:lambda:ap-south-1:618642320905:function:s3-file-reader",
+        "insights": "Public Lambda",
+        "metrics": {
+          "inVpc": false,
+          "vpcId": "",
+          "memory": "128 MB",
+          "region": "ap-south-1",
+          "iamRole": "s3-file-reader-role-frdjh8tw",
+          "roleArn": "arn:aws:iam::618642320905:role/service-role/s3-file-reader-role-frdjh8tw",
+          "runtime": "python3.11",
+          "timeout": "3s",
+          "subnetIds": [],
+          "environment": {},
+          "functionArn": "arn:aws:lambda:ap-south-1:618642320905:function:s3-file-reader",
+          "securityScan": "Warning: Lambda not in VPC",
+          "securityGroupIds": [],
+          "eventSourceMappings": []
+        },
+        "tags": {},
+        "telemetryData": [],
+        "metricsSummary": {
+          "invocations": 0,
+          "errors": 0,
+          "errorRate": 0,
+          "avgDurationMs": 0,
+          "p99DurationMs": 0,
+          "maxConcurrency": 0,
+          "throttles": 0,
+          "memoryMB": 128,
+          "gbSeconds": 0
+        },
+        "telemetrySchema": [
+          {
+            "key": "invocations",
+            "label": "Invocations",
+            "unit": "Count",
+            "chart": "bar"
+          },
+          {
+            "key": "errors",
+            "label": "Errors",
+            "unit": "Count",
+            "chart": "bar"
+          },
+          {
+            "key": "duration",
+            "label": "Avg Duration",
+            "unit": "Milliseconds",
+            "chart": "line"
+          }
+        ],
+        "cost": {
+          "source": "pricing-api",
+          "confidence": "estimated",
+          "billingModel": "pay-per-use",
+          "dailyCost": 0,
+          "monthlyCost": 0,
+          "yearlyCost": 0,
+          "currency": "USD",
+          "usageMetrics": {
+            "monthlyRequests": 0,
+            "monthlyGbSeconds": 0,
+            "billableRequests": 0,
+            "billableGbSeconds": 0
+          },
+          "lineItems": [
+            {
+              "description": "Lambda Requests",
+              "quantity": 0,
+              "unit": "per 1M requests",
+              "unitPrice": 0,
+              "cost": 0
+            },
+            {
+              "description": "Lambda Compute (GB-seconds)",
+              "quantity": 0,
+              "unit": "per 1K GB-seconds",
+              "unitPrice": 0,
+              "cost": 0
+            }
+          ],
+          "notes": "Estimated monthly cost for s3-file-reader in ap-south-1"
+        }
+      }
+    },
+    {
+      "id": "arn:aws:rds:ap-south-1:618642320905:db:database-1-instance-1",
+      "type": "rdsNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "name": "database-1-instance-1",
+        "service": "rds",
+        "region": "ap-south-1",
+        "account_id": "618642320905",
+        "resource_arn": "arn:aws:rds:ap-south-1:618642320905:db:database-1-instance-1",
+        "insights": "Available - aurora-postgresql",
+        "metrics": {
+          "engine": "aurora-postgresql 17.7",
+          "region": "ap-south-1",
+          "status": "available",
+          "multiAZ": false,
+          "storage": "1 GB",
+          "securityScan": "Warning: Multi-AZ not enabled",
+          "instanceClass": "db.serverless"
+        },
+        "tags": {},
+        "telemetryData": [],
+        "metricsSummary": {},
+        "telemetrySchema": [],
+        "cost": {
+          "source": "pricing-api",
+          "confidence": "estimated",
+          "billingModel": "unsupported",
+          "dailyCost": 0,
+          "monthlyCost": 0,
+          "yearlyCost": 0,
+          "currency": "USD",
+          "usageMetrics": {},
+          "lineItems": [],
+          "notes": "No cost calculator registered for service 'rds'"
+        }
+      }
+    },
+    {
+      "id": "arn:aws:rds:ap-south-1:618642320905:db:database-2-instance-1",
+      "type": "rdsNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "name": "database-2-instance-1",
+        "service": "rds",
+        "region": "ap-south-1",
+        "account_id": "618642320905",
+        "resource_arn": "arn:aws:rds:ap-south-1:618642320905:db:database-2-instance-1",
+        "insights": "Available - aurora-postgresql",
+        "metrics": {
+          "engine": "aurora-postgresql 17.7",
+          "region": "ap-south-1",
+          "status": "available",
+          "multiAZ": false,
+          "storage": "1 GB",
+          "securityScan": "Warning: Multi-AZ not enabled",
+          "instanceClass": "db.serverless"
+        },
+        "tags": {},
+        "telemetryData": [],
+        "metricsSummary": {},
+        "telemetrySchema": [],
+        "cost": {
+          "source": "pricing-api",
+          "confidence": "estimated",
+          "billingModel": "unsupported",
+          "dailyCost": 0,
+          "monthlyCost": 0,
+          "yearlyCost": 0,
+          "currency": "USD",
+          "usageMetrics": {},
+          "lineItems": [],
+          "notes": "No cost calculator registered for service 'rds'"
+        }
+      }
+    },
+    {
+      "id": "arn:aws:sqs:ap-south-1:618642320905:audit-queue",
+      "type": "sqsNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "name": "audit-queue",
+        "service": "sqs",
+        "region": "ap-south-1",
+        "account_id": "618642320905",
+        "resource_arn": "arn:aws:sqs:ap-south-1:618642320905:audit-queue",
+        "insights": "Standard Queue",
+        "metrics": {
+          "type": "Standard",
+          "region": "ap-south-1",
+          "encrypted": true,
+          "securityScan": "Pass: Encrypted",
+          "messageRetention": "4 days",
+          "visibilityTimeout": "30s"
+        },
+        "tags": {},
+        "telemetryData": [
+          {
+            "time": "00:00",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "00:05",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "00:10",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "00:15",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "00:20",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "00:25",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "00:30",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "00:35",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "00:40",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "00:45",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "00:50",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "00:55",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "01:00",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "01:05",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "01:10",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "01:15",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "01:20",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "01:25",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "01:30",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "01:35",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "01:40",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "01:45",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "01:50",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "01:55",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "02:00",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "02:05",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "02:10",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "02:15",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "02:20",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "02:25",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "02:30",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "02:35",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "02:40",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "02:45",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "02:50",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "02:55",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "03:00",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "03:05",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "03:10",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "03:15",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "03:20",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "03:25",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "03:30",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "03:35",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "03:40",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "03:45",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "03:50",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "03:55",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "04:00",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "04:05",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "04:10",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "04:15",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "04:20",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "04:25",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "04:30",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "04:35",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "04:40",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "04:45",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "04:50",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "04:55",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "05:00",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "05:05",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "05:10",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "05:15",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "05:20",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "05:25",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "05:30",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "05:35",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "05:40",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "05:45",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "05:50",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "05:55",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "06:00",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "06:05",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "06:10",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "06:15",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "06:20",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "06:25",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "06:30",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "06:35",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "06:40",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "06:45",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "06:50",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "06:55",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "07:00",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "07:05",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "07:10",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "07:15",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "07:20",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "07:25",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "07:30",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "07:35",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "07:40",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "07:45",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "07:50",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "07:55",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "08:00",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "08:05",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "08:10",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "08:15",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "08:20",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "08:25",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "08:30",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "08:35",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "08:40",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "08:45",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "08:50",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "08:55",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "09:00",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "09:05",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "09:10",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "09:15",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "09:20",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "09:25",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "09:30",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "09:35",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "09:40",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "09:45",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "09:50",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "09:55",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "10:00",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "10:05",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "10:10",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "10:15",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "10:20",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "10:25",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "10:30",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "10:35",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "10:40",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "10:45",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "10:50",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "10:55",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "11:00",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "11:05",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "11:10",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "11:15",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "11:20",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "11:25",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "11:30",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "11:35",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "11:40",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "11:45",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "11:50",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "11:55",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "12:00",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "12:05",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "12:10",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "12:15",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "12:20",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "12:25",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "12:30",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "12:35",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "12:40",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "12:45",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "12:50",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "12:55",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "13:00",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "13:05",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "13:10",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "13:15",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "13:20",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "13:25",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "13:30",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "13:35",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "13:40",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "13:45",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "13:50",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "13:55",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "14:00",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "14:05",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "14:10",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "14:15",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "14:20",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "14:25",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "14:30",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "14:35",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "14:40",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "14:45",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "14:50",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "14:55",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "15:00",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "15:05",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "15:10",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "15:15",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "15:20",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "15:25",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "15:30",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "15:35",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "15:40",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "15:45",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "15:50",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "15:55",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "16:00",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "16:05",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "16:10",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "16:15",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "16:20",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "16:25",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "16:30",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "16:35",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "16:40",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "16:45",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "16:50",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "16:55",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "17:00",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "17:05",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "17:10",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "17:15",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "17:20",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "17:25",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "17:30",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "17:35",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "17:40",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "17:45",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "17:50",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "17:55",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "18:00",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "18:05",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "18:10",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "18:15",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "18:20",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "18:25",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "18:30",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "18:35",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "18:40",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "18:45",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "18:50",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "18:55",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "19:00",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "19:05",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "19:10",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "19:15",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "19:20",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "19:25",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "19:30",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "19:35",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "19:40",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "19:45",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "19:50",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "19:55",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "20:00",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "20:05",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "20:10",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "20:15",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "20:20",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "20:25",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "20:30",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "20:35",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "20:40",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "20:45",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "20:50",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "20:55",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "21:00",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "21:05",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "21:10",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "21:15",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "21:20",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "21:25",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "21:30",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "21:35",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "21:40",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "21:45",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "21:50",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "21:55",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "22:00",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "22:05",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "22:10",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "22:15",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "22:20",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "22:25",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "22:30",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "22:35",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "22:40",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "22:45",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "22:50",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "22:55",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "23:00",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "23:05",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "23:10",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "23:15",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "23:20",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "23:25",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "23:30",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "23:35",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "23:40",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "23:45",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "23:50",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "23:55",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          }
+        ],
+        "metricsSummary": {
+          "messagesSent": 0,
+          "messagesReceived": 0,
+          "messagesDeleted": 0,
+          "visibleMessages": 0,
+          "oldestMessageAge": 0,
+          "totalApiRequests": 0
+        },
+        "telemetrySchema": [
+          {
+            "key": "messages_sent",
+            "label": "Messages Sent",
+            "unit": "Count",
+            "chart": "bar"
+          },
+          {
+            "key": "messages_received",
+            "label": "Messages Received",
+            "unit": "Count",
+            "chart": "bar"
+          },
+          {
+            "key": "visible_messages",
+            "label": "Queue Depth",
+            "unit": "Count",
+            "chart": "line"
+          }
+        ],
+        "cost": {
+          "source": "pricing-api",
+          "confidence": "estimated",
+          "billingModel": "pay-per-request",
+          "dailyCost": 0,
+          "monthlyCost": 0,
+          "yearlyCost": 0,
+          "currency": "USD",
+          "usageMetrics": {
+            "queueType": "Standard",
+            "monthlyRequests": 0,
+            "billableRequests": 0
+          },
+          "lineItems": [
+            {
+              "description": "SQS API Requests (Standard)",
+              "quantity": 0,
+              "unit": "per 1M requests",
+              "unitPrice": 0,
+              "cost": 0
+            }
+          ],
+          "notes": "Estimated based on ap-south-1 on-demand pricing"
+        }
+      }
+    },
+    {
+      "id": "arn:aws:sqs:ap-south-1:618642320905:document-processing-queue",
+      "type": "sqsNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "name": "document-processing-queue",
+        "service": "sqs",
+        "region": "ap-south-1",
+        "account_id": "618642320905",
+        "resource_arn": "arn:aws:sqs:ap-south-1:618642320905:document-processing-queue",
+        "insights": "Standard Queue",
+        "metrics": {
+          "type": "Standard",
+          "region": "ap-south-1",
+          "encrypted": true,
+          "securityScan": "Pass: Encrypted",
+          "messageRetention": "4 days",
+          "visibilityTimeout": "30s"
+        },
+        "tags": {},
+        "telemetryData": [
+          {
+            "time": "00:00",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "00:05",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "00:10",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "00:15",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "00:20",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "00:25",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "00:30",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "00:35",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "00:40",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "00:45",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "00:50",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "00:55",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "01:00",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "01:05",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "01:10",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "01:15",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "01:20",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "01:25",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "01:30",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "01:35",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "01:40",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "01:45",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "01:50",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "01:55",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "02:00",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "02:05",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "02:10",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "02:15",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "02:20",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "02:25",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "02:30",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "02:35",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "02:40",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "02:45",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "02:50",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "02:55",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "03:00",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "03:05",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "03:10",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "03:15",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "03:20",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "03:25",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "03:30",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "03:35",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "03:40",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "03:45",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "03:50",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "03:55",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "04:00",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "04:05",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "04:10",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "04:15",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "04:20",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "04:25",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "04:30",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "04:35",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "04:40",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "04:45",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "04:50",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "04:55",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "05:00",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "05:05",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "05:10",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "05:15",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "05:20",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "05:25",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "05:30",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "05:35",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "05:40",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "05:45",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "05:50",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "05:55",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "06:00",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "06:05",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "06:10",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "06:15",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "06:20",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "06:25",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "06:30",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "06:35",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "06:40",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "06:45",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "06:50",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "06:55",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "07:00",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "07:05",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "07:10",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "07:15",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "07:20",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "07:25",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "07:30",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "07:35",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "07:40",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "07:45",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "07:50",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "07:55",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "08:00",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "08:05",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "08:10",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "08:15",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "08:20",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "08:25",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "08:30",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "08:35",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "08:40",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "08:45",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "08:50",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "08:55",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "09:00",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "09:05",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "09:10",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "09:15",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "09:20",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "09:25",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "09:30",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "09:35",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "09:40",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "09:45",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "09:50",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "09:55",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "10:00",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "10:05",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "10:10",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "10:15",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "10:20",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "10:25",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "10:30",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "10:35",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "10:40",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "10:45",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "10:50",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "10:55",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "11:00",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "11:05",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "11:10",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "11:15",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "11:20",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "11:25",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "11:30",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "11:35",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "11:40",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "11:45",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "11:50",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "11:55",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "12:00",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "12:05",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "12:10",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "12:15",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "12:20",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "12:25",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "12:30",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "12:35",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "12:40",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "12:45",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "12:50",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "12:55",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "13:00",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "13:05",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "13:10",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "13:15",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "13:20",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "13:25",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "13:30",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "13:35",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "13:40",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "13:45",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "13:50",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "13:55",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "14:00",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "14:05",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "14:10",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "14:15",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "14:20",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "14:25",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "14:30",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "14:35",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "14:40",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "14:45",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "14:50",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "14:55",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "15:00",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "15:05",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "15:10",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "15:15",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "15:20",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "15:25",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "15:30",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "15:35",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "15:40",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "15:45",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "15:50",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "15:55",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "16:00",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "16:05",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "16:10",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "16:15",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "16:20",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "16:25",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "16:30",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "16:35",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "16:40",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "16:45",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "16:50",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "16:55",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "17:00",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "17:05",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "17:10",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "17:15",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "17:20",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "17:25",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "17:30",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "17:35",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "17:40",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "17:45",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "17:50",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "17:55",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "18:00",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "18:05",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "18:10",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "18:15",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "18:20",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "18:25",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "18:30",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "18:35",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "18:40",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "18:45",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "18:50",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "18:55",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "19:00",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "19:05",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "19:10",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "19:15",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "19:20",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "19:25",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "19:30",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "19:35",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "19:40",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "19:45",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "19:50",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "19:55",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "20:00",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "20:05",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "20:10",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "20:15",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "20:20",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "20:25",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "20:30",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "20:35",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "20:40",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "20:45",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "20:50",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "20:55",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "21:00",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "21:05",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "21:10",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "21:15",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "21:20",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "21:25",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "21:30",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "21:35",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "21:40",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "21:45",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "21:50",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "21:55",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "22:00",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "22:05",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "22:10",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "22:15",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "22:20",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "22:25",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "22:30",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "22:35",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "22:40",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "22:45",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "22:50",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "22:55",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "23:00",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "23:05",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "23:10",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "23:15",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "23:20",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "23:25",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "23:30",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "23:35",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "23:40",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "23:45",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "23:50",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          },
+          {
+            "time": "23:55",
+            "messages_sent": 0,
+            "messages_received": 0,
+            "visible_messages": 0
+          }
+        ],
+        "metricsSummary": {
+          "messagesSent": 0,
+          "messagesReceived": 0,
+          "messagesDeleted": 0,
+          "visibleMessages": 0,
+          "oldestMessageAge": 0,
+          "totalApiRequests": 0
+        },
+        "telemetrySchema": [
+          {
+            "key": "messages_sent",
+            "label": "Messages Sent",
+            "unit": "Count",
+            "chart": "bar"
+          },
+          {
+            "key": "messages_received",
+            "label": "Messages Received",
+            "unit": "Count",
+            "chart": "bar"
+          },
+          {
+            "key": "visible_messages",
+            "label": "Queue Depth",
+            "unit": "Count",
+            "chart": "line"
+          }
+        ],
+        "cost": {
+          "source": "pricing-api",
+          "confidence": "estimated",
+          "billingModel": "pay-per-request",
+          "dailyCost": 0,
+          "monthlyCost": 0,
+          "yearlyCost": 0,
+          "currency": "USD",
+          "usageMetrics": {
+            "queueType": "Standard",
+            "monthlyRequests": 0,
+            "billableRequests": 0
+          },
+          "lineItems": [
+            {
+              "description": "SQS API Requests (Standard)",
+              "quantity": 0,
+              "unit": "per 1M requests",
+              "unitPrice": 0,
+              "cost": 0
+            }
+          ],
+          "notes": "Estimated based on ap-south-1 on-demand pricing"
+        }
+      }
+    },
+    {
+      "id": "arn:aws:events:ap-south-1:618642320905:rule/nebula-demo-rule",
+      "type": "eventbridgeNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "name": "nebula-demo-rule",
+        "service": "eventbridge",
+        "region": "ap-south-1",
+        "account_id": "618642320905",
+        "resource_arn": "arn:aws:events:ap-south-1:618642320905:rule/nebula-demo-rule",
+        "insights": "EventBridge Rule",
+        "metrics": {
+          "state": "ENABLED",
+          "region": "ap-south-1",
+          "ruleArn": "arn:aws:events:ap-south-1:618642320905:rule/nebula-demo-rule",
+          "targets": [
+            {
+              "id": "Idf81e22bf-b99a-47d6-9aed-1560aabc9d7f",
+              "arn": "arn:aws:sqs:ap-south-1:618642320905:audit-queue"
+            }
+          ],
+          "eventPattern": "{\"source\":[\"aws.s3-banner\"],\"detail-type\":[\"AWS Console Action via CloudTrail\"]}",
+          "securityScan": "Pass",
+          "scheduleExpression": ""
+        },
+        "tags": {},
+        "telemetryData": [],
+        "metricsSummary": {
+          "totalEvents": 0,
+          "totalCustomEvents": 0,
+          "failedInvocations": 0,
+          "throttledRules": 0,
+          "errorRate": 0
+        },
+        "telemetrySchema": [
+          {
+            "key": "invocations",
+            "label": "Invocations",
+            "unit": "Count",
+            "chart": "bar"
+          },
+          {
+            "key": "failed_inv",
+            "label": "Failed Invocations",
+            "unit": "Count",
+            "chart": "bar"
+          }
+        ],
+        "cost": {
+          "source": "pricing-api",
+          "confidence": "estimated",
+          "billingModel": "none",
+          "dailyCost": 0,
+          "monthlyCost": 0,
+          "yearlyCost": 0,
+          "currency": "USD",
+          "usageMetrics": {},
+          "lineItems": [],
+          "notes": "No custom EventBridge events detected — default bus events are free"
+        }
+      }
+    },
+    {
+      "id": "arn:aws:dynamodb:ap-south-1:618642320905:table/BucketItems",
+      "type": "dynamodbNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "name": "BucketItems",
+        "service": "dynamodb",
+        "region": "ap-south-1",
+        "account_id": "618642320905",
+        "resource_arn": "arn:aws:dynamodb:ap-south-1:618642320905:table/BucketItems",
+        "insights": "PAY_PER_REQUEST - 4 items",
+        "metrics": {
+          "region": "ap-south-1",
+          "status": "ACTIVE",
+          "itemCount": 4,
+          "sizeBytes": 351,
+          "streamArn": "",
+          "billingMode": "PAY_PER_REQUEST",
+          "securityScan": "Pass",
+          "streamEnabled": false
+        },
+        "tags": {},
+        "telemetryData": [],
+        "metricsSummary": {},
+        "telemetrySchema": [],
+        "cost": {
+          "source": "pricing-api",
+          "confidence": "estimated",
+          "billingModel": "unsupported",
+          "dailyCost": 0,
+          "monthlyCost": 0,
+          "yearlyCost": 0,
+          "currency": "USD",
+          "usageMetrics": {},
+          "lineItems": [],
+          "notes": "No cost calculator registered for service 'dynamodb'"
+        }
+      }
+    },
+    {
+      "id": "arn:aws:sns:ap-south-1:618642320905:demo-topic",
+      "type": "snsNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "name": "demo-topic",
+        "service": "sns",
+        "region": "ap-south-1",
+        "account_id": "618642320905",
+        "resource_arn": "arn:aws:sns:ap-south-1:618642320905:demo-topic",
+        "insights": "Standard Topic",
+        "metrics": {
+          "type": "Standard",
+          "region": "ap-south-1",
+          "encrypted": false,
+          "securityScan": "Warning: Not encrypted",
+          "subscriptionsCount": 1,
+          "subscriptionEndpoints": [
+            "arn:aws:lambda:ap-south-1:618642320905:function:audit-worker"
+          ]
+        },
+        "tags": {},
+        "telemetryData": [],
+        "metricsSummary": {},
+        "telemetrySchema": [],
+        "cost": {
+          "source": "pricing-api",
+          "confidence": "estimated",
+          "billingModel": "unsupported",
+          "dailyCost": 0,
+          "monthlyCost": 0,
+          "yearlyCost": 0,
+          "currency": "USD",
+          "usageMetrics": {},
+          "lineItems": [],
+          "notes": "No cost calculator registered for service 'sns'"
+        }
+      }
+    },
+    {
+      "id": "arn:aws:s3:::audit-bucket123",
+      "type": "s3Node",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "name": "audit-bucket123",
+        "service": "s3",
+        "region": "ap-south-1",
+        "account_id": "618642320905",
+        "resource_arn": "arn:aws:s3:::audit-bucket123",
+        "insights": "Public Access Blocked",
+        "metrics": {
+          "region": "ap-south-1",
+          "bucketArn": "arn:aws:s3:::audit-bucket123",
+          "versioning": "Disabled",
+          "creationDate": "2026-06-09 13:11:04+00:00",
+          "publicAccess": "Blocked",
+          "securityScan": "Pass: Block Public Access enabled",
+          "notificationConfiguration": {
+            "LambdaFunctionConfigurations": []
+          }
+        },
+        "tags": {},
+        "telemetryData": [],
+        "metricsSummary": {
+          "storageSizeGB": 0,
+          "objectCount": 0,
+          "getRequests": 0,
+          "putRequests": 0,
+          "downloadedMB": 0,
+          "dataTransferOutGB": 0
+        },
+        "telemetrySchema": [
+          {
+            "key": "get_requests",
+            "label": "GET Requests",
+            "unit": "Count",
+            "chart": "bar"
+          },
+          {
+            "key": "put_requests",
+            "label": "PUT Requests",
+            "unit": "Count",
+            "chart": "bar"
+          },
+          {
+            "key": "bytes_down",
+            "label": "Downloaded",
+            "unit": "Bytes",
+            "chart": "area"
+          }
+        ],
+        "cost": {
+          "source": "pricing-api",
+          "confidence": "estimated",
+          "billingModel": "storage-plus-requests",
+          "dailyCost": 0,
+          "monthlyCost": 0,
+          "yearlyCost": 0,
+          "currency": "USD",
+          "usageMetrics": {
+            "avgStorageGB": 0,
+            "monthlyPutReqs": 0,
+            "monthlyGetReqs": 0,
+            "monthlyOutGB": 0
+          },
+          "lineItems": [
+            {
+              "description": "S3 Standard Storage",
+              "quantity": 0,
+              "unit": "GB-month",
+              "unitPrice": 0,
+              "cost": 0
+            },
+            {
+              "description": "S3 PUT / COPY / POST / LIST",
+              "quantity": 0,
+              "unit": "per 1K requests",
+              "unitPrice": 0,
+              "cost": 0
+            },
+            {
+              "description": "S3 GET / SELECT Requests",
+              "quantity": 0,
+              "unit": "per 1K requests",
+              "unitPrice": 0,
+              "cost": 0
+            },
+            {
+              "description": "Data Transfer Out",
+              "quantity": 0,
+              "unit": "GB",
+              "unitPrice": 0,
+              "cost": 0
+            }
+          ],
+          "notes": "Estimated based on ap-south-1 on-demand pricing"
+        }
+      }
+    },
+    {
+      "id": "arn:aws:s3:::aws-cloudtrail-logs-618642320905-d5676bb3",
+      "type": "s3Node",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "name": "aws-cloudtrail-logs-618642320905-d5676bb3",
+        "service": "s3",
+        "region": "ap-south-1",
+        "account_id": "618642320905",
+        "resource_arn": "arn:aws:s3:::aws-cloudtrail-logs-618642320905-d5676bb3",
+        "insights": "Public Access Blocked",
+        "metrics": {
+          "region": "ap-south-1",
+          "bucketArn": "arn:aws:s3:::aws-cloudtrail-logs-618642320905-d5676bb3",
+          "versioning": "Disabled",
+          "creationDate": "2026-06-19 09:35:05+00:00",
+          "publicAccess": "Blocked",
+          "securityScan": "Pass: Block Public Access enabled",
+          "notificationConfiguration": {
+            "LambdaFunctionConfigurations": []
+          }
+        },
+        "tags": {},
+        "telemetryData": [],
+        "metricsSummary": {
+          "storageSizeGB": 0,
+          "objectCount": 0,
+          "getRequests": 0,
+          "putRequests": 0,
+          "downloadedMB": 0,
+          "dataTransferOutGB": 0
+        },
+        "telemetrySchema": [
+          {
+            "key": "get_requests",
+            "label": "GET Requests",
+            "unit": "Count",
+            "chart": "bar"
+          },
+          {
+            "key": "put_requests",
+            "label": "PUT Requests",
+            "unit": "Count",
+            "chart": "bar"
+          },
+          {
+            "key": "bytes_down",
+            "label": "Downloaded",
+            "unit": "Bytes",
+            "chart": "area"
+          }
+        ],
+        "cost": {
+          "source": "pricing-api",
+          "confidence": "estimated",
+          "billingModel": "storage-plus-requests",
+          "dailyCost": 0,
+          "monthlyCost": 0,
+          "yearlyCost": 0,
+          "currency": "USD",
+          "usageMetrics": {
+            "avgStorageGB": 0,
+            "monthlyPutReqs": 0,
+            "monthlyGetReqs": 0,
+            "monthlyOutGB": 0
+          },
+          "lineItems": [
+            {
+              "description": "S3 Standard Storage",
+              "quantity": 0,
+              "unit": "GB-month",
+              "unitPrice": 0,
+              "cost": 0
+            },
+            {
+              "description": "S3 PUT / COPY / POST / LIST",
+              "quantity": 0,
+              "unit": "per 1K requests",
+              "unitPrice": 0,
+              "cost": 0
+            },
+            {
+              "description": "S3 GET / SELECT Requests",
+              "quantity": 0,
+              "unit": "per 1K requests",
+              "unitPrice": 0,
+              "cost": 0
+            },
+            {
+              "description": "Data Transfer Out",
+              "quantity": 0,
+              "unit": "GB",
+              "unitPrice": 0,
+              "cost": 0
+            }
+          ],
+          "notes": "Estimated based on ap-south-1 on-demand pricing"
+        }
+      }
+    },
+    {
+      "id": "arn:aws:s3:::cloud-discovery-demo-bucket",
+      "type": "s3Node",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "name": "cloud-discovery-demo-bucket",
+        "service": "s3",
+        "region": "us-west-2",
+        "account_id": "618642320905",
+        "resource_arn": "arn:aws:s3:::cloud-discovery-demo-bucket",
+        "insights": "Warning: Check Access",
+        "metrics": {
+          "region": "us-west-2",
+          "bucketArn": "arn:aws:s3:::cloud-discovery-demo-bucket",
+          "versioning": "Disabled",
+          "creationDate": "2026-06-17 12:05:36+00:00",
+          "publicAccess": "Open",
+          "securityScan": "Warning: Public access may be open",
+          "notificationConfiguration": {
+            "LambdaFunctionConfigurations": []
+          }
+        },
+        "tags": {},
+        "telemetryData": [],
+        "metricsSummary": {
+          "storageSizeGB": 0,
+          "objectCount": 0,
+          "getRequests": 0,
+          "putRequests": 0,
+          "downloadedMB": 0,
+          "dataTransferOutGB": 0
+        },
+        "telemetrySchema": [
+          {
+            "key": "get_requests",
+            "label": "GET Requests",
+            "unit": "Count",
+            "chart": "bar"
+          },
+          {
+            "key": "put_requests",
+            "label": "PUT Requests",
+            "unit": "Count",
+            "chart": "bar"
+          },
+          {
+            "key": "bytes_down",
+            "label": "Downloaded",
+            "unit": "Bytes",
+            "chart": "area"
+          }
+        ],
+        "cost": {
+          "source": "pricing-api",
+          "confidence": "estimated",
+          "billingModel": "storage-plus-requests",
+          "dailyCost": 0,
+          "monthlyCost": 0,
+          "yearlyCost": 0,
+          "currency": "USD",
+          "usageMetrics": {
+            "avgStorageGB": 0,
+            "monthlyPutReqs": 0,
+            "monthlyGetReqs": 0,
+            "monthlyOutGB": 0
+          },
+          "lineItems": [
+            {
+              "description": "S3 Standard Storage",
+              "quantity": 0,
+              "unit": "GB-month",
+              "unitPrice": 0,
+              "cost": 0
+            },
+            {
+              "description": "S3 PUT / COPY / POST / LIST",
+              "quantity": 0,
+              "unit": "per 1K requests",
+              "unitPrice": 0,
+              "cost": 0
+            },
+            {
+              "description": "S3 GET / SELECT Requests",
+              "quantity": 0,
+              "unit": "per 1K requests",
+              "unitPrice": 0,
+              "cost": 0
+            },
+            {
+              "description": "Data Transfer Out",
+              "quantity": 0,
+              "unit": "GB",
+              "unitPrice": 0,
+              "cost": 0
+            }
+          ],
+          "notes": "Estimated based on ap-south-1 on-demand pricing"
+        }
+      }
+    },
+    {
+      "id": "arn:aws:s3:::config-bucket-618642320905",
+      "type": "s3Node",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "name": "config-bucket-618642320905",
+        "service": "s3",
+        "region": "ap-south-1",
+        "account_id": "618642320905",
+        "resource_arn": "arn:aws:s3:::config-bucket-618642320905",
+        "insights": "Public Access Blocked",
+        "metrics": {
+          "region": "ap-south-1",
+          "bucketArn": "arn:aws:s3:::config-bucket-618642320905",
+          "versioning": "Disabled",
+          "creationDate": "2026-06-19 08:30:34+00:00",
+          "publicAccess": "Blocked",
+          "securityScan": "Pass: Block Public Access enabled",
+          "notificationConfiguration": {
+            "LambdaFunctionConfigurations": []
+          }
+        },
+        "tags": {},
+        "telemetryData": [],
+        "metricsSummary": {
+          "storageSizeGB": 0,
+          "objectCount": 0,
+          "getRequests": 0,
+          "putRequests": 0,
+          "downloadedMB": 0,
+          "dataTransferOutGB": 0
+        },
+        "telemetrySchema": [
+          {
+            "key": "get_requests",
+            "label": "GET Requests",
+            "unit": "Count",
+            "chart": "bar"
+          },
+          {
+            "key": "put_requests",
+            "label": "PUT Requests",
+            "unit": "Count",
+            "chart": "bar"
+          },
+          {
+            "key": "bytes_down",
+            "label": "Downloaded",
+            "unit": "Bytes",
+            "chart": "area"
+          }
+        ],
+        "cost": {
+          "source": "pricing-api",
+          "confidence": "estimated",
+          "billingModel": "storage-plus-requests",
+          "dailyCost": 0,
+          "monthlyCost": 0,
+          "yearlyCost": 0,
+          "currency": "USD",
+          "usageMetrics": {
+            "avgStorageGB": 0,
+            "monthlyPutReqs": 0,
+            "monthlyGetReqs": 0,
+            "monthlyOutGB": 0
+          },
+          "lineItems": [
+            {
+              "description": "S3 Standard Storage",
+              "quantity": 0,
+              "unit": "GB-month",
+              "unitPrice": 0,
+              "cost": 0
+            },
+            {
+              "description": "S3 PUT / COPY / POST / LIST",
+              "quantity": 0,
+              "unit": "per 1K requests",
+              "unitPrice": 0,
+              "cost": 0
+            },
+            {
+              "description": "S3 GET / SELECT Requests",
+              "quantity": 0,
+              "unit": "per 1K requests",
+              "unitPrice": 0,
+              "cost": 0
+            },
+            {
+              "description": "Data Transfer Out",
+              "quantity": 0,
+              "unit": "GB",
+              "unitPrice": 0,
+              "cost": 0
+            }
+          ],
+          "notes": "Estimated based on ap-south-1 on-demand pricing"
+        }
+      }
+    },
+    {
+      "id": "arn:aws:s3:::config-demo-bucket4433",
+      "type": "s3Node",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "name": "config-demo-bucket4433",
+        "service": "s3",
+        "region": "ap-south-1",
+        "account_id": "618642320905",
+        "resource_arn": "arn:aws:s3:::config-demo-bucket4433",
+        "insights": "Public Access Blocked",
+        "metrics": {
+          "region": "ap-south-1",
+          "bucketArn": "arn:aws:s3:::config-demo-bucket4433",
+          "versioning": "Disabled",
+          "creationDate": "2026-06-22 10:33:12+00:00",
+          "publicAccess": "Blocked",
+          "securityScan": "Pass: Block Public Access enabled",
+          "notificationConfiguration": {
+            "LambdaFunctionConfigurations": []
+          }
+        },
+        "tags": {},
+        "telemetryData": [],
+        "metricsSummary": {
+          "storageSizeGB": 0,
+          "objectCount": 0,
+          "getRequests": 0,
+          "putRequests": 0,
+          "downloadedMB": 0,
+          "dataTransferOutGB": 0
+        },
+        "telemetrySchema": [
+          {
+            "key": "get_requests",
+            "label": "GET Requests",
+            "unit": "Count",
+            "chart": "bar"
+          },
+          {
+            "key": "put_requests",
+            "label": "PUT Requests",
+            "unit": "Count",
+            "chart": "bar"
+          },
+          {
+            "key": "bytes_down",
+            "label": "Downloaded",
+            "unit": "Bytes",
+            "chart": "area"
+          }
+        ],
+        "cost": {
+          "source": "pricing-api",
+          "confidence": "estimated",
+          "billingModel": "storage-plus-requests",
+          "dailyCost": 0,
+          "monthlyCost": 0,
+          "yearlyCost": 0,
+          "currency": "USD",
+          "usageMetrics": {
+            "avgStorageGB": 0,
+            "monthlyPutReqs": 0,
+            "monthlyGetReqs": 0,
+            "monthlyOutGB": 0
+          },
+          "lineItems": [
+            {
+              "description": "S3 Standard Storage",
+              "quantity": 0,
+              "unit": "GB-month",
+              "unitPrice": 0,
+              "cost": 0
+            },
+            {
+              "description": "S3 PUT / COPY / POST / LIST",
+              "quantity": 0,
+              "unit": "per 1K requests",
+              "unitPrice": 0,
+              "cost": 0
+            },
+            {
+              "description": "S3 GET / SELECT Requests",
+              "quantity": 0,
+              "unit": "per 1K requests",
+              "unitPrice": 0,
+              "cost": 0
+            },
+            {
+              "description": "Data Transfer Out",
+              "quantity": 0,
+              "unit": "GB",
+              "unitPrice": 0,
+              "cost": 0
+            }
+          ],
+          "notes": "Estimated based on ap-south-1 on-demand pricing"
+        }
+      }
+    },
+    {
+      "id": "arn:aws:s3:::github-for-devops-learning",
+      "type": "s3Node",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "name": "github-for-devops-learning",
+        "service": "s3",
+        "region": "ap-south-1",
+        "account_id": "618642320905",
+        "resource_arn": "arn:aws:s3:::github-for-devops-learning",
+        "insights": "Warning: Check Access",
+        "metrics": {
+          "region": "ap-south-1",
+          "bucketArn": "arn:aws:s3:::github-for-devops-learning",
+          "versioning": "Disabled",
+          "creationDate": "2026-06-12 21:20:23+00:00",
+          "publicAccess": "Open",
+          "securityScan": "Warning: Public access may be open",
+          "notificationConfiguration": {
+            "LambdaFunctionConfigurations": []
+          }
+        },
+        "tags": {},
+        "telemetryData": [],
+        "metricsSummary": {
+          "storageSizeGB": 0,
+          "objectCount": 0,
+          "getRequests": 0,
+          "putRequests": 0,
+          "downloadedMB": 0,
+          "dataTransferOutGB": 0
+        },
+        "telemetrySchema": [
+          {
+            "key": "get_requests",
+            "label": "GET Requests",
+            "unit": "Count",
+            "chart": "bar"
+          },
+          {
+            "key": "put_requests",
+            "label": "PUT Requests",
+            "unit": "Count",
+            "chart": "bar"
+          },
+          {
+            "key": "bytes_down",
+            "label": "Downloaded",
+            "unit": "Bytes",
+            "chart": "area"
+          }
+        ],
+        "cost": {
+          "source": "pricing-api",
+          "confidence": "estimated",
+          "billingModel": "storage-plus-requests",
+          "dailyCost": 0,
+          "monthlyCost": 0,
+          "yearlyCost": 0,
+          "currency": "USD",
+          "usageMetrics": {
+            "avgStorageGB": 0,
+            "monthlyPutReqs": 0,
+            "monthlyGetReqs": 0,
+            "monthlyOutGB": 0
+          },
+          "lineItems": [
+            {
+              "description": "S3 Standard Storage",
+              "quantity": 0,
+              "unit": "GB-month",
+              "unitPrice": 0,
+              "cost": 0
+            },
+            {
+              "description": "S3 PUT / COPY / POST / LIST",
+              "quantity": 0,
+              "unit": "per 1K requests",
+              "unitPrice": 0,
+              "cost": 0
+            },
+            {
+              "description": "S3 GET / SELECT Requests",
+              "quantity": 0,
+              "unit": "per 1K requests",
+              "unitPrice": 0,
+              "cost": 0
+            },
+            {
+              "description": "Data Transfer Out",
+              "quantity": 0,
+              "unit": "GB",
+              "unitPrice": 0,
+              "cost": 0
+            }
+          ],
+          "notes": "Estimated based on ap-south-1 on-demand pricing"
+        }
+      }
+    },
+    {
+      "id": "arn:aws:s3:::nebula-demo-queue",
+      "type": "s3Node",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "name": "nebula-demo-queue",
+        "service": "s3",
+        "region": "ap-south-1",
+        "account_id": "618642320905",
+        "resource_arn": "arn:aws:s3:::nebula-demo-queue",
+        "insights": "Public Access Blocked",
+        "metrics": {
+          "region": "ap-south-1",
+          "bucketArn": "arn:aws:s3:::nebula-demo-queue",
+          "versioning": "Disabled",
+          "creationDate": "2026-06-22 10:19:46+00:00",
+          "publicAccess": "Blocked",
+          "securityScan": "Pass: Block Public Access enabled",
+          "notificationConfiguration": {
+            "LambdaFunctionConfigurations": [
+              {
+                "Events": [
+                  "s3:ObjectCreated:*"
+                ],
+                "LambdaFunctionArn": "arn:aws:lambda:ap-south-1:618642320905:function:s3-file-reader"
+              }
+            ]
+          }
+        },
+        "tags": {},
+        "telemetryData": [],
+        "metricsSummary": {
+          "storageSizeGB": 0,
+          "objectCount": 0,
+          "getRequests": 0,
+          "putRequests": 0,
+          "downloadedMB": 0,
+          "dataTransferOutGB": 0
+        },
+        "telemetrySchema": [
+          {
+            "key": "get_requests",
+            "label": "GET Requests",
+            "unit": "Count",
+            "chart": "bar"
+          },
+          {
+            "key": "put_requests",
+            "label": "PUT Requests",
+            "unit": "Count",
+            "chart": "bar"
+          },
+          {
+            "key": "bytes_down",
+            "label": "Downloaded",
+            "unit": "Bytes",
+            "chart": "area"
+          }
+        ],
+        "cost": {
+          "source": "pricing-api",
+          "confidence": "estimated",
+          "billingModel": "storage-plus-requests",
+          "dailyCost": 0,
+          "monthlyCost": 0,
+          "yearlyCost": 0,
+          "currency": "USD",
+          "usageMetrics": {
+            "avgStorageGB": 0,
+            "monthlyPutReqs": 0,
+            "monthlyGetReqs": 0,
+            "monthlyOutGB": 0
+          },
+          "lineItems": [
+            {
+              "description": "S3 Standard Storage",
+              "quantity": 0,
+              "unit": "GB-month",
+              "unitPrice": 0,
+              "cost": 0
+            },
+            {
+              "description": "S3 PUT / COPY / POST / LIST",
+              "quantity": 0,
+              "unit": "per 1K requests",
+              "unitPrice": 0,
+              "cost": 0
+            },
+            {
+              "description": "S3 GET / SELECT Requests",
+              "quantity": 0,
+              "unit": "per 1K requests",
+              "unitPrice": 0,
+              "cost": 0
+            },
+            {
+              "description": "Data Transfer Out",
+              "quantity": 0,
+              "unit": "GB",
+              "unitPrice": 0,
+              "cost": 0
+            }
+          ],
+          "notes": "Estimated based on ap-south-1 on-demand pricing"
+        }
+      }
+    },
+    {
+      "id": "arn:aws:s3:::processed-document-bucket",
+      "type": "s3Node",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "name": "processed-document-bucket",
+        "service": "s3",
+        "region": "ap-south-1",
+        "account_id": "618642320905",
+        "resource_arn": "arn:aws:s3:::processed-document-bucket",
+        "insights": "Public Access Blocked",
+        "metrics": {
+          "region": "ap-south-1",
+          "bucketArn": "arn:aws:s3:::processed-document-bucket",
+          "versioning": "Disabled",
+          "creationDate": "2026-06-09 09:27:42+00:00",
+          "publicAccess": "Blocked",
+          "securityScan": "Pass: Block Public Access enabled",
+          "notificationConfiguration": {
+            "LambdaFunctionConfigurations": []
+          }
+        },
+        "tags": {},
+        "telemetryData": [],
+        "metricsSummary": {
+          "storageSizeGB": 0,
+          "objectCount": 0,
+          "getRequests": 0,
+          "putRequests": 0,
+          "downloadedMB": 0,
+          "dataTransferOutGB": 0
+        },
+        "telemetrySchema": [
+          {
+            "key": "get_requests",
+            "label": "GET Requests",
+            "unit": "Count",
+            "chart": "bar"
+          },
+          {
+            "key": "put_requests",
+            "label": "PUT Requests",
+            "unit": "Count",
+            "chart": "bar"
+          },
+          {
+            "key": "bytes_down",
+            "label": "Downloaded",
+            "unit": "Bytes",
+            "chart": "area"
+          }
+        ],
+        "cost": {
+          "source": "pricing-api",
+          "confidence": "estimated",
+          "billingModel": "storage-plus-requests",
+          "dailyCost": 0,
+          "monthlyCost": 0,
+          "yearlyCost": 0,
+          "currency": "USD",
+          "usageMetrics": {
+            "avgStorageGB": 0,
+            "monthlyPutReqs": 0,
+            "monthlyGetReqs": 0,
+            "monthlyOutGB": 0
+          },
+          "lineItems": [
+            {
+              "description": "S3 Standard Storage",
+              "quantity": 0,
+              "unit": "GB-month",
+              "unitPrice": 0,
+              "cost": 0
+            },
+            {
+              "description": "S3 PUT / COPY / POST / LIST",
+              "quantity": 0,
+              "unit": "per 1K requests",
+              "unitPrice": 0,
+              "cost": 0
+            },
+            {
+              "description": "S3 GET / SELECT Requests",
+              "quantity": 0,
+              "unit": "per 1K requests",
+              "unitPrice": 0,
+              "cost": 0
+            },
+            {
+              "description": "Data Transfer Out",
+              "quantity": 0,
+              "unit": "GB",
+              "unitPrice": 0,
+              "cost": 0
+            }
+          ],
+          "notes": "Estimated based on ap-south-1 on-demand pricing"
+        }
+      }
+    },
+    {
+      "id": "arn:aws:cloudfront::618642320905:distribution/E9DM7NEIZ0F05",
+      "type": "cloudfrontNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "name": "d1qba0pr4p4po2.cloudfront.net",
+        "service": "cloudfront",
+        "region": "global",
+        "account_id": "618642320905",
+        "resource_arn": "arn:aws:cloudfront::618642320905:distribution/E9DM7NEIZ0F05",
+        "insights": "Deployed - HTTP allowed",
+        "metrics": {
+          "region": "global",
+          "status": "Deployed",
+          "enabled": true,
+          "httpsOnly": false,
+          "domainName": "d1qba0pr4p4po2.cloudfront.net",
+          "securityScan": "Warning: HTTPS not enforced",
+          "originDomains": [
+            "config-demo-bucket4433.s3.amazonaws.com"
+          ],
+          "s3BucketNames": [
+            "config-demo-bucket4433"
+          ]
+        },
+        "tags": {},
+        "telemetryData": [],
+        "metricsSummary": {},
+        "telemetrySchema": [],
+        "cost": {
+          "source": "pricing-api",
+          "confidence": "estimated",
+          "billingModel": "unsupported",
+          "dailyCost": 0,
+          "monthlyCost": 0,
+          "yearlyCost": 0,
+          "currency": "USD",
+          "usageMetrics": {},
+          "lineItems": [],
+          "notes": "No cost calculator registered for service 'cloudfront'"
+        }
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge-udit-queue-dit-worker",
+      "source": "arn:aws:sqs:ap-south-1:618642320905:audit-queue",
+      "target": "arn:aws:lambda:ap-south-1:618642320905:function:audit-worker",
+      "type": "animatedEdge",
+      "label": "triggers",
+      "confidence": 100,
+      "evidence": [
+        "event_source_mapping"
+      ]
+    },
+    {
+      "id": "edge-sing-queue--processor",
+      "source": "arn:aws:sqs:ap-south-1:618642320905:document-processing-queue",
+      "target": "arn:aws:lambda:ap-south-1:618642320905:function:document-processor",
+      "type": "animatedEdge",
+      "label": "triggers",
+      "confidence": 100,
+      "evidence": [
+        "event_source_mapping"
+      ]
+    },
+    {
+      "id": "edge-demo-queue-ile-reader",
+      "source": "arn:aws:s3:::nebula-demo-queue",
+      "target": "arn:aws:lambda:ap-south-1:618642320905:function:s3-file-reader",
+      "type": "animatedEdge",
+      "label": "triggers",
+      "confidence": 100,
+      "evidence": [
+        "s3_bucket_notification"
+      ]
+    },
+    {
+      "id": "edge--demo-rule-udit-queue",
+      "source": "arn:aws:events:ap-south-1:618642320905:rule/nebula-demo-rule",
+      "target": "arn:aws:sqs:ap-south-1:618642320905:audit-queue",
+      "type": "animatedEdge",
+      "label": "triggers",
+      "confidence": 100,
+      "evidence": [
+        "eventbridge_rule_target"
+      ]
+    },
+    {
+      "id": "edge-demo-topic-dit-worker",
+      "source": "arn:aws:sns:ap-south-1:618642320905:demo-topic",
+      "target": "arn:aws:lambda:ap-south-1:618642320905:function:audit-worker",
+      "type": "animatedEdge",
+      "label": "triggers",
+      "confidence": 100,
+      "evidence": [
+        "sns_subscription"
+      ]
+    },
+    {
+      "id": "edge-M7NEIZ0F05-bucket4433",
+      "source": "arn:aws:cloudfront::618642320905:distribution/E9DM7NEIZ0F05",
+      "target": "arn:aws:s3:::config-demo-bucket4433",
+      "type": "animatedEdge",
+      "label": "serves_from",
+      "confidence": 90,
+      "evidence": [
+        "cloudfront_s3_origin"
+      ]
+    },
+    {
+      "id": "edge-ile-reader-s-learning",
+      "source": "arn:aws:lambda:ap-south-1:618642320905:function:s3-file-reader",
+      "target": "arn:aws:s3:::github-for-devops-learning",
+      "type": "animatedEdge",
+      "label": "writes_to",
+      "confidence": 80,
+      "evidence": [
+        "iam_policy_permission"
+      ]
+    },
+    {
+      "id": "edge-ad-service-udit-queue",
+      "source": "arn:aws:lambda:ap-south-1:618642320905:function:upload-service",
+      "target": "arn:aws:sqs:ap-south-1:618642320905:audit-queue",
+      "type": "animatedEdge",
+      "label": "sends_to",
+      "confidence": 80,
+      "evidence": [
+        "iam_policy_permission"
+      ]
+    },
+    {
+      "id": "edge-ad-service-sing-queue",
+      "source": "arn:aws:lambda:ap-south-1:618642320905:function:upload-service",
+      "target": "arn:aws:sqs:ap-south-1:618642320905:document-processing-queue",
+      "type": "animatedEdge",
+      "label": "sends_to",
+      "confidence": 80,
+      "evidence": [
+        "iam_policy_permission"
+      ]
+    },
+    {
+      "id": "edge-dit-worker--bucket123",
+      "source": "arn:aws:lambda:ap-south-1:618642320905:function:audit-worker",
+      "target": "arn:aws:s3:::audit-bucket123",
+      "type": "animatedEdge",
+      "label": "writes_to",
+      "confidence": 80,
+      "evidence": [
+        "iam_policy_permission"
+      ]
+    },
+    {
+      "id": "edge-dit-worker-5-d5676bb3",
+      "source": "arn:aws:lambda:ap-south-1:618642320905:function:audit-worker",
+      "target": "arn:aws:s3:::aws-cloudtrail-logs-618642320905-d5676bb3",
+      "type": "animatedEdge",
+      "label": "writes_to",
+      "confidence": 80,
+      "evidence": [
+        "iam_policy_permission"
+      ]
+    },
+    {
+      "id": "edge-dit-worker-emo-bucket",
+      "source": "arn:aws:lambda:ap-south-1:618642320905:function:audit-worker",
+      "target": "arn:aws:s3:::cloud-discovery-demo-bucket",
+      "type": "animatedEdge",
+      "label": "writes_to",
+      "confidence": 80,
+      "evidence": [
+        "iam_policy_permission"
+      ]
+    },
+    {
+      "id": "edge-dit-worker-8642320905",
+      "source": "arn:aws:lambda:ap-south-1:618642320905:function:audit-worker",
+      "target": "arn:aws:s3:::config-bucket-618642320905",
+      "type": "animatedEdge",
+      "label": "writes_to",
+      "confidence": 80,
+      "evidence": [
+        "iam_policy_permission"
+      ]
+    },
+    {
+      "id": "edge-dit-worker-bucket4433",
+      "source": "arn:aws:lambda:ap-south-1:618642320905:function:audit-worker",
+      "target": "arn:aws:s3:::config-demo-bucket4433",
+      "type": "animatedEdge",
+      "label": "writes_to",
+      "confidence": 80,
+      "evidence": [
+        "iam_policy_permission"
+      ]
+    },
+    {
+      "id": "edge-dit-worker-s-learning",
+      "source": "arn:aws:lambda:ap-south-1:618642320905:function:audit-worker",
+      "target": "arn:aws:s3:::github-for-devops-learning",
+      "type": "animatedEdge",
+      "label": "writes_to",
+      "confidence": 80,
+      "evidence": [
+        "iam_policy_permission"
+      ]
+    },
+    {
+      "id": "edge-dit-worker-demo-queue",
+      "source": "arn:aws:lambda:ap-south-1:618642320905:function:audit-worker",
+      "target": "arn:aws:s3:::nebula-demo-queue",
+      "type": "animatedEdge",
+      "label": "writes_to",
+      "confidence": 80,
+      "evidence": [
+        "iam_policy_permission"
+      ]
+    },
+    {
+      "id": "edge-dit-worker-ent-bucket",
+      "source": "arn:aws:lambda:ap-south-1:618642320905:function:audit-worker",
+      "target": "arn:aws:s3:::processed-document-bucket",
+      "type": "animatedEdge",
+      "label": "writes_to",
+      "confidence": 80,
+      "evidence": [
+        "iam_policy_permission"
+      ]
+    },
+    {
+      "id": "edge-dit-worker-udit-queue",
+      "source": "arn:aws:lambda:ap-south-1:618642320905:function:audit-worker",
+      "target": "arn:aws:sqs:ap-south-1:618642320905:audit-queue",
+      "type": "animatedEdge",
+      "label": "sends_to",
+      "confidence": 80,
+      "evidence": [
+        "iam_policy_permission"
+      ]
+    },
+    {
+      "id": "edge-dit-worker-sing-queue",
+      "source": "arn:aws:lambda:ap-south-1:618642320905:function:audit-worker",
+      "target": "arn:aws:sqs:ap-south-1:618642320905:document-processing-queue",
+      "type": "animatedEdge",
+      "label": "sends_to",
+      "confidence": 80,
+      "evidence": [
+        "iam_policy_permission"
+      ]
+    },
+    {
+      "id": "edge-dit-worker-instance-1",
+      "source": "arn:aws:lambda:ap-south-1:618642320905:function:audit-worker",
+      "target": "arn:aws:rds:ap-south-1:618642320905:db:database-1-instance-1",
+      "type": "animatedEdge",
+      "label": "writes_to",
+      "confidence": 80,
+      "evidence": [
+        "iam_policy_permission"
+      ]
+    },
+    {
+      "id": "edge-dit-worker-instance-1",
+      "source": "arn:aws:lambda:ap-south-1:618642320905:function:audit-worker",
+      "target": "arn:aws:rds:ap-south-1:618642320905:db:database-2-instance-1",
+      "type": "animatedEdge",
+      "label": "writes_to",
+      "confidence": 80,
+      "evidence": [
+        "iam_policy_permission"
+      ]
+    },
+    {
+      "id": "edge-dit-worker-ucketItems",
+      "source": "arn:aws:lambda:ap-south-1:618642320905:function:audit-worker",
+      "target": "arn:aws:dynamodb:ap-south-1:618642320905:table/BucketItems",
+      "type": "animatedEdge",
+      "label": "writes_to",
+      "confidence": 80,
+      "evidence": [
+        "iam_policy_permission"
+      ]
+    },
+    {
+      "id": "edge--processor--bucket123",
+      "source": "arn:aws:lambda:ap-south-1:618642320905:function:document-processor",
+      "target": "arn:aws:s3:::audit-bucket123",
+      "type": "animatedEdge",
+      "label": "writes_to",
+      "confidence": 80,
+      "evidence": [
+        "iam_policy_permission"
+      ]
+    },
+    {
+      "id": "edge--processor-5-d5676bb3",
+      "source": "arn:aws:lambda:ap-south-1:618642320905:function:document-processor",
+      "target": "arn:aws:s3:::aws-cloudtrail-logs-618642320905-d5676bb3",
+      "type": "animatedEdge",
+      "label": "writes_to",
+      "confidence": 80,
+      "evidence": [
+        "iam_policy_permission"
+      ]
+    },
+    {
+      "id": "edge--processor-emo-bucket",
+      "source": "arn:aws:lambda:ap-south-1:618642320905:function:document-processor",
+      "target": "arn:aws:s3:::cloud-discovery-demo-bucket",
+      "type": "animatedEdge",
+      "label": "writes_to",
+      "confidence": 80,
+      "evidence": [
+        "iam_policy_permission"
+      ]
+    },
+    {
+      "id": "edge--processor-8642320905",
+      "source": "arn:aws:lambda:ap-south-1:618642320905:function:document-processor",
+      "target": "arn:aws:s3:::config-bucket-618642320905",
+      "type": "animatedEdge",
+      "label": "writes_to",
+      "confidence": 80,
+      "evidence": [
+        "iam_policy_permission"
+      ]
+    },
+    {
+      "id": "edge--processor-bucket4433",
+      "source": "arn:aws:lambda:ap-south-1:618642320905:function:document-processor",
+      "target": "arn:aws:s3:::config-demo-bucket4433",
+      "type": "animatedEdge",
+      "label": "writes_to",
+      "confidence": 80,
+      "evidence": [
+        "iam_policy_permission"
+      ]
+    },
+    {
+      "id": "edge--processor-s-learning",
+      "source": "arn:aws:lambda:ap-south-1:618642320905:function:document-processor",
+      "target": "arn:aws:s3:::github-for-devops-learning",
+      "type": "animatedEdge",
+      "label": "writes_to",
+      "confidence": 80,
+      "evidence": [
+        "iam_policy_permission"
+      ]
+    },
+    {
+      "id": "edge--processor-demo-queue",
+      "source": "arn:aws:lambda:ap-south-1:618642320905:function:document-processor",
+      "target": "arn:aws:s3:::nebula-demo-queue",
+      "type": "animatedEdge",
+      "label": "writes_to",
+      "confidence": 80,
+      "evidence": [
+        "iam_policy_permission"
+      ]
+    },
+    {
+      "id": "edge--processor-ent-bucket",
+      "source": "arn:aws:lambda:ap-south-1:618642320905:function:document-processor",
+      "target": "arn:aws:s3:::processed-document-bucket",
+      "type": "animatedEdge",
+      "label": "writes_to",
+      "confidence": 80,
+      "evidence": [
+        "iam_policy_permission"
+      ]
+    },
+    {
+      "id": "edge--processor-udit-queue",
+      "source": "arn:aws:lambda:ap-south-1:618642320905:function:document-processor",
+      "target": "arn:aws:sqs:ap-south-1:618642320905:audit-queue",
+      "type": "animatedEdge",
+      "label": "sends_to",
+      "confidence": 80,
+      "evidence": [
+        "iam_policy_permission"
+      ]
+    },
+    {
+      "id": "edge--processor-sing-queue",
+      "source": "arn:aws:lambda:ap-south-1:618642320905:function:document-processor",
+      "target": "arn:aws:sqs:ap-south-1:618642320905:document-processing-queue",
+      "type": "animatedEdge",
+      "label": "sends_to",
+      "confidence": 80,
+      "evidence": [
+        "iam_policy_permission"
+      ]
+    },
+    {
+      "id": "edge-ile-reader--bucket123",
+      "source": "arn:aws:lambda:ap-south-1:618642320905:function:s3-file-reader",
+      "target": "arn:aws:s3:::audit-bucket123",
+      "type": "animatedEdge",
+      "label": "writes_to",
+      "confidence": 80,
+      "evidence": [
+        "iam_policy_permission"
+      ]
+    },
+    {
+      "id": "edge-ile-reader-5-d5676bb3",
+      "source": "arn:aws:lambda:ap-south-1:618642320905:function:s3-file-reader",
+      "target": "arn:aws:s3:::aws-cloudtrail-logs-618642320905-d5676bb3",
+      "type": "animatedEdge",
+      "label": "writes_to",
+      "confidence": 80,
+      "evidence": [
+        "iam_policy_permission"
+      ]
+    },
+    {
+      "id": "edge-ile-reader-emo-bucket",
+      "source": "arn:aws:lambda:ap-south-1:618642320905:function:s3-file-reader",
+      "target": "arn:aws:s3:::cloud-discovery-demo-bucket",
+      "type": "animatedEdge",
+      "label": "writes_to",
+      "confidence": 80,
+      "evidence": [
+        "iam_policy_permission"
+      ]
+    },
+    {
+      "id": "edge-ile-reader-8642320905",
+      "source": "arn:aws:lambda:ap-south-1:618642320905:function:s3-file-reader",
+      "target": "arn:aws:s3:::config-bucket-618642320905",
+      "type": "animatedEdge",
+      "label": "writes_to",
+      "confidence": 80,
+      "evidence": [
+        "iam_policy_permission"
+      ]
+    },
+    {
+      "id": "edge-ile-reader-bucket4433",
+      "source": "arn:aws:lambda:ap-south-1:618642320905:function:s3-file-reader",
+      "target": "arn:aws:s3:::config-demo-bucket4433",
+      "type": "animatedEdge",
+      "label": "writes_to",
+      "confidence": 80,
+      "evidence": [
+        "iam_policy_permission"
+      ]
+    },
+    {
+      "id": "edge-ile-reader-demo-queue",
+      "source": "arn:aws:lambda:ap-south-1:618642320905:function:s3-file-reader",
+      "target": "arn:aws:s3:::nebula-demo-queue",
+      "type": "animatedEdge",
+      "label": "writes_to",
+      "confidence": 80,
+      "evidence": [
+        "iam_policy_permission"
+      ]
+    },
+    {
+      "id": "edge-ile-reader-ent-bucket",
+      "source": "arn:aws:lambda:ap-south-1:618642320905:function:s3-file-reader",
+      "target": "arn:aws:s3:::processed-document-bucket",
+      "type": "animatedEdge",
+      "label": "writes_to",
+      "confidence": 80,
+      "evidence": [
+        "iam_policy_permission"
+      ]
+    }
+  ],
+  "total_monthly_cost": 0,
+  "cost_summary": {
+    "vpc": 0,
+    "subnet": 0,
+    "lambda": 0,
+    "rds": 0,
+    "sqs": 0,
+    "eventbridge": 0,
+    "dynamodb": 0,
+    "sns": 0,
+    "s3": 0,
+    "cloudfront": 0
+  },
+  "cloudwatch_mode": "live"
+}
